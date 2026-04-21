@@ -5,6 +5,7 @@ import com.servicehomes.api.analytics.domain.OutboxEvent;
 import com.servicehomes.api.analytics.domain.OutboxEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,8 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+
+@Slf4j
 
 @Component
 @RequiredArgsConstructor
@@ -39,25 +42,30 @@ public class OutboxExportJob {
             return;
         }
 
-        String timestamp = DateTimeFormatter.ofPattern("yyyy/MM/dd/HH-mm-ss").format(Instant.now().atOffset(ZoneOffset.UTC));
-        String key = "events/raw/" + timestamp + ".jsonl";
+        try {
+            String timestamp = DateTimeFormatter.ofPattern("yyyy/MM/dd/HH-mm-ss").format(Instant.now().atOffset(ZoneOffset.UTC));
+            String key = "events/raw/" + timestamp + ".jsonl";
 
-        String content = events.stream()
-            .map(this::toJsonLine)
-            .collect(Collectors.joining("\n"));
+            String content = events.stream()
+                .map(this::toJsonLine)
+                .collect(Collectors.joining("\n"));
 
-        s3Client.putObject(PutObjectRequest.builder()
-            .bucket(bucket)
-            .key(key)
-            .contentType("application/jsonlines")
-            .build(), RequestBody.fromBytes(content.getBytes(StandardCharsets.UTF_8)));
+            s3Client.putObject(PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType("application/jsonlines")
+                .build(), RequestBody.fromBytes(content.getBytes(StandardCharsets.UTF_8)));
 
-        Instant now = Instant.now();
-        events.forEach(e -> {
-            e.setPublished(true);
-            e.setPublishedAt(now);
-        });
-        outboxEventRepository.saveAll(events);
+            Instant now = Instant.now();
+            events.forEach(e -> {
+                e.setPublished(true);
+                e.setPublishedAt(now);
+            });
+            outboxEventRepository.saveAll(events);
+            log.info("Exported {} events to s3://{}/{}", events.size(), bucket, key);
+        } catch (Exception e) {
+            log.warn("Failed to export outbox events to S3: {}", e.getMessage());
+        }
     }
 
     @SneakyThrows
