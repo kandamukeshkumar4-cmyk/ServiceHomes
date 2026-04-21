@@ -21,10 +21,12 @@ class IdentityRepositoryTest {
 
     @Test
     void findByAuth0IdReturnsUser() {
-        String auth0Id = "auth0|test123";
+        String suffix = System.nanoTime() + "";
+        String auth0Id = "auth0|test-" + suffix;
+        String email = "test-" + suffix + "@example.com";
         User user = User.builder()
             .auth0Id(auth0Id)
-            .email("test@example.com")
+            .email(email)
             .build();
         Profile profile = Profile.builder()
             .user(user)
@@ -36,22 +38,23 @@ class IdentityRepositoryTest {
         Optional<User> found = userRepository.findByAuth0Id(auth0Id);
 
         assertThat(found).isPresent();
-        assertThat(found.get().getEmail()).isEqualTo("test@example.com");
+        assertThat(found.get().getEmail()).isEqualTo(email);
         assertThat(found.get().getProfile().getDisplayName()).isEqualTo("Test User");
     }
 
     @Test
     void findByAuth0IdReturnsEmptyForUnknownId() {
-        Optional<User> found = userRepository.findByAuth0Id("nonexistent");
+        Optional<User> found = userRepository.findByAuth0Id("nonexistent-" + System.nanoTime());
         assertThat(found).isEmpty();
     }
 
     @Test
     void existsByAuth0IdReturnsTrue() {
-        String auth0Id = "auth0|exists";
+        String suffix = System.nanoTime() + "";
+        String auth0Id = "auth0|exists-" + suffix;
         User user = User.builder()
             .auth0Id(auth0Id)
-            .email("exists@example.com")
+            .email("exists-" + suffix + "@example.com")
             .build();
         userRepository.save(user);
 
