@@ -1,9 +1,5 @@
 package com.servicehomes.api.reservations;
 
-import static com.servicehomes.api.config.WithMockJwt.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingCategory;
 import com.servicehomes.api.listings.domain.ListingCategoryRepository;
@@ -31,6 +27,9 @@ import org.testcontainers.utility.DockerImageName;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -129,7 +128,7 @@ class ReservationIntegrationTest {
         );
 
         mockMvc.perform(post("/reservations")
-                .with(jwt(SEED_GUEST_ID))
+                .header("X-Test-User-Id", SEED_GUEST_ID.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
@@ -145,7 +144,7 @@ class ReservationIntegrationTest {
         );
 
         mockMvc.perform(post("/reservations")
-                .with(jwt(SEED_HOST_ID))
+                .header("X-Test-User-Id", SEED_HOST_ID.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
@@ -174,7 +173,7 @@ class ReservationIntegrationTest {
         );
 
         mockMvc.perform(post("/reservations")
-                .with(jwt(SEED_GUEST_ID))
+                .header("X-Test-User-Id", SEED_GUEST_ID.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
@@ -188,7 +187,7 @@ class ReservationIntegrationTest {
         );
 
         mockMvc.perform(post("/reservations")
-                .with(jwt(SEED_GUEST_ID))
+                .header("X-Test-User-Id", SEED_GUEST_ID.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())

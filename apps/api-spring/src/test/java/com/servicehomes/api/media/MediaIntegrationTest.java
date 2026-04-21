@@ -1,5 +1,6 @@
 package com.servicehomes.api.media;
 
+import com.servicehomes.api.config.TestS3Config;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingCategory;
 import com.servicehomes.api.listings.domain.ListingCategoryRepository;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -50,20 +52,22 @@ class MediaIntegrationTest {
     @Configuration
     static class MockS3Config {
         @Bean
-        S3Client s3Client() {
-            S3Client mock = mock(S3Client.class);
-            doNothing().when(mock).putObject(any(PutObjectRequest.class), any());
-            return mock;
+        @Primary
+        S3Client testS3Client() {
+            S3Client m = mock(S3Client.class);
+            doNothing().when(m).putObject(any(PutObjectRequest.class), any());
+            return m;
         }
 
         @Bean
-        S3Presigner s3Presigner() throws Exception {
-            S3Presigner mock = mock(S3Presigner.class);
+        @Primary
+        S3Presigner testS3Presigner() throws Exception {
+            S3Presigner m = mock(S3Presigner.class);
             PresignedPutObjectRequest presignedRequest = PresignedPutObjectRequest.builder()
                 .url(URI.create("https://mock-bucket.s3.us-east-1.amazonaws.com/test.jpg").toURL())
                 .build();
-            when(mock.presignPutObject(any(PutObjectPresignRequest.class))).thenReturn(presignedRequest);
-            return mock;
+            when(m.presignPutObject(any(PutObjectPresignRequest.class))).thenReturn(presignedRequest);
+            return m;
         }
     }
 

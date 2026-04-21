@@ -1,9 +1,5 @@
 package com.servicehomes.api.listings;
 
-import static com.servicehomes.api.config.WithMockJwt.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import com.servicehomes.api.listings.application.dto.CreateListingRequest;
 import com.servicehomes.api.listings.application.dto.ListingDto;
 import com.servicehomes.api.listings.domain.*;
@@ -25,6 +21,9 @@ import org.testcontainers.utility.DockerImageName;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -81,7 +80,7 @@ class ListingIntegrationTest {
         );
 
         mockMvc.perform(post("/listings")
-                .with(jwt(SEED_HOST_ID))
+                .header("X-Test-User-Id", SEED_HOST_ID.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
