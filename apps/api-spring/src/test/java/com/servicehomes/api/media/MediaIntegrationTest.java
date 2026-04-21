@@ -24,6 +24,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -54,17 +55,16 @@ class MediaIntegrationTest {
         @Primary
         S3Client testS3Client() {
             S3Client m = mock(S3Client.class);
-            doNothing().when(m).putObject(any(PutObjectRequest.class), any());
+            doNothing().when(m).putObject(any(PutObjectRequest.class), any(RequestBody.class));
             return m;
         }
 
         @Bean
         @Primary
-        S3Presigner testS3Presigner() throws Exception {
+        S3Presigner testS3Presigner() {
             S3Presigner m = mock(S3Presigner.class);
-            PresignedPutObjectRequest presignedRequest = PresignedPutObjectRequest.builder()
-                .url(URI.create("https://mock-bucket.s3.us-east-1.amazonaws.com/test.jpg").toURL())
-                .build();
+            PresignedPutObjectRequest presignedRequest = mock(PresignedPutObjectRequest.class);
+            when(presignedRequest.url()).thenReturn(URI.create("https://mock-bucket.s3.us-east-1.amazonaws.com/test.jpg").toURL());
             when(m.presignPutObject(any(PutObjectPresignRequest.class))).thenReturn(presignedRequest);
             return m;
         }
