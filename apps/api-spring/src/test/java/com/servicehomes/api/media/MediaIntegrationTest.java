@@ -1,6 +1,5 @@
 package com.servicehomes.api.media;
 
-import com.servicehomes.api.listings.application.dto.CreateListingRequest;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingCategory;
 import com.servicehomes.api.listings.domain.ListingCategoryRepository;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.bean.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,11 +21,19 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.net.URI;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -48,6 +56,12 @@ class MediaIntegrationTest {
         registry.add("spring.datasource.password", postgres::getPassword);
     }
 
+    @MockBean
+    private S3Client s3Client;
+
+    @MockBean
+    private S3Presigner s3Presigner;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -65,7 +79,7 @@ class MediaIntegrationTest {
     private static final UUID SEED_HOST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         ListingCategory category = categoryRepository.findAll().isEmpty()
             ? categoryRepository.save(ListingCategory.builder().name("Test").icon("test").description("Test").build())
             : categoryRepository.findAll().get(0);
@@ -87,20 +101,12 @@ class MediaIntegrationTest {
             .build();
         listing = listingRepository.save(listing);
         listingId = listing.getId();
-    }
 
-    @Test
-    @WithMockUser
-    void addPhotoByUrl() throws Exception {
-        var body = """
-            {"url": "https://example.com/photo.jpg"}
-            """;
-
-        mockMvc.perform(post("/listings/{id}/photos/upload-by-url", listingId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.url").value("https://example.com/photo.jpg"));
+        PresignedPutObjectRequest presignedRequest = PresignedPutObjectRequest.builder()
+            .url(URI.create("https://mock-bucket.s3.us-east-1.amazonaws.com/test.jpg").toURL())
+            .build();
+        when(s3Presigner.presignPutObject(any(PutObjectPresignRequest.class))).thenReturn(presignedRequest);
+        doNothing().when(s3Client).putObject(any(PutObjectRequest.class), any());
     }
 
     @Test

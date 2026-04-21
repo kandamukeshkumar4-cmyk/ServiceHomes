@@ -1,6 +1,6 @@
 package com.servicehomes.api.reservations;
 
-import com.servicehomes.api.listings.application.dto.CreateListingRequest;
+import com.servicehomes.api.config.WithMockJwt;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingCategory;
 import com.servicehomes.api.listings.domain.ListingCategoryRepository;
@@ -10,13 +10,13 @@ import com.servicehomes.api.reservations.application.dto.QuoteRequest;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -28,7 +28,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -71,22 +70,16 @@ class ReservationIntegrationTest {
     private static final UUID SEED_HOST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
     private static final UUID SEED_GUEST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12");
 
-    private UUID guestId;
-    private UUID hostId;
     private UUID listingId;
 
     @BeforeEach
     void setUp() {
-        guestId = SEED_GUEST_ID;
-        hostId = SEED_HOST_ID;
-        listingId = null;
-
         ListingCategory category = categoryRepository.findAll().isEmpty()
             ? categoryRepository.save(ListingCategory.builder().name("Test").icon("test").description("Test").build())
             : categoryRepository.findAll().get(0);
 
         Listing listing = Listing.builder()
-            .hostId(hostId)
+            .hostId(SEED_HOST_ID)
             .title("Test Listing")
             .description("A nice place")
             .category(category)
@@ -104,8 +97,12 @@ class ReservationIntegrationTest {
         listingId = listing.getId();
     }
 
+    @AfterEach
+    void tearDown() {
+        WithMockJwt.clear();
+    }
+
     @Test
-    @WithMockUser
     void quoteReturnsCorrectPricing() throws Exception {
         QuoteRequest request = new QuoteRequest(listingId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5), 2);
 
@@ -122,7 +119,6 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void quoteRejectsInvalidDates() throws Exception {
         QuoteRequest request = new QuoteRequest(listingId, LocalDate.of(2026, 5, 5), LocalDate.of(2026, 5, 1), 2);
 
@@ -133,8 +129,9 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void createReservationSucceedsForPublishedListing() throws Exception {
+        WithMockJwt.setup(SEED_GUEST_ID);
+
         CreateReservationRequest request = new CreateReservationRequest(
             listingId, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 5), 2
         );
@@ -149,8 +146,9 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void createReservationRejectsOwnListing() throws Exception {
+        WithMockJwt.setup(SEED_HOST_ID);
+
         CreateReservationRequest request = new CreateReservationRequest(
             listingId, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 5), 2
         );
@@ -163,11 +161,10 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void createReservationRejectsOverlappingDates() throws Exception {
         Reservation existing = Reservation.builder()
             .listing(listingRepository.findById(listingId).get())
-            .guestId(UUID.randomUUID())
+            .guestId(SEED_GUEST_ID)
             .checkIn(LocalDate.of(2026, 7, 1))
             .checkOut(LocalDate.of(2026, 7, 5))
             .guests(2)
@@ -179,6 +176,8 @@ class ReservationIntegrationTest {
             .status(Reservation.Status.CONFIRMED)
             .build();
         reservationRepository.save(existing);
+
+        WithMockJwt.setup(SEED_GUEST_ID);
 
         CreateReservationRequest request = new CreateReservationRequest(
             listingId, LocalDate.of(2026, 7, 3), LocalDate.of(2026, 7, 8), 2
@@ -192,8 +191,9 @@ class ReservationIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void createReservationRejectsExceedingGuestCapacity() throws Exception {
+        WithMockJwt.setup(SEED_GUEST_ID);
+
         CreateReservationRequest request = new CreateReservationRequest(
             listingId, LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 5), 10
         );

@@ -1,8 +1,10 @@
 package com.servicehomes.api.listings;
 
+import com.servicehomes.api.config.WithMockJwt;
 import com.servicehomes.api.listings.application.dto.CreateListingRequest;
 import com.servicehomes.api.listings.application.dto.ListingDto;
 import com.servicehomes.api.listings.domain.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -58,8 +60,14 @@ class ListingIntegrationTest {
     @Autowired
     private ListingRepository listingRepository;
 
+    @AfterEach
+    void tearDown() {
+        WithMockJwt.clear();
+    }
+
     @Test
     void createListing() throws Exception {
+        WithMockJwt.setup(SEED_HOST_ID);
         ListingCategory category = categoryRepository.findAll().get(0);
 
         var request = new CreateListingRequest(

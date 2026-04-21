@@ -1,33 +1,23 @@
 package com.servicehomes.api.identity;
 
 import com.servicehomes.api.identity.domain.Profile;
-import com.servicehomes.api.identity.domain.Role;
 import com.servicehomes.api.identity.domain.User;
 import com.servicehomes.api.identity.domain.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
+@SpringBootTest
 @ActiveProfiles("ci")
-@TestPropertySource(properties = {
-    "spring.jpa.hibernate.ddl-auto=create-drop",
-    "spring.flyway.enabled=false"
-})
 class IdentityRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private TestEntityManager entityManager;
 
     @Test
     void findByAuth0IdReturnsUser() {
@@ -41,8 +31,7 @@ class IdentityRepositoryTest {
             .displayName("Test User")
             .build();
         user.setProfile(profile);
-        entityManager.persist(user);
-        entityManager.flush();
+        userRepository.save(user);
 
         Optional<User> found = userRepository.findByAuth0Id(auth0Id);
 
@@ -64,8 +53,7 @@ class IdentityRepositoryTest {
             .auth0Id(auth0Id)
             .email("exists@example.com")
             .build();
-        entityManager.persist(user);
-        entityManager.flush();
+        userRepository.save(user);
 
         boolean exists = userRepository.existsByAuth0Id(auth0Id);
 

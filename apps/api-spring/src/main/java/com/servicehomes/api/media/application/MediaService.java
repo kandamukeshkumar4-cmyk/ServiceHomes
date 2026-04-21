@@ -20,8 +20,10 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +59,11 @@ public class MediaService {
         String publicUrl = buildPublicUrl(s3Key);
 
         return new PresignedUploadResponse(uploadUrl, s3Key, publicUrl);
+    }
+
+    @Transactional
+    public List<ListingPhoto> listPhotos(UUID listingId) {
+        return photoRepository.findByListingIdOrderByOrderIndexAsc(listingId);
     }
 
     @Transactional

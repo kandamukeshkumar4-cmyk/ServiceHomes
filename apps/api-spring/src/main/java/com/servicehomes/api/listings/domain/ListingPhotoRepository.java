@@ -7,4 +7,5 @@ import java.util.UUID;
 
 @Repository
 public interface ListingPhotoRepository extends JpaRepository<ListingPhoto, UUID> {
+    java.util.List<ListingPhoto> findByListingIdOrderByOrderIndexAsc(UUID listingId);
 }
