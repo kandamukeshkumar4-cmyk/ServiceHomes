@@ -1,5 +1,6 @@
 package com.servicehomes.api.listings.application;
 
+import com.servicehomes.api.analytics.application.EventPublisher;
 import com.servicehomes.api.listings.application.dto.CreateListingRequest;
 import com.servicehomes.api.listings.application.dto.ListingDto;
 import com.servicehomes.api.listings.domain.*;
@@ -21,6 +22,7 @@ public class ListingService {
     private final ListingRepository listingRepository;
     private final ListingCategoryRepository categoryRepository;
     private final ListingAmenityRepository amenityRepository;
+    private final EventPublisher eventPublisher;
 
     @Transactional
     public ListingDto create(UUID hostId, CreateListingRequest req) {
@@ -75,6 +77,8 @@ public class ListingService {
         listing.setPolicy(policy);
 
         Listing saved = listingRepository.save(listing);
+        eventPublisher.publish("listing_created", "listing", saved.getId().toString(),
+            java.util.Map.of("hostId", hostId.toString(), "category", category.getName()));
         return toDto(saved);
     }
 
@@ -138,6 +142,8 @@ public class ListingService {
         }
         listing.setStatus(Listing.Status.PUBLISHED);
         listing.setPublishedAt(Instant.now());
+        eventPublisher.publish("listing_published", "listing", listingId.toString(),
+            java.util.Map.of("hostId", hostId.toString()));
         return toDto(listing);
     }
 
@@ -149,6 +155,8 @@ public class ListingService {
             throw new IllegalArgumentException("Not authorized");
         }
         listing.setStatus(Listing.Status.UNPUBLISHED);
+        eventPublisher.publish("listing_unpublished", "listing", listingId.toString(),
+            java.util.Map.of("hostId", hostId.toString()));
         return toDto(listing);
     }
 

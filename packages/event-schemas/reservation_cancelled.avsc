@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "ReservationCancelled",
+  "namespace": "com.servicehomes.events",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "timestamp", "type": "string" },
+    { "name": "reservationId", "type": "string" },
+    { "name": "listingId", "type": "string" },
+    { "name": "by", "type": "string" }
+  ]
+}

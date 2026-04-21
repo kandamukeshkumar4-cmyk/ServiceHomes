@@ -1,5 +1,6 @@
 package com.servicehomes.api.reservations.application;
 
+import com.servicehomes.api.analytics.application.EventPublisher;
 import com.servicehomes.api.identity.domain.Profile;
 import com.servicehomes.api.identity.domain.User;
 import com.servicehomes.api.identity.domain.UserRepository;
@@ -28,6 +29,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
+    private final EventPublisher eventPublisher;
 
     public QuoteResponse quote(QuoteRequest request) {
         Listing listing = listingRepository.findById(request.listingId())
@@ -101,6 +103,14 @@ public class ReservationService {
             .build();
 
         Reservation saved = reservationRepository.save(reservation);
+        String eventName = status == Reservation.Status.CONFIRMED ? "reservation_confirmed" : "reservation_created";
+        eventPublisher.publish(eventName, "reservation", saved.getId().toString(),
+            java.util.Map.of(
+                "listingId", listing.getId().toString(),
+                "guestId", guestId.toString(),
+                "totalAmount", quote.totalAmount().toString(),
+                "status", status.name()
+            ));
         return toDto(saved);
     }
 
@@ -120,6 +130,8 @@ public class ReservationService {
         }
 
         reservation.setStatus(Reservation.Status.CANCELLED_BY_GUEST);
+        eventPublisher.publish("reservation_cancelled", "reservation", reservationId.toString(),
+            java.util.Map.of("by", "guest", "listingId", reservation.getListing().getId().toString()));
         return toDto(reservation);
     }
 
@@ -139,6 +151,8 @@ public class ReservationService {
         }
 
         reservation.setStatus(Reservation.Status.CANCELLED_BY_HOST);
+        eventPublisher.publish("reservation_cancelled", "reservation", reservationId.toString(),
+            java.util.Map.of("by", "host", "listingId", reservation.getListing().getId().toString()));
         return toDto(reservation);
     }
 
