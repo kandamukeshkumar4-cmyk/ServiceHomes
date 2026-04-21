@@ -64,7 +64,11 @@ class MediaIntegrationTest {
         S3Presigner testS3Presigner() {
             S3Presigner m = mock(S3Presigner.class);
             PresignedPutObjectRequest presignedRequest = mock(PresignedPutObjectRequest.class);
-            when(presignedRequest.url()).thenReturn(URI.create("https://mock-bucket.s3.us-east-1.amazonaws.com/test.jpg").toURL());
+            try {
+                when(presignedRequest.url()).thenReturn(URI.create("https://mock-bucket.s3.us-east-1.amazonaws.com/test.jpg").toURL());
+            } catch (java.net.MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
             when(m.presignPutObject(any(PutObjectPresignRequest.class))).thenReturn(presignedRequest);
             return m;
         }
