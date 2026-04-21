@@ -4,12 +4,14 @@ import com.servicehomes.api.reservations.application.ReservationService;
 import com.servicehomes.api.reservations.application.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -34,15 +36,21 @@ public class ReservationController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<ReservationDto>> myReservations(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<Page<ReservationDto>> myReservations(
+        @AuthenticationPrincipal Jwt jwt,
+        @PageableDefault(size = 20) Pageable pageable
+    ) {
         UUID guestId = UUID.fromString(jwt.getSubject());
-        return ResponseEntity.ok(reservationService.listByGuest(guestId));
+        return ResponseEntity.ok(reservationService.listByGuest(guestId, pageable));
     }
 
     @GetMapping("/host")
-    public ResponseEntity<List<ReservationDto>> hostReservations(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<Page<ReservationDto>> hostReservations(
+        @AuthenticationPrincipal Jwt jwt,
+        @PageableDefault(size = 20) Pageable pageable
+    ) {
         UUID hostId = UUID.fromString(jwt.getSubject());
-        return ResponseEntity.ok(reservationService.listByHost(hostId));
+        return ResponseEntity.ok(reservationService.listByHost(hostId, pageable));
     }
 
     @GetMapping("/{id}")

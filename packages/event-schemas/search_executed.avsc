@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "SearchExecuted",
+  "namespace": "com.servicehomes.events",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "timestamp", "type": "string" },
+    { "name": "locationQuery", "type": ["null", "string"], "default": null },
+    { "name": "categoryId", "type": ["null", "string"], "default": null },
+    { "name": "guests", "type": ["null", "int"], "default": null },
+    { "name": "checkIn", "type": ["null", "string"], "default": null },
+    { "name": "checkOut", "type": ["null", "string"], "default": null },
+    { "name": "minPrice", "type": ["null", "string"], "default": null },
+    { "name": "maxPrice", "type": ["null", "string"], "default": null },
+    { "name": "resultCount", "type": "int" }
+  ]
+}

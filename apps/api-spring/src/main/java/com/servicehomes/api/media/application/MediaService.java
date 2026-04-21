@@ -4,6 +4,8 @@ import com.servicehomes.api.listings.domain.*;
 import com.servicehomes.api.media.application.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -14,8 +16,11 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -33,6 +38,7 @@ public class MediaService {
     @Value("${aws.s3.endpoint:}")
     private String endpoint;
 
+    @Retryable(retryFor = {Exception.class}, maxAttempts = 3, backoff = @Backoff(delay = 1000))
     public PresignedUploadResponse generatePresignedUrl(PresignedUploadRequest request) {
         String s3Key = "listings/" + UUID.randomUUID() + "-" + request.fileName();
 
@@ -58,12 +64,15 @@ public class MediaService {
         Listing listing = listingRepository.findById(listingId)
             .orElseThrow(() -> new IllegalArgumentException("Listing not found"));
 
+        validateUrl(request.url());
+
         try {
             URL url = new URL(request.url());
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(30000);
+            connection.setInstanceFollowRedirects(false);
 
             String contentType = connection.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
@@ -94,8 +103,41 @@ public class MediaService {
                 .build();
 
             return photoRepository.save(photo);
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to upload image from URL: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to upload image", e);
+        }
+    }
+
+    private void validateUrl(String urlString) {
+        try {
+            URI uri = new URI(urlString);
+            if (!"https".equals(uri.getScheme())) {
+                throw new IllegalArgumentException("Only HTTPS URLs are allowed");
+            }
+
+            String host = uri.getHost();
+            if (host == null) {
+                throw new IllegalArgumentException("Invalid URL: no host");
+            }
+
+            InetAddress address = InetAddress.getByName(host);
+            if (address.isSiteLocalAddress() || address.isLoopbackAddress() || address.isAnyLocalAddress()) {
+                throw new IllegalArgumentException("Internal addresses are not allowed");
+            }
+
+            Set<String> blockedHosts = Set.of(
+                "localhost", "127.0.0.1", "0.0.0.0", "169.254.169.254",
+                "metadata.google.internal", "metadata.azure.com"
+            );
+            if (blockedHosts.contains(host.toLowerCase())) {
+                throw new IllegalArgumentException("Access to this host is not allowed");
+            }
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid URL: " + e.getMessage());
         }
     }
 

@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ListingService } from './listing.service';
-import { ListingCategory, ListingAmenity } from './listing.model';
+import { ListingCategory, ListingAmenity, CreateListingPayload } from './listing.model';
+import { PhotoManagerComponent } from './photo-manager.component';
 
 @Component({
   selector: 'app-listing-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, PhotoManagerComponent],
   template: `
     <div class="p-4 max-w-40rem mx-auto">
       <h1 class="text-2xl font-bold mb-4">Create a new listing</h1>
@@ -162,7 +163,13 @@ import { ListingCategory, ListingAmenity } from './listing.model';
           </div>
         </div>
 
-        <button type="submit" class="p-button p-button-primary" [disabled]="form.invalid">Create listing</button>
+        <div *ngIf="createdListingId">
+          <app-photo-manager [listingId]="createdListingId" />
+        </div>
+
+        <button type="submit" class="p-button p-button-primary" [disabled]="form.invalid || submitting">
+          {{ submitting ? 'Creating...' : 'Create listing' }}
+        </button>
       </form>
     </div>
   `,
@@ -176,6 +183,8 @@ export class ListingCreateComponent implements OnInit {
   categories: ListingCategory[] = [];
   amenities: ListingAmenity[] = [];
   selectedAmenityIds: string[] = [];
+  submitting = false;
+  createdListingId: string | null = null;
 
   form = this.fb.group({
     title: ['', Validators.required],
@@ -222,16 +231,47 @@ export class ListingCreateComponent implements OnInit {
   }
 
   submit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.submitting) return;
+    this.submitting = true;
     const value = this.form.getRawValue();
-    this.listingService.create({
-      ...value,
-      location: value.location,
+    const payload: CreateListingPayload = {
+      title: value.title!,
+      description: value.description!,
+      categoryId: value.categoryId!,
+      propertyType: value.propertyType!,
+      maxGuests: value.maxGuests!,
+      bedrooms: value.bedrooms!,
+      beds: value.beds!,
+      bathrooms: value.bathrooms!,
+      nightlyPrice: value.nightlyPrice!,
+      cleaningFee: value.cleaningFee ?? 0,
+      serviceFee: value.serviceFee ?? 0,
+      location: {
+        addressLine1: value.location!.addressLine1!,
+        addressLine2: value.location!.addressLine2 || undefined,
+        city: value.location!.city!,
+        state: value.location!.state || undefined,
+        postalCode: value.location!.postalCode || undefined,
+        country: value.location!.country!
+      },
       policy: {
-        ...value.policy,
-        instantBook: !!value.policy.instantBook
+        checkInTime: value.policy!.checkInTime || undefined,
+        checkOutTime: value.policy!.checkOutTime || undefined,
+        minNights: value.policy!.minNights!,
+        maxNights: value.policy!.maxNights || undefined,
+        cancellationPolicy: value.policy!.cancellationPolicy!,
+        instantBook: !!value.policy!.instantBook
       },
       amenityIds: this.selectedAmenityIds
-    } as any).subscribe(() => this.router.navigate(['/host/accommodations']));
+    };
+    this.listingService.create(payload).subscribe({
+      next: (listing) => {
+        this.createdListingId = listing.id;
+        this.submitting = false;
+      },
+      error: () => {
+        this.submitting = false;
+      }
+    });
   }
 }

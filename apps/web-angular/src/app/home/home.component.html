@@ -2,11 +2,21 @@
 <div class="p-4 max-w-80rem mx-auto">
   <app-search-bar class="block mb-4" />
 
-  <div *ngIf="listings.length === 0" class="text-center p-4">
+  <div *ngIf="loading" class="text-center p-4">
+    <i class="pi pi-spin pi-spinner text-2xl"></i>
+    <p class="text-600 mt-2">Loading listings...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="surface-0 shadow-1 border-round-lg p-3 text-center">
+    <i class="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
+    <p class="text-600 mt-2">{{ error }}</p>
+  </div>
+
+  <div *ngIf="!loading && !error && listings.length === 0" class="text-center p-4">
     <p class="text-600">No listings available yet.</p>
   </div>
 
-  <div class="grid gap-3">
+  <div *ngIf="!loading && !error && listings.length > 0" class="grid gap-3">
     <div *ngFor="let listing of listings" class="col-12 sm:col-6 md:col-4 lg:col-3">
       <a [routerLink]="['/listings', listing.id]" class="no-underline text-900">
         <div class="border-round-xl overflow-hidden shadow-1 hover:shadow-3 transition-all cursor-pointer">

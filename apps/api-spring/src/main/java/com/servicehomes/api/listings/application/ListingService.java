@@ -5,6 +5,8 @@ import com.servicehomes.api.listings.application.dto.CreateListingRequest;
 import com.servicehomes.api.listings.application.dto.ListingDto;
 import com.servicehomes.api.listings.domain.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -130,7 +132,10 @@ public class ListingService {
         ));
         listing.getPolicy().setInstantBook(req.policy().instantBook() != null ? req.policy().instantBook() : false);
 
-        return toDto(listing);
+        Listing saved = listingRepository.save(listing);
+        eventPublisher.publish("listing_updated", "listing", saved.getId().toString(),
+            java.util.Map.of("hostId", hostId.toString()));
+        return toDto(saved);
     }
 
     @Transactional
@@ -166,11 +171,9 @@ public class ListingService {
         return toDto(listing);
     }
 
-    public List<ListingDto> listByHost(UUID hostId) {
-        return listingRepository.findAll().stream()
-            .filter(l -> l.getHostId().equals(hostId))
-            .map(this::toDto)
-            .collect(Collectors.toList());
+    public Page<ListingDto> listByHost(UUID hostId, Pageable pageable) {
+        return listingRepository.findByHostId(hostId, pageable)
+            .map(this::toDto);
     }
 
     private ListingDto toDto(Listing l) {
