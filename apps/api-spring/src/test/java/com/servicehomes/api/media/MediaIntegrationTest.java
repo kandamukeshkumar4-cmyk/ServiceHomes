@@ -1,5 +1,7 @@
 package com.servicehomes.api.media;
 
+import com.servicehomes.api.ApiApplication;
+import com.servicehomes.api.ApiApplication;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingCategory;
 import com.servicehomes.api.listings.domain.ListingCategoryRepository;
@@ -42,7 +44,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(classes = ApiApplication.class)
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("ci")
