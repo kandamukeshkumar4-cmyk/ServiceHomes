@@ -31,6 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("ci")
 class ListingIntegrationTest {
 
+    private static final UUID SEED_HOST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgis/postgis:15-3.4").asCompatibleSubstituteFor("postgres"))
         .withDatabaseName("servicehomes")
@@ -52,6 +54,9 @@ class ListingIntegrationTest {
 
     @Autowired
     private ListingCategoryRepository categoryRepository;
+
+    @Autowired
+    private ListingRepository listingRepository;
 
     @Test
     void createListing() throws Exception {
@@ -84,7 +89,28 @@ class ListingIntegrationTest {
 
     @Test
     void getListingById() throws Exception {
-        mockMvc.perform(get("/listings/search"))
-            .andExpect(status().isOk());
+        ListingCategory category = categoryRepository.findAll().get(0);
+
+        Listing listing = Listing.builder()
+            .hostId(SEED_HOST_ID)
+            .title("Get By Id Test")
+            .description("Test description")
+            .category(category)
+            .propertyType(Listing.PropertyType.APARTMENT)
+            .maxGuests(2)
+            .bedrooms(1)
+            .beds(1)
+            .bathrooms(1)
+            .nightlyPrice(new BigDecimal("50.00"))
+            .cleaningFee(new BigDecimal("10.00"))
+            .serviceFee(new BigDecimal("5.00"))
+            .status(Listing.Status.PUBLISHED)
+            .build();
+        listing = listingRepository.save(listing);
+
+        mockMvc.perform(get("/listings/{id}", listing.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(listing.getId().toString()))
+            .andExpect(jsonPath("$.title").value("Get By Id Test"));
     }
 }

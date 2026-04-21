@@ -68,14 +68,17 @@ class ReservationIntegrationTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    private static final UUID SEED_HOST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+    private static final UUID SEED_GUEST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12");
+
     private UUID guestId;
     private UUID hostId;
     private UUID listingId;
 
     @BeforeEach
     void setUp() {
-        guestId = UUID.randomUUID();
-        hostId = UUID.randomUUID();
+        guestId = SEED_GUEST_ID;
+        hostId = SEED_HOST_ID;
         listingId = null;
 
         ListingCategory category = categoryRepository.findAll().isEmpty()

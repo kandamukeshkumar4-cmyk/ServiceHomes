@@ -7,13 +7,8 @@ import com.servicehomes.api.identity.domain.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import java.util.Optional;
 import java.util.Set;
@@ -22,25 +17,14 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Testcontainers
 @ActiveProfiles("ci")
 class IdentityRepositoryTest {
 
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgis/postgis:15-3.4").asCompatibleSubstituteFor("postgres"))
-        .withDatabaseName("servicehomes")
-        .withUsername("servicehomes")
-        .withPassword("servicehomes");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
-
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TestEntityManager entityManager;
 
     @Test
     void findByAuth0IdReturnsUser() {
@@ -54,7 +38,8 @@ class IdentityRepositoryTest {
             .displayName("Test User")
             .build();
         user.setProfile(profile);
-        userRepository.save(user);
+        entityManager.persist(user);
+        entityManager.flush();
 
         Optional<User> found = userRepository.findByAuth0Id(auth0Id);
 
@@ -76,7 +61,8 @@ class IdentityRepositoryTest {
             .auth0Id(auth0Id)
             .email("exists@example.com")
             .build();
-        userRepository.save(user);
+        entityManager.persist(user);
+        entityManager.flush();
 
         boolean exists = userRepository.existsByAuth0Id(auth0Id);
 

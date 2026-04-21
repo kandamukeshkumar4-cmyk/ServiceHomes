@@ -62,6 +62,8 @@ class MediaIntegrationTest {
 
     private UUID listingId;
 
+    private static final UUID SEED_HOST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+
     @BeforeEach
     void setUp() {
         ListingCategory category = categoryRepository.findAll().isEmpty()
@@ -69,7 +71,7 @@ class MediaIntegrationTest {
             : categoryRepository.findAll().get(0);
 
         Listing listing = Listing.builder()
-            .hostId(UUID.randomUUID())
+            .hostId(SEED_HOST_ID)
             .title("Media Test Listing")
             .description("A place with photos")
             .category(category)
