@@ -13,6 +13,7 @@ import { AppAuthService } from '../core/auth.service';
       <div class="flex align-items-center gap-3">
         <a routerLink="/home" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Home</a>
         <ng-container *ngIf="auth.isAuthenticated$ | async; else loggedOut">
+          <a routerLink="/host/accommodations" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Host</a>
           <a routerLink="/account" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Account</a>
           <button pButton class="p-button-text p-button-sm" (click)="auth.logout()">Log out</button>
         </ng-container>

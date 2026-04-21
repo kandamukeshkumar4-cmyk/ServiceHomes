@@ -15,5 +15,67 @@ paths:
         '200':
           description: OK
 
+  /me:
+    get:
+      summary: Get current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile
+
+  /listings:
+    post:
+      summary: Create listing
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Created listing
+    get:
+      summary: List host listings
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of listings
+
+  /listings/{id}:
+    get:
+      summary: Get listing by ID
+      responses:
+        '200':
+          description: Listing detail
+    put:
+      summary: Update listing
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Updated listing
+
+  /listings/{id}/publish:
+    post:
+      summary: Publish listing
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Published listing
+
+  /listings/{id}/unpublish:
+    post:
+      summary: Unpublish listing
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Unpublished listing
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas: {}
