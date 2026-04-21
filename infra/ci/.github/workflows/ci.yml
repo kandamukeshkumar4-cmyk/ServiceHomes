@@ -9,6 +9,20 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_DB: servicehomes
+          POSTGRES_USER: servicehomes
+          POSTGRES_PASSWORD: servicehomes
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     defaults:
       run:
         working-directory: apps/api-spring
@@ -18,7 +32,7 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      - run: ./mvnw verify
+      - run: ./mvnw verify -Dspring.profiles.active=ci
 
   frontend:
     runs-on: ubuntu-latest
@@ -47,3 +61,4 @@ jobs:
       - run: pip install dbt-snowflake
       - run: dbt deps
       - run: dbt parse
+      - run: dbt test
