@@ -74,7 +74,7 @@ class ListingIntegrationTest {
             List.of()
         );
 
-        mockMvc.perform(post("/api/listings")
+        mockMvc.perform(post("/listings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
@@ -84,7 +84,7 @@ class ListingIntegrationTest {
 
     @Test
     void getListingById() throws Exception {
-        mockMvc.perform(get("/api/listings/search"))
+        mockMvc.perform(get("/listings/search"))
             .andExpect(status().isOk());
     }
 }
