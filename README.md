@@ -52,6 +52,34 @@ The local dev environment seeds sample data automatically:
 - A guest user
 - Categories and amenities
 
+## No-Mistakes QA Gate (Required for All PRs)
+
+This repo uses [no-mistakes](https://github.com/kunchenguid/no-mistakes) as a mandatory QA pipeline. **Every commit must go through the gate.**
+
+### Quick setup
+
+```bash
+# One-time installation
+./scripts/install-no-mistakes.sh
+
+# Daily workflow
+git checkout -b feat/my-feature
+# ... make changes ...
+git commit -am "feat: my feature"
+./scripts/push-no-mistakes.sh   # pushes through QA gate
+```
+
+### What the gate does
+
+1. **Rebase** onto latest `master`
+2. **Agentic review** — AI finds bugs, style issues, security problems
+3. **Test** — Spring Boot + Angular + dbt full test suite
+4. **Docs** — README, ADRs, API contracts auto-updated
+5. **PR** — clean PR opened automatically
+6. **CI** — GitHub Actions monitored, failures auto-fixed
+
+See [NO-MISTAKES.md](NO-MISTAKES.md) for full documentation.
+
 ## Auth0 Setup (Production / Staging)
 
 If you want to use real authentication:

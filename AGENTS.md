@@ -24,6 +24,13 @@ Build a production-style Airbnb-like application without payment processing.
 - Prefer explicit DTOs over leaking entities.
 - Keep controllers thin, services transactional, repositories narrow.
 
+# No-Mistakes QA Gate (Mandatory)
+- All changes must push through the `no-mistakes` remote, never directly to `origin/master`
+- The pipeline will rebase, review, test, update docs, open PR, and babysit CI
+- Agent must run `./scripts/push-no-mistakes.sh` after committing changes
+- Never force-push to `master`
+- Wait for QA pipeline to pass before considering work complete
+
 # Definition of Done
 - Build passes
 - Tests pass
@@ -31,3 +38,4 @@ Build a production-style Airbnb-like application without payment processing.
 - API contract updated
 - Analytics event updated if applicable
 - Docs/ADR updated
+- No-mistakes QA gate passed
