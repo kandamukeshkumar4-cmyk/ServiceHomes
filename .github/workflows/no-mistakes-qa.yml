@@ -86,17 +86,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: apps/web-angular/package-lock.json
 
       - name: Install dependencies
         working-directory: apps/web-angular
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm install
 
       - name: Frontend lint
         working-directory: apps/web-angular
