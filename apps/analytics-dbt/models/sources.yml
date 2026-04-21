@@ -1,11 +1,20 @@
 version: 2
 
 sources:
-  - name: raw_events
+  - name: app
+    database: SERVICEHOMES
+    schema: public
+    tables:
+      - name: users
+      - name: profiles
+      - name: listings
+      - name: listing_categories
+      - name: listing_locations
+      - name: reservations
+      - name: outbox_events
+
+  - name: raw
     database: SERVICEHOMES
     schema: raw
     tables:
-      - name: listing_events
-      - name: reservation_events
-      - name: search_events
-      - name: user_events
+      - name: events_stage

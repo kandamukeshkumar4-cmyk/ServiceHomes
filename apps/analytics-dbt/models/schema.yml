@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: sr_users
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null
+  - name: sr_listings
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['DRAFT', 'PUBLISHED', 'UNPUBLISHED']
+  - name: sr_reservations
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['PENDING', 'CONFIRMED', 'CANCELLED_BY_GUEST', 'CANCELLED_BY_HOST', 'COMPLETED']
+  - name: fct_reservation
+    columns:
+      - name: reservation_id
+        tests:
+          - unique
+          - not_null
+      - name: total_amount
+        tests:
+          - not_null
