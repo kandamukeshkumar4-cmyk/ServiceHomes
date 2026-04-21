@@ -151,7 +151,7 @@ export class ListingEditComponent implements OnInit {
       checkInTime: [''],
       checkOutTime: [''],
       minNights: [1, Validators.required],
-      maxNights: [null],
+      maxNights: [null as number | null],
       cancellationPolicy: ['FLEXIBLE'],
       instantBook: [false]
     })

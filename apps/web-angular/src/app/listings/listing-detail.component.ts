@@ -7,14 +7,7 @@ import { ListingService } from '../listings/listing.service';
 import { Listing, ListingPhoto } from '../listings/listing.model';
 import { AppAuthService } from '../core/auth.service';
 
-interface Quote {
-  totalNights: number;
-  nightlyPrice: number;
-  subtotal: number;
-  cleaningFee: number;
-  serviceFee: number;
-  totalAmount: number;
-}
+
 
 @Component({
   selector: 'app-listing-detail',
@@ -83,22 +76,22 @@ interface Quote {
               </div>
             </div>
 
-            <div *ngIf="priceQuote" class="mb-3">
+            <div *ngIf="showQuote" class="mb-3">
               <div class="flex justify-content-between text-sm mb-1">
-                <span>${{ priceQuote.nightlyPrice }} x {{ priceQuote.totalNights }} nights</span>
-                <span>${{ priceQuote.subtotal }}</span>
+                <span>${{ quoteNightlyPrice }} x {{ quoteNights }} nights</span>
+                <span>${{ quoteSubtotal }}</span>
               </div>
               <div class="flex justify-content-between text-sm mb-1">
                 <span>Cleaning fee</span>
-                <span>${{ priceQuote.cleaningFee }}</span>
+                <span>${{ quoteCleaningFee }}</span>
               </div>
               <div class="flex justify-content-between text-sm mb-1">
                 <span>Service fee</span>
-                <span>${{ priceQuote.serviceFee }}</span>
+                <span>${{ quoteServiceFee }}</span>
               </div>
               <div class="flex justify-content-between font-bold border-top-1 surface-border pt-2 mt-2">
                 <span>Total</span>
-                <span>${{ priceQuote.totalAmount }}</span>
+                <span>${{ quoteTotal }}</span>
               </div>
             </div>
 
@@ -123,7 +116,13 @@ export class ListingDetailComponent implements OnInit {
   checkIn = '';
   checkOut = '';
   guests = 1;
-  priceQuote: Quote | null = null;
+  quoteNights = 0;
+  quoteNightlyPrice = 0;
+  quoteSubtotal = 0;
+  quoteCleaningFee = 0;
+  quoteServiceFee = 0;
+  quoteTotal = 0;
+  showQuote = false;
 
   get coverPhoto(): ListingPhoto | undefined {
     return this.listing?.photos.find(p => p.isCover) || this.listing?.photos[0];
