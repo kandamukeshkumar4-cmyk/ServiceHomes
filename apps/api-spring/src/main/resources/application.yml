@@ -26,6 +26,10 @@ management:
       exposure:
         include: health,info,metrics
 
+auth0:
+  domain: ${AUTH0_DOMAIN:your-auth0-domain}
+  audience: ${AUTH0_AUDIENCE:your-auth0-audience}
+
 logging:
   level:
     com.servicehomes: DEBUG
