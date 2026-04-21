@@ -3,6 +3,8 @@ package com.servicehomes.api.analytics.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -33,10 +35,12 @@ public class OutboxEvent {
     @Column(name = "aggregate_id", nullable = false, length = 64)
     private String aggregateId;
 
-    @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "payload", nullable = false)
     private String payload;
 
-    @Column(name = "metadata", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "metadata")
     private String metadata;
 
     @Column(name = "published", nullable = false)
