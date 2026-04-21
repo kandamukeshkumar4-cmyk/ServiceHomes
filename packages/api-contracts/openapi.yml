@@ -72,6 +72,61 @@ paths:
         '200':
           description: Unpublished listing
 
+  /listings/search:
+    get:
+      summary: Search published listings
+      parameters:
+        - name: locationQuery
+          in: query
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: guests
+          in: query
+          schema:
+            type: integer
+        - name: checkIn
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: checkOut
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: swLat
+          in: query
+          schema:
+            type: number
+        - name: swLng
+          in: query
+          schema:
+            type: number
+        - name: neLat
+          in: query
+          schema:
+            type: number
+        - name: neLng
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Search results
+
 components:
   securitySchemes:
     bearerAuth:
