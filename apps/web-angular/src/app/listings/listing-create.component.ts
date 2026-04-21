@@ -2,8 +2,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ListingService } from '../../listings/listing.service';
-import { ListingCategory, ListingAmenity } from '../../listings/listing.model';
+import { ListingService } from './listing.service';
+import { ListingCategory, ListingAmenity } from './listing.model';
 
 @Component({
   selector: 'app-listing-create',
@@ -208,8 +208,8 @@ export class ListingCreateComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.listingService.getCategories().subscribe(c => this.categories = c);
-    this.listingService.getAmenities().subscribe(a => this.amenities = a);
+    this.listingService.getCategories().subscribe((c: ListingCategory[]) => this.categories = c);
+    this.listingService.getAmenities().subscribe((a: ListingAmenity[]) => this.amenities = a);
   }
 
   toggleAmenity(id: string, event: Event) {
@@ -223,13 +223,13 @@ export class ListingCreateComponent implements OnInit {
 
   submit() {
     if (this.form.invalid) return;
-    const value = this.form.value;
+    const value = this.form.getRawValue();
     this.listingService.create({
       ...value,
-      location: value.location!,
+      location: value.location,
       policy: {
-        ...value.policy!,
-        instantBook: !!value.policy!.instantBook
+        ...value.policy,
+        instantBook: !!value.policy.instantBook
       },
       amenityIds: this.selectedAmenityIds
     } as any).subscribe(() => this.router.navigate(['/host/accommodations']));

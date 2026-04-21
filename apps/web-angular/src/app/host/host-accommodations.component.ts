@@ -1,58 +1,14 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { ListingService } from '../../listings/listing.service';
-import { Listing } from '../../listings/listing.model';
+import { ListingService } from '../listings/listing.service';
+import { Listing } from '../listings/listing.model';
 
 @Component({
   selector: 'app-host-accommodations',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  template: `
-    <div class="p-4 max-w-60rem mx-auto">
-      <div class="flex justify-content-between align-items-center mb-4">
-        <h1 class="text-2xl font-bold m-0">My Accommodations</h1>
-        <a routerLink="/listings/new" class="p-button p-button-primary no-underline">Create new listing</a>
-      </div>
-
-      <div *ngIf="listings.length === 0" class="surface-100 p-4 border-round-lg text-center">
-        <p class="text-600">You have no listings yet.</p>
-        <a routerLink="/listings/new" class="p-button p-button-primary no-underline mt-2 inline-block">Create your first listing</a>
-      </div>
-
-      <div class="grid gap-3">
-        <div *ngFor="let listing of listings" class="col-12 md:col-6 lg:col-4">
-          <div class="surface-0 shadow-1 border-round-lg overflow-hidden">
-            <div class="h-10rem surface-200 flex align-items-center justify-content-center">
-              <img *ngIf="listing.photos[0]" [src]="listing.photos[0].url" class="w-full h-full object-cover" />
-              <span *ngIf="!listing.photos[0]" class="text-500">No photo</span>
-            </div>
-            <div class="p-3">
-              <div class="flex justify-content-between align-items-start mb-2">
-                <h3 class="text-lg font-bold m-0">{{ listing.title }}</h3>
-                <span class="px-2 py-1 text-xs border-round-lg"
-                      [class.bg-green-100]="listing.status === 'PUBLISHED'"
-                      [class.text-green-700]="listing.status === 'PUBLISHED'"
-                      [class.bg-gray-100]="listing.status === 'DRAFT'"
-                      [class.text-gray-700]="listing.status === 'DRAFT'"
-                      [class.bg-orange-100]="listing.status === 'UNPUBLISHED'"
-                      [class.text-orange-700]="listing.status === 'UNPUBLISHED'">
-                  {{ listing.status }}
-                </span>
-              </div>
-              <p class="text-600 text-sm m-0 mb-2">{{ listing.location.city }}, {{ listing.location.country }}</p>
-              <p class="text-900 font-bold m-0 mb-3">${{ listing.nightlyPrice }} / night</p>
-              <div class="flex gap-2">
-                <a [routerLink]="['/listings', listing.id, 'edit']" class="p-button p-button-sm p-button-outlined no-underline flex-1 text-center">Edit</a>
-                <button *ngIf="listing.status !== 'PUBLISHED'" class="p-button p-button-sm p-button-success flex-1" (click)="publish(listing.id)">Publish</button>
-                <button *ngIf="listing.status === 'PUBLISHED'" class="p-button p-button-sm p-button-secondary flex-1" (click)="unpublish(listing.id)">Unpublish</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './host-accommodations.component.html',
   styles: []
 })
 export class HostAccommodationsComponent implements OnInit {

@@ -78,3 +78,19 @@ export interface CreateListingPayload {
   policy: ListingPolicy;
   amenityIds: string[];
 }
+
+export interface ListingCardDto {
+  id: string;
+  title: string;
+  coverUrl: string;
+  city: string;
+  country: string;
+  nightlyPrice: number;
+  categoryName: string;
+  latitude: number;
+  longitude: number;
+  maxGuests: number;
+  bedrooms: number;
+  beds: number;
+  bathrooms: number;
+}

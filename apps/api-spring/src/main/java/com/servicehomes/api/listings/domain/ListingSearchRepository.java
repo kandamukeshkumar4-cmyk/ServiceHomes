@@ -28,14 +28,14 @@ public interface ListingSearchRepository extends JpaRepository<Listing, UUID> {
           AND (:guests IS NULL OR l.maxGuests >= :guests)
           AND (:minPrice IS NULL OR l.nightlyPrice >= :minPrice)
           AND (:maxPrice IS NULL OR l.nightlyPrice <= :maxPrice)
-          AND (:locationQuery IS NULL OR
-               LOWER(loc.city) LIKE LOWER(CONCAT('%', :locationQuery, '%')) OR
-               LOWER(loc.country) LIKE LOWER(CONCAT('%', :locationQuery, '%')))
-          AND (:swLat IS NULL OR loc.latitude BETWEEN :swLat AND :neLat)
-          AND (:swLng IS NULL OR loc.longitude BETWEEN :swLng AND :neLng)
-          AND (:amenityIdsEmpty = true OR l.id IN (
-              SELECT l2.id FROM Listing l2 JOIN l2.amenities a WHERE a.id IN :amenityIds
-          ))
+          AND (:locationPattern IS NULL OR
+               LOWER(loc.city) LIKE :locationPattern OR
+               LOWER(loc.country) LIKE :locationPattern)
+           AND (:swLat IS NULL OR loc.latitude BETWEEN :swLat AND :neLat)
+           AND (:swLng IS NULL OR loc.longitude BETWEEN :swLng AND :neLng)
+           AND (:amenityIdsEmpty = true OR l.id IN (
+               SELECT l2.id FROM Listing l2 JOIN l2.amenities a WHERE a.id IN :amenityIds
+           ))
           AND NOT EXISTS (
               SELECT 1 FROM Reservation r
               WHERE r.listing.id = l.id
@@ -46,7 +46,7 @@ public interface ListingSearchRepository extends JpaRepository<Listing, UUID> {
         ORDER BY l.createdAt DESC
         """)
     List<com.servicehomes.api.listings.application.dto.ListingCardDto> search(
-        @Param("locationQuery") String locationQuery,
+        @Param("locationPattern") String locationPattern,
         @Param("categoryId") UUID categoryId,
         @Param("guests") Integer guests,
         @Param("checkIn") LocalDate checkIn,
