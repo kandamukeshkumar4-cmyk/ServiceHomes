@@ -7,6 +7,11 @@ on:
   push:
     branches: [master, main]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 env:
   JAVA_VERSION: '21'
   NODE_VERSION: '20'
@@ -62,24 +67,19 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
-
-      - name: Backend format check
-        working-directory: apps/api-spring
-        run: |
-          ./mvnw spotless:check || echo "::warning::Code formatting issues detected. Run './mvnw spotless:apply' to fix."
-        continue-on-error: true
+          cache: maven
 
       - name: Backend compile
         working-directory: apps/api-spring
-        run: ./mvnw compile -DskipTests
+        run: mvn compile -DskipTests
 
       - name: Backend tests
         working-directory: apps/api-spring
-        run: ./mvnw test -Dspring.profiles.active=ci
+        run: mvn test -Dspring.profiles.active=ci
 
       - name: Backend integration tests
         working-directory: apps/api-spring
-        run: ./mvnw verify -Dspring.profiles.active=ci
+        run: mvn verify -Dspring.profiles.active=ci
 
   # Job 3: Frontend validation
   frontend-qa:
@@ -94,7 +94,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: apps/web-angular
-        run: npm ci
+        run: npm install
 
       - name: Frontend lint
         working-directory: apps/web-angular

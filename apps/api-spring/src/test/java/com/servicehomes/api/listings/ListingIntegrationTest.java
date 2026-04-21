@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ListingIntegrationTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgis/postgis:15-3.4")
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgis/postgis:15-3.4").asCompatibleSubstituteFor("postgres"))
         .withDatabaseName("servicehomes")
         .withUsername("servicehomes")
         .withPassword("servicehomes");
@@ -73,7 +74,7 @@ class ListingIntegrationTest {
             List.of()
         );
 
-        mockMvc.perform(post("/api/listings")
+        mockMvc.perform(post("/listings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
@@ -83,7 +84,7 @@ class ListingIntegrationTest {
 
     @Test
     void getListingById() throws Exception {
-        mockMvc.perform(get("/api/listings/search"))
+        mockMvc.perform(get("/listings/search"))
             .andExpect(status().isOk());
     }
 }

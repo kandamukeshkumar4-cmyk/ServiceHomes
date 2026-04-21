@@ -151,7 +151,7 @@ export class ListingEditComponent implements OnInit {
       checkInTime: [''],
       checkOutTime: [''],
       minNights: [1, Validators.required],
-      maxNights: [null],
+      maxNights: [null as number | null],
       cancellationPolicy: ['FLEXIBLE'],
       instantBook: [false]
     })
@@ -159,9 +159,9 @@ export class ListingEditComponent implements OnInit {
 
   ngOnInit() {
     this.listingId = this.route.snapshot.paramMap.get('id') || '';
-    this.listingService.getCategories().subscribe(c => this.categories = c);
-    this.listingService.getAmenities().subscribe(a => this.amenities = a);
-    this.listingService.getById(this.listingId).subscribe(l => {
+    this.listingService.getCategories().subscribe((c: ListingCategory[]) => this.categories = c);
+    this.listingService.getAmenities().subscribe((a: ListingAmenity[]) => this.amenities = a);
+    this.listingService.getById(this.listingId).subscribe((l: Listing) => {
       this.listing = l;
       this.selectedAmenityIds = l.amenities.map(a => a.id);
       this.form.patchValue({
@@ -188,7 +188,7 @@ export class ListingEditComponent implements OnInit {
           checkInTime: l.policy.checkInTime || '',
           checkOutTime: l.policy.checkOutTime || '',
           minNights: l.policy.minNights,
-          maxNights: l.policy.maxNights || null,
+          maxNights: l.policy.maxNights ?? undefined,
           cancellationPolicy: l.policy.cancellationPolicy,
           instantBook: l.policy.instantBook
         }
@@ -207,13 +207,13 @@ export class ListingEditComponent implements OnInit {
 
   submit() {
     if (this.form.invalid) return;
-    const value = this.form.value;
+    const value = this.form.getRawValue();
     this.listingService.update(this.listingId, {
       ...value,
-      location: value.location!,
+      location: value.location,
       policy: {
-        ...value.policy!,
-        instantBook: !!value.policy!.instantBook
+        ...value.policy,
+        instantBook: !!value.policy.instantBook
       },
       amenityIds: this.selectedAmenityIds
     } as any).subscribe(() => this.router.navigate(['/host/accommodations']));

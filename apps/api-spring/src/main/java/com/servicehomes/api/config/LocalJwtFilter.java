@@ -27,7 +27,7 @@ public class LocalJwtFilter extends OncePerRequestFilter {
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             Jwt jwt = Jwt.withTokenValue("local")
                 .header("alg", "none")
-                .claim("sub", "local-user")
+                .claim("sub", "00000000-0000-0000-0000-000000000001")
                 .claim("email", "local@example.com")
                 .claim("email_verified", true)
                 .claim("given_name", "Local")

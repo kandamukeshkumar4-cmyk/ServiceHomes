@@ -18,8 +18,11 @@ public class ListingSearchService {
 
     public List<ListingCardDto> search(SearchListingsRequest request) {
         var amenityIds = request.amenityIds() != null ? request.amenityIds() : List.<java.util.UUID>of();
+        String locationPattern = request.locationQuery() != null && !request.locationQuery().isBlank()
+            ? "%" + request.locationQuery().toLowerCase() + "%"
+            : null;
         return searchRepository.search(
-            request.locationQuery(),
+            locationPattern,
             request.categoryId(),
             request.guests(),
             request.checkIn() != null ? request.checkIn() : java.time.LocalDate.now().plusYears(10),

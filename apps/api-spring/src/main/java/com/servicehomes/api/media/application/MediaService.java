@@ -106,10 +106,11 @@ public class MediaService {
 
         for (int i = 0; i < request.photoIds().size(); i++) {
             UUID photoId = UUID.fromString(request.photoIds().get(i));
+            final int orderIndex = i;
             listing.getPhotos().stream()
                 .filter(p -> p.getId().equals(photoId))
                 .findFirst()
-                .ifPresent(p -> p.setOrderIndex(i));
+                .ifPresent(p -> p.setOrderIndex(orderIndex));
         }
     }
 

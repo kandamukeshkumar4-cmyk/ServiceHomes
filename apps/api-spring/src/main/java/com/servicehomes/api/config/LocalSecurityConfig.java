@@ -40,7 +40,7 @@ public class LocalSecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user = new User(
-            "local-user",
+            "00000000-0000-0000-0000-000000000001",
             "",
             List.of(
                 new SimpleGrantedAuthority("ROLE_USER"),

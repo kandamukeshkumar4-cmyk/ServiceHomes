@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS listing_locations (
     state VARCHAR(128),
     postal_code VARCHAR(32),
     country VARCHAR(128) NOT NULL,
-    latitude NUMERIC(10, 8),
-    longitude NUMERIC(11, 8)
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION
 );
 
 CREATE TABLE IF NOT EXISTS listing_policies (
