@@ -1,13 +1,25 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { ListingService } from '../listings/listing.service';
-import { Listing } from '../listings/listing.model';
+import { Listing, ListingPhoto } from '../listings/listing.model';
+import { AppAuthService } from '../core/auth.service';
+
+interface Quote {
+  totalNights: number;
+  nightlyPrice: number;
+  subtotal: number;
+  cleaningFee: number;
+  serviceFee: number;
+  totalAmount: number;
+}
 
 @Component({
   selector: 'app-listing-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="p-4 max-w-60rem mx-auto" *ngIf="listing">
       <h1 class="text-2xl font-bold mb-1">{{ listing.title }}</h1>
@@ -58,19 +70,41 @@ import { Listing } from '../listings/listing.model';
               <div class="grid gap-1">
                 <div class="col-6 flex flex-column gap-1">
                   <label class="text-xs font-bold">Check in</label>
-                  <input type="date" class="p-inputtext" />
+                  <input type="date" class="p-inputtext" [(ngModel)]="checkIn" />
                 </div>
                 <div class="col-6 flex flex-column gap-1">
                   <label class="text-xs font-bold">Check out</label>
-                  <input type="date" class="p-inputtext" />
+                  <input type="date" class="p-inputtext" [(ngModel)]="checkOut" />
                 </div>
               </div>
               <div class="flex flex-column gap-1">
                 <label class="text-xs font-bold">Guests</label>
-                <input type="number" class="p-inputtext" [max]="listing.maxGuests" min="1" value="1" />
+                <input type="number" class="p-inputtext" [max]="listing.maxGuests" min="1" [(ngModel)]="guests" />
               </div>
             </div>
-            <button class="p-button p-button-primary w-full">Reserve</button>
+
+            <div *ngIf="quote" class="mb-3">
+              <div class="flex justify-content-between text-sm mb-1">
+                <span>${{ quote.nightlyPrice }} x {{ quote.totalNights }} nights</span>
+                <span>${{ quote.subtotal }}</span>
+              </div>
+              <div class="flex justify-content-between text-sm mb-1">
+                <span>Cleaning fee</span>
+                <span>${{ quote.cleaningFee }}</span>
+              </div>
+              <div class="flex justify-content-between text-sm mb-1">
+                <span>Service fee</span>
+                <span>${{ quote.serviceFee }}</span>
+              </div>
+              <div class="flex justify-content-between font-bold border-top-1 surface-border pt-2 mt-2">
+                <span>Total</span>
+                <span>${{ quote.totalAmount }}</span>
+              </div>
+            </div>
+
+            <button class="p-button p-button-primary w-full" (click)="reserve()" [disabled]="!auth.isAuthenticated$">
+              {{ (auth.isAuthenticated$ | async) ? 'Reserve' : 'Log in to reserve' }}
+            </button>
             <div class="mt-3 text-center text-600 text-sm">You won't be charged yet</div>
           </div>
         </div>
@@ -82,19 +116,39 @@ import { Listing } from '../listings/listing.model';
 export class ListingDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private listingService = inject(ListingService);
+  private http = inject(HttpClient);
+  auth = inject(AppAuthService);
 
   listing: Listing | null = null;
+  checkIn = '';
+  checkOut = '';
+  guests = 1;
+  quote: Quote | null = null;
 
-  get coverPhoto() {
+  get coverPhoto(): ListingPhoto | undefined {
     return this.listing?.photos.find(p => p.isCover) || this.listing?.photos[0];
   }
 
-  get otherPhotos() {
+  get otherPhotos(): ListingPhoto[] {
     return (this.listing?.photos || []).filter(p => p.id !== this.coverPhoto?.id).slice(0, 3);
   }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id') || '';
-    this.listingService.getById(id).subscribe(l => this.listing = l);
+    this.listingService.getById(id).subscribe(l => {
+      this.listing = l;
+    });
+  }
+
+  reserve() {
+    if (!this.listing || !this.checkIn || !this.checkOut) return;
+    this.http.post('/api/reservations', {
+      listingId: this.listing.id,
+      checkIn: this.checkIn,
+      checkOut: this.checkOut,
+      guests: this.guests
+    }).subscribe(() => {
+      alert('Reservation created!');
+    });
   }
 }
