@@ -1,6 +1,5 @@
 package com.servicehomes.api.media;
 
-import com.servicehomes.api.config.TestS3Config;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingCategory;
 import com.servicehomes.api.listings.domain.ListingCategoryRepository;
