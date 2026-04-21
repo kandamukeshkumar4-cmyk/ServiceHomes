@@ -188,7 +188,7 @@ export class ListingEditComponent implements OnInit {
           checkInTime: l.policy.checkInTime || '',
           checkOutTime: l.policy.checkOutTime || '',
           minNights: l.policy.minNights,
-          maxNights: l.policy.maxNights || null,
+          maxNights: l.policy.maxNights ?? undefined,
           cancellationPolicy: l.policy.cancellationPolicy,
           instantBook: l.policy.instantBook
         }

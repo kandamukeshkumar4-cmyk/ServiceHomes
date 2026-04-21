@@ -40,9 +40,7 @@ public class ListingLocation {
     @Column(nullable = false, length = 128)
     private String country;
 
-    @Column(precision = 10, scale = 8)
     private Double latitude;
 
-    @Column(precision = 11, scale = 8)
     private Double longitude;
 }

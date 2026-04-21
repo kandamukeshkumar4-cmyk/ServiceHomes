@@ -2,8 +2,8 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ListingService } from '../../listings/listing.service';
-import { ListingCardDto } from '../../listings/listing.model';
+import { ListingService } from '../listings/listing.service';
+import { ListingCardDto } from '../listings/listing.model';
 
 @Component({
   selector: 'app-search-bar',

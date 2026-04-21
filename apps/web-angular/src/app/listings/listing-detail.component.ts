@@ -83,22 +83,22 @@ interface Quote {
               </div>
             </div>
 
-            <div *ngIf="quote" class="mb-3">
+            <div *ngIf="priceQuote" class="mb-3">
               <div class="flex justify-content-between text-sm mb-1">
-                <span>${{ quote.nightlyPrice }} x {{ quote.totalNights }} nights</span>
-                <span>${{ quote.subtotal }}</span>
+                <span>${{ priceQuote.nightlyPrice }} x {{ priceQuote.totalNights }} nights</span>
+                <span>${{ priceQuote.subtotal }}</span>
               </div>
               <div class="flex justify-content-between text-sm mb-1">
                 <span>Cleaning fee</span>
-                <span>${{ quote.cleaningFee }}</span>
+                <span>${{ priceQuote.cleaningFee }}</span>
               </div>
               <div class="flex justify-content-between text-sm mb-1">
                 <span>Service fee</span>
-                <span>${{ quote.serviceFee }}</span>
+                <span>${{ priceQuote.serviceFee }}</span>
               </div>
               <div class="flex justify-content-between font-bold border-top-1 surface-border pt-2 mt-2">
                 <span>Total</span>
-                <span>${{ quote.totalAmount }}</span>
+                <span>${{ priceQuote.totalAmount }}</span>
               </div>
             </div>
 
@@ -123,7 +123,7 @@ export class ListingDetailComponent implements OnInit {
   checkIn = '';
   checkOut = '';
   guests = 1;
-  quote: Quote | null = null;
+  priceQuote: Quote | null = null;
 
   get coverPhoto(): ListingPhoto | undefined {
     return this.listing?.photos.find(p => p.isCover) || this.listing?.photos[0];
