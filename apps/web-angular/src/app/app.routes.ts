@@ -7,7 +7,9 @@ export const routes: Routes = [
   { path: 'listings/:id', loadComponent: () => import('./listings/listing-detail.component').then(m => m.ListingDetailComponent) },
   { path: 'account', canActivate: [authGuard], loadComponent: () => import('./account/account.component').then(m => m.AccountComponent) },
   { path: 'bookings', canActivate: [authGuard], loadComponent: () => import('./bookings/my-bookings.component').then(m => m.MyBookingsComponent) },
+  { path: 'bookings/:id', canActivate: [authGuard], loadComponent: () => import('./bookings/booking-detail.component').then(m => m.BookingDetailComponent) },
   { path: 'host/accommodations', canActivate: [authGuard], loadComponent: () => import('./host/host-accommodations.component').then(m => m.HostAccommodationsComponent) },
+  { path: 'host/reservations', canActivate: [authGuard], loadComponent: () => import('./host/host-reservations.component').then(m => m.HostReservationsComponent) },
   { path: 'listings/new', canActivate: [authGuard], loadComponent: () => import('./listings/listing-create.component').then(m => m.ListingCreateComponent) },
   { path: 'listings/:id/edit', canActivate: [authGuard], loadComponent: () => import('./listings/listing-edit.component').then(m => m.ListingEditComponent) }
 ];
