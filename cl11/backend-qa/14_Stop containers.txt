@@ -1,0 +1,86 @@
+﻿2026-04-21T19:18:30.0390379Z Print service container logs: 822af211e2a4443b813c4d0a440f0ca1_postgispostgis1534_a01695
+2026-04-21T19:18:30.0394957Z ##[command]/usr/bin/docker logs --details acb084b8674856843fd47974f3d84cca3435c7071f03ea1b9a4200068030a507
+2026-04-21T19:18:30.0514631Z  The files belonging to this database system will be owned by user "postgres".
+2026-04-21T19:18:30.0517014Z  initdb: warning: enabling "trust" authentication for local connections
+2026-04-21T19:18:30.0517753Z  initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+2026-04-21T19:18:30.0518363Z  This user must also own the server process.
+2026-04-21T19:18:30.0518626Z  
+2026-04-21T19:18:30.0518897Z  The database cluster will be initialized with locale "en_US.utf8".
+2026-04-21T19:18:30.0519454Z  The default database encoding has accordingly been set to "UTF8".
+2026-04-21T19:18:30.0520022Z  The default text search configuration will be set to "english".
+2026-04-21T19:18:30.0520377Z  
+2026-04-21T19:18:30.0520562Z  Data page checksums are disabled.
+2026-04-21T19:18:30.0520805Z  
+2026-04-21T19:18:30.0521093Z  fixing permissions on existing directory /var/lib/postgresql/data ... ok
+2026-04-21T19:18:30.0521506Z  creating subdirectories ... ok
+2026-04-21T19:18:30.0522129Z  selecting dynamic shared memory implementation ... posix
+2026-04-21T19:18:30.0522528Z  selecting default max_connections ... 100
+2026-04-21T19:18:30.0523072Z  selecting default shared_buffers ... 128MB
+2026-04-21T19:18:30.0523404Z  selecting default time zone ... Etc/UTC
+2026-04-21T19:18:30.0523715Z  creating configuration files ... ok
+2026-04-21T19:18:30.0524025Z  running bootstrap script ... ok
+2026-04-21T19:18:30.0524360Z  performing post-bootstrap initialization ... ok
+2026-04-21T19:18:30.0524708Z  syncing data to disk ... ok
+2026-04-21T19:18:30.0524955Z  
+2026-04-21T19:18:30.0525135Z  
+2026-04-21T19:18:30.0525389Z  Success. You can now start the database server using:
+2026-04-21T19:18:30.0525731Z  
+2026-04-21T19:18:30.0525996Z      pg_ctl -D /var/lib/postgresql/data -l logfile start
+2026-04-21T19:18:30.0526330Z  
+2026-04-21T19:18:30.0527105Z  waiting for server to start....2026-04-21 19:16:57.329 UTC [49] LOG:  starting PostgreSQL 15.8 (Debian 15.8-1.pgdg110+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit
+2026-04-21T19:18:30.0527758Z  2026-04-21 19:16:57.330 UTC [49] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-04-21T19:18:30.0528175Z  2026-04-21 19:16:57.464 UTC [52] LOG:  database system was shut down at 2026-04-21 19:16:56 UTC
+2026-04-21T19:18:30.0528549Z  2026-04-21 19:16:57.467 UTC [49] LOG:  database system is ready to accept connections
+2026-04-21T19:18:30.0528817Z   done
+2026-04-21T19:18:30.0528954Z  server started
+2026-04-21T19:18:30.0529100Z  CREATE DATABASE
+2026-04-21T19:18:30.0529241Z  
+2026-04-21T19:18:30.0529376Z  
+2026-04-21T19:18:30.0529634Z  /usr/local/bin/docker-entrypoint.sh: sourcing /docker-entrypoint-initdb.d/10_postgis.sh
+2026-04-21T19:18:30.0529947Z  CREATE DATABASE
+2026-04-21T19:18:30.0530125Z  Loading PostGIS extensions into template_postgis
+2026-04-21T19:18:30.0530337Z  CREATE EXTENSION
+2026-04-21T19:18:30.0530479Z  CREATE EXTENSION
+2026-04-21T19:18:30.0530705Z  You are now connected to database "template_postgis" as user "servicehomes".
+2026-04-21T19:18:30.0530986Z  CREATE EXTENSION
+2026-04-21T19:18:30.0531136Z  CREATE EXTENSION
+2026-04-21T19:18:30.0531308Z  Loading PostGIS extensions into servicehomes
+2026-04-21T19:18:30.0531508Z  CREATE EXTENSION
+2026-04-21T19:18:30.0531648Z  CREATE EXTENSION
+2026-04-21T19:18:30.0531866Z  You are now connected to database "servicehomes" as user "servicehomes".
+2026-04-21T19:18:30.0532126Z  CREATE EXTENSION
+2026-04-21T19:18:30.0532634Z  2026-04-21 19:17:02.454 UTC [1] LOG:  starting PostgreSQL 15.8 (Debian 15.8-1.pgdg110+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit
+2026-04-21T19:18:30.0533705Z  2026-04-21 19:17:02.454 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-04-21T19:18:30.0534559Z  2026-04-21 19:17:02.454 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-04-21T19:18:30.0535114Z  2026-04-21 19:17:02.455 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-04-21T19:18:30.0535754Z  2026-04-21 19:17:02.458 UTC [73] LOG:  database system was shut down at 2026-04-21 19:17:02 UTC
+2026-04-21T19:18:30.0536343Z  2026-04-21 19:17:02.461 UTC [1] LOG:  database system is ready to accept connections
+2026-04-21T19:18:30.0546889Z  2026-04-21 19:17:05.862 UTC [84] FATAL:  role "root" does not exist
+2026-04-21T19:18:30.0547593Z  2026-04-21 19:17:15.920 UTC [92] FATAL:  role "root" does not exist
+2026-04-21T19:18:30.0548347Z  2026-04-21 19:17:25.975 UTC [101] FATAL:  role "root" does not exist
+2026-04-21T19:18:30.0548819Z  2026-04-21 19:17:36.047 UTC [110] FATAL:  role "root" does not exist
+2026-04-21T19:18:30.0549219Z  2026-04-21 19:17:46.133 UTC [127] FATAL:  role "root" does not exist
+2026-04-21T19:18:30.0549686Z  2026-04-21 19:17:56.211 UTC [146] FATAL:  role "root" does not exist
+2026-04-21T19:18:30.0550057Z  2026-04-21 19:18:06.289 UTC [155] FATAL:  role "root" does not exist
+2026-04-21T19:18:30.0550332Z  2026-04-21 19:18:16.370 UTC [173] FATAL:  role "root" does not exist
+2026-04-21T19:18:30.0550708Z  2026-04-21 19:18:26.444 UTC [182] FATAL:  role "root" does not exist
+2026-04-21T19:18:30.0550936Z  CREATE EXTENSION
+2026-04-21T19:18:30.0551081Z  
+2026-04-21T19:18:30.0551268Z  2026-04-21 19:17:01.751 UTC [49] LOG:  received fast shutdown request
+2026-04-21T19:18:30.0551634Z  waiting for server to shut down....2026-04-21 19:17:01.751 UTC [49] LOG:  aborting any active transactions
+2026-04-21T19:18:30.0552158Z  2026-04-21 19:17:01.753 UTC [49] LOG:  background worker "logical replication launcher" (PID 55) exited with exit code 1
+2026-04-21T19:18:30.0552576Z  2026-04-21 19:17:01.754 UTC [50] LOG:  shutting down
+2026-04-21T19:18:30.0553056Z  2026-04-21 19:17:01.754 UTC [50] LOG:  checkpoint starting: shutdown immediate
+2026-04-21T19:18:30.0553807Z  2026-04-21 19:17:02.145 UTC [50] LOG:  checkpoint complete: wrote 4473 buffers (27.3%); 0 WAL file(s) added, 0 removed, 2 recycled; write=0.316 s, sync=0.074 s, total=0.392 s; sync files=963, longest=0.012 s, average=0.001 s; distance=34925 kB, estimate=34925 kB
+2026-04-21T19:18:30.0554511Z  2026-04-21 19:17:02.156 UTC [49] LOG:  database system is shut down
+2026-04-21T19:18:30.0554739Z   done
+2026-04-21T19:18:30.0554875Z  server stopped
+2026-04-21T19:18:30.0555015Z  
+2026-04-21T19:18:30.0555187Z  PostgreSQL init process complete; ready for start up.
+2026-04-21T19:18:30.0555401Z  
+2026-04-21T19:18:30.0560012Z Stop and remove container: 822af211e2a4443b813c4d0a440f0ca1_postgispostgis1534_a01695
+2026-04-21T19:18:30.0564813Z ##[command]/usr/bin/docker rm --force acb084b8674856843fd47974f3d84cca3435c7071f03ea1b9a4200068030a507
+2026-04-21T19:18:31.5455443Z acb084b8674856843fd47974f3d84cca3435c7071f03ea1b9a4200068030a507
+2026-04-21T19:18:31.5494844Z Remove container network: github_network_ea2a9c4295fd464c91481063fd7d1a3c
+2026-04-21T19:18:31.5498146Z ##[command]/usr/bin/docker network rm github_network_ea2a9c4295fd464c91481063fd7d1a3c
+2026-04-21T19:18:31.6406735Z github_network_ea2a9c4295fd464c91481063fd7d1a3c

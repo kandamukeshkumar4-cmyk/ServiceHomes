@@ -1,0 +1,11 @@
+﻿2026-04-21T19:18:38.5126583Z ##[group]Run if [ ! -f "packages/api-contracts/openapi.yml" ]; then
+2026-04-21T19:18:38.5127576Z [36;1mif [ ! -f "packages/api-contracts/openapi.yml" ]; then[0m
+2026-04-21T19:18:38.5128281Z [36;1m  echo "::error::Missing API contracts"[0m
+2026-04-21T19:18:38.5128869Z [36;1m  exit 1[0m
+2026-04-21T19:18:38.5129270Z [36;1mfi[0m
+2026-04-21T19:18:38.5178307Z shell: /usr/bin/bash -e {0}
+2026-04-21T19:18:38.5178818Z env:
+2026-04-21T19:18:38.5179183Z   JAVA_VERSION: 21
+2026-04-21T19:18:38.5179601Z   NODE_VERSION: 20
+2026-04-21T19:18:38.5180021Z   PYTHON_VERSION: 3.11
+2026-04-21T19:18:38.5180445Z ##[endgroup]

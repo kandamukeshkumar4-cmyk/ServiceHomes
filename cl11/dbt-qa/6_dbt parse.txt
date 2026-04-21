@@ -1,0 +1,30 @@
+﻿2026-04-21T19:16:45.3928170Z ##[group]Run dbt parse
+2026-04-21T19:16:45.3928424Z [36;1mdbt parse[0m
+2026-04-21T19:16:45.3950845Z shell: /usr/bin/bash -e {0}
+2026-04-21T19:16:45.3951071Z env:
+2026-04-21T19:16:45.3951235Z   JAVA_VERSION: 21
+2026-04-21T19:16:45.3951412Z   NODE_VERSION: 20
+2026-04-21T19:16:45.3951594Z   PYTHON_VERSION: 3.11
+2026-04-21T19:16:45.3951856Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-21T19:16:45.3952268Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+2026-04-21T19:16:45.3952686Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-21T19:16:45.3953033Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-21T19:16:45.3953387Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-21T19:16:45.3953761Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+2026-04-21T19:16:45.3954064Z ##[endgroup]
+2026-04-21T19:16:46.8853216Z [0m19:16:46  Running with dbt=1.11.8
+2026-04-21T19:16:47.4766391Z [0m19:16:47  Registered adapter: snowflake=1.11.4
+2026-04-21T19:16:47.5844147Z [0m19:16:47  Unable to do partial parsing because saved manifest not found. Starting full parse.
+2026-04-21T19:16:49.1763397Z [0m19:16:49  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+2026-04-21T19:16:49.1764586Z functionality
+2026-04-21T19:16:49.1765104Z Found top-level arguments to test `accepted_values` defined on 'sr_listings' in
+2026-04-21T19:16:49.1765905Z package 'servicehomes_analytics' (models/schema.yml). Arguments to generic tests
+2026-04-21T19:16:49.1766569Z should be nested under the `arguments` property.
+2026-04-21T19:16:49.3447555Z [0m19:16:49  Performance info: /home/runner/work/ServiceHomes/ServiceHomes/apps/analytics-dbt/target/perf_info.json
+2026-04-21T19:16:49.4602074Z [0m19:16:49  [[33mWARNING[0m][DeprecationsSummary]: Deprecated functionality
+2026-04-21T19:16:49.4603030Z Summary of encountered deprecations:
+2026-04-21T19:16:49.4603848Z - MissingArgumentsPropertyInGenericTestDeprecation: 2 occurrences
+2026-04-21T19:16:49.4605089Z To see all deprecation instances instead of just the first occurrence of each,
+2026-04-21T19:16:49.4606149Z run command again with the `--show-all-deprecations` flag. You may also need to
+2026-04-21T19:16:49.4607289Z run with `--no-partial-parse` as some deprecations are only encountered during
+2026-04-21T19:16:49.4607766Z parsing.

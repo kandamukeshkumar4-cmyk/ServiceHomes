@@ -1,0 +1,178 @@
+﻿2026-04-21T19:18:37.3400956Z Current runner version: '2.333.1'
+2026-04-21T19:18:37.3438354Z ##[group]Runner Image Provisioner
+2026-04-21T19:18:37.3439651Z Hosted Compute Agent
+2026-04-21T19:18:37.3440326Z Version: 20260415.520
+2026-04-21T19:18:37.3441200Z Commit: af089020f5f67b61ccc91db6c07980876c02bf7b
+2026-04-21T19:18:37.3442305Z Build Date: 2026-04-15T18:07:08Z
+2026-04-21T19:18:37.3443390Z Worker ID: {a80aa25c-4b4d-489d-8b50-dfd285252f3f}
+2026-04-21T19:18:37.3444454Z Azure Region: eastus
+2026-04-21T19:18:37.3445363Z ##[endgroup]
+2026-04-21T19:18:37.3447895Z ##[group]Operating System
+2026-04-21T19:18:37.3448805Z Ubuntu
+2026-04-21T19:18:37.3449708Z 24.04.4
+2026-04-21T19:18:37.3450354Z LTS
+2026-04-21T19:18:37.3451031Z ##[endgroup]
+2026-04-21T19:18:37.3451920Z ##[group]Runner Image
+2026-04-21T19:18:37.3452794Z Image: ubuntu-24.04
+2026-04-21T19:18:37.3453533Z Version: 20260420.95.1
+2026-04-21T19:18:37.3455522Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260420.95/images/ubuntu/Ubuntu2404-Readme.md
+2026-04-21T19:18:37.3458305Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260420.95
+2026-04-21T19:18:37.3459836Z ##[endgroup]
+2026-04-21T19:18:37.3461714Z ##[group]GITHUB_TOKEN Permissions
+2026-04-21T19:18:37.3464556Z Contents: read
+2026-04-21T19:18:37.3465475Z Issues: write
+2026-04-21T19:18:37.3466573Z Metadata: read
+2026-04-21T19:18:37.3467375Z PullRequests: write
+2026-04-21T19:18:37.3468349Z ##[endgroup]
+2026-04-21T19:18:37.3471208Z Secret source: Actions
+2026-04-21T19:18:37.3472463Z Prepare workflow directory
+2026-04-21T19:18:37.4021850Z Prepare all required actions
+2026-04-21T19:18:37.4077474Z Getting action download info
+2026-04-21T19:18:37.6989980Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-04-21T19:18:37.9043618Z Complete job name: docs-qa
+2026-04-21T19:18:37.9733094Z ##[group]Run actions/checkout@v4
+2026-04-21T19:18:37.9733923Z with:
+2026-04-21T19:18:37.9734375Z   repository: kandamukeshkumar4-cmyk/ServiceHomes
+2026-04-21T19:18:37.9735142Z   token: ***
+2026-04-21T19:18:37.9735511Z   ssh-strict: true
+2026-04-21T19:18:37.9735894Z   ssh-user: git
+2026-04-21T19:18:37.9736503Z   persist-credentials: true
+2026-04-21T19:18:37.9736958Z   clean: true
+2026-04-21T19:18:37.9737358Z   sparse-checkout-cone-mode: true
+2026-04-21T19:18:37.9737834Z   fetch-depth: 1
+2026-04-21T19:18:37.9738214Z   fetch-tags: false
+2026-04-21T19:18:37.9738603Z   show-progress: true
+2026-04-21T19:18:37.9739005Z   lfs: false
+2026-04-21T19:18:37.9739361Z   submodules: false
+2026-04-21T19:18:37.9739761Z   set-safe-directory: true
+2026-04-21T19:18:37.9740442Z env:
+2026-04-21T19:18:37.9740806Z   JAVA_VERSION: 21
+2026-04-21T19:18:37.9741196Z   NODE_VERSION: 20
+2026-04-21T19:18:37.9741617Z   PYTHON_VERSION: 3.11
+2026-04-21T19:18:37.9742024Z ##[endgroup]
+2026-04-21T19:18:38.0840933Z Syncing repository: kandamukeshkumar4-cmyk/ServiceHomes
+2026-04-21T19:18:38.0842732Z ##[group]Getting Git version info
+2026-04-21T19:18:38.0843573Z Working directory is '/home/runner/work/ServiceHomes/ServiceHomes'
+2026-04-21T19:18:38.0844585Z [command]/usr/bin/git version
+2026-04-21T19:18:38.0916945Z git version 2.53.0
+2026-04-21T19:18:38.0943023Z ##[endgroup]
+2026-04-21T19:18:38.0955959Z Temporarily overriding HOME='/home/runner/work/_temp/cb37f0a2-3b09-4b7a-8d4e-e1c4d4768914' before making global git config changes
+2026-04-21T19:18:38.0957799Z Adding repository directory to the temporary git global config as a safe directory
+2026-04-21T19:18:38.0962426Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ServiceHomes/ServiceHomes
+2026-04-21T19:18:38.1012643Z Deleting the contents of '/home/runner/work/ServiceHomes/ServiceHomes'
+2026-04-21T19:18:38.1016600Z ##[group]Initializing the repository
+2026-04-21T19:18:38.1021830Z [command]/usr/bin/git init /home/runner/work/ServiceHomes/ServiceHomes
+2026-04-21T19:18:38.1124100Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-04-21T19:18:38.1125849Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-04-21T19:18:38.1128169Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-04-21T19:18:38.1129485Z hint: call:
+2026-04-21T19:18:38.1130147Z hint:
+2026-04-21T19:18:38.1130990Z hint: 	git config --global init.defaultBranch <name>
+2026-04-21T19:18:38.1132082Z hint:
+2026-04-21T19:18:38.1133053Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-04-21T19:18:38.1134615Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-04-21T19:18:38.1135901Z hint:
+2026-04-21T19:18:38.1136909Z hint: 	git branch -m <name>
+2026-04-21T19:18:38.1137717Z hint:
+2026-04-21T19:18:38.1138872Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-04-21T19:18:38.1140700Z Initialized empty Git repository in /home/runner/work/ServiceHomes/ServiceHomes/.git/
+2026-04-21T19:18:38.1143482Z [command]/usr/bin/git remote add origin https://github.com/kandamukeshkumar4-cmyk/ServiceHomes
+2026-04-21T19:18:38.1185221Z ##[endgroup]
+2026-04-21T19:18:38.1186666Z ##[group]Disabling automatic garbage collection
+2026-04-21T19:18:38.1190522Z [command]/usr/bin/git config --local gc.auto 0
+2026-04-21T19:18:38.1217902Z ##[endgroup]
+2026-04-21T19:18:38.1219127Z ##[group]Setting up auth
+2026-04-21T19:18:38.1225366Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-04-21T19:18:38.1255077Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-04-21T19:18:38.1588087Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-04-21T19:18:38.1617621Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-04-21T19:18:38.1825614Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-04-21T19:18:38.1853660Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-04-21T19:18:38.2065969Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-04-21T19:18:38.2098512Z ##[endgroup]
+2026-04-21T19:18:38.2099301Z ##[group]Fetching the repository
+2026-04-21T19:18:38.2107144Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +c3b7ca9d3a2a8fb349697add2f7b0f117994a34e:refs/remotes/pull/2/merge
+2026-04-21T19:18:38.4144910Z From https://github.com/kandamukeshkumar4-cmyk/ServiceHomes
+2026-04-21T19:18:38.4146782Z  * [new ref]         c3b7ca9d3a2a8fb349697add2f7b0f117994a34e -> pull/2/merge
+2026-04-21T19:18:38.4181766Z ##[endgroup]
+2026-04-21T19:18:38.4182556Z ##[group]Determining the checkout info
+2026-04-21T19:18:38.4184016Z ##[endgroup]
+2026-04-21T19:18:38.4189691Z [command]/usr/bin/git sparse-checkout disable
+2026-04-21T19:18:38.4239251Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-04-21T19:18:38.4265860Z ##[group]Checking out the ref
+2026-04-21T19:18:38.4269633Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/2/merge
+2026-04-21T19:18:38.4399538Z Note: switching to 'refs/remotes/pull/2/merge'.
+2026-04-21T19:18:38.4400355Z 
+2026-04-21T19:18:38.4400860Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-04-21T19:18:38.4401876Z changes and commit them, and you can discard any commits you make in this
+2026-04-21T19:18:38.4402878Z state without impacting any branches by switching back to a branch.
+2026-04-21T19:18:38.4403483Z 
+2026-04-21T19:18:38.4403923Z If you want to create a new branch to retain commits you create, you may
+2026-04-21T19:18:38.4404877Z do so (now or later) by using -c with the switch command. Example:
+2026-04-21T19:18:38.4405437Z 
+2026-04-21T19:18:38.4405932Z   git switch -c <new-branch-name>
+2026-04-21T19:18:38.4406810Z 
+2026-04-21T19:18:38.4407105Z Or undo this operation with:
+2026-04-21T19:18:38.4407463Z 
+2026-04-21T19:18:38.4407673Z   git switch -
+2026-04-21T19:18:38.4407949Z 
+2026-04-21T19:18:38.4408389Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-04-21T19:18:38.4409049Z 
+2026-04-21T19:18:38.4409775Z HEAD is now at c3b7ca9 Merge 6a68ce96116f9f9e0b679c50edea5997cf4bc345 into ddb409f3e09e272cfd054a6e3d833c259315b126
+2026-04-21T19:18:38.4412191Z ##[endgroup]
+2026-04-21T19:18:38.4444041Z [command]/usr/bin/git log -1 --format=%H
+2026-04-21T19:18:38.4465278Z c3b7ca9d3a2a8fb349697add2f7b0f117994a34e
+2026-04-21T19:18:38.4657548Z ##[group]Run # Check if README mentions all major components
+2026-04-21T19:18:38.4658453Z [36;1m# Check if README mentions all major components[0m
+2026-04-21T19:18:38.4659185Z [36;1mif ! grep -q "apps/api-spring" README.md; then[0m
+2026-04-21T19:18:38.4660062Z [36;1m  echo "::warning::README.md may be outdated - missing backend reference"[0m
+2026-04-21T19:18:38.4660837Z [36;1mfi[0m
+2026-04-21T19:18:38.4661337Z [36;1mif ! grep -q "apps/web-angular" README.md; then[0m
+2026-04-21T19:18:38.4662186Z [36;1m  echo "::warning::README.md may be outdated - missing frontend reference"[0m
+2026-04-21T19:18:38.4662942Z [36;1mfi[0m
+2026-04-21T19:18:38.4663450Z [36;1mif ! grep -q "apps/analytics-dbt" README.md; then[0m
+2026-04-21T19:18:38.4664290Z [36;1m  echo "::warning::README.md may be outdated - missing analytics reference"[0m
+2026-04-21T19:18:38.4665018Z [36;1mfi[0m
+2026-04-21T19:18:38.4776875Z shell: /usr/bin/bash -e {0}
+2026-04-21T19:18:38.4777411Z env:
+2026-04-21T19:18:38.4777849Z   JAVA_VERSION: 21
+2026-04-21T19:18:38.4778285Z   NODE_VERSION: 20
+2026-04-21T19:18:38.4778736Z   PYTHON_VERSION: 3.11
+2026-04-21T19:18:38.4779187Z ##[endgroup]
+2026-04-21T19:18:38.4956873Z ##[group]Run if [ ! -f "docs/adr/ADR-001-architecture.md" ]; then
+2026-04-21T19:18:38.4957794Z [36;1mif [ ! -f "docs/adr/ADR-001-architecture.md" ]; then[0m
+2026-04-21T19:18:38.4958492Z [36;1m  echo "::warning::Missing ADR files"[0m
+2026-04-21T19:18:38.4959048Z [36;1mfi[0m
+2026-04-21T19:18:38.5009073Z shell: /usr/bin/bash -e {0}
+2026-04-21T19:18:38.5009571Z env:
+2026-04-21T19:18:38.5009945Z   JAVA_VERSION: 21
+2026-04-21T19:18:38.5010348Z   NODE_VERSION: 20
+2026-04-21T19:18:38.5010763Z   PYTHON_VERSION: 3.11
+2026-04-21T19:18:38.5011185Z ##[endgroup]
+2026-04-21T19:18:38.5126606Z ##[group]Run if [ ! -f "packages/api-contracts/openapi.yml" ]; then
+2026-04-21T19:18:38.5127580Z [36;1mif [ ! -f "packages/api-contracts/openapi.yml" ]; then[0m
+2026-04-21T19:18:38.5128284Z [36;1m  echo "::error::Missing API contracts"[0m
+2026-04-21T19:18:38.5128873Z [36;1m  exit 1[0m
+2026-04-21T19:18:38.5129273Z [36;1mfi[0m
+2026-04-21T19:18:38.5178320Z shell: /usr/bin/bash -e {0}
+2026-04-21T19:18:38.5178821Z env:
+2026-04-21T19:18:38.5179186Z   JAVA_VERSION: 21
+2026-04-21T19:18:38.5179604Z   NODE_VERSION: 20
+2026-04-21T19:18:38.5180025Z   PYTHON_VERSION: 3.11
+2026-04-21T19:18:38.5180448Z ##[endgroup]
+2026-04-21T19:18:38.5454021Z Post job cleanup.
+2026-04-21T19:18:38.6396355Z [command]/usr/bin/git version
+2026-04-21T19:18:38.6432105Z git version 2.53.0
+2026-04-21T19:18:38.6481314Z Temporarily overriding HOME='/home/runner/work/_temp/cc7a4f4d-a63f-4d1f-b109-ccfe4a82bd89' before making global git config changes
+2026-04-21T19:18:38.6483949Z Adding repository directory to the temporary git global config as a safe directory
+2026-04-21T19:18:38.6485851Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ServiceHomes/ServiceHomes
+2026-04-21T19:18:38.6518668Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-04-21T19:18:38.6549823Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-04-21T19:18:38.6768717Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-04-21T19:18:38.6789098Z http.https://github.com/.extraheader
+2026-04-21T19:18:38.6801158Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-04-21T19:18:38.6830899Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-04-21T19:18:38.7040474Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-04-21T19:18:38.7069912Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-04-21T19:18:38.7445496Z Cleaning up orphan processes
+2026-04-21T19:18:38.7848968Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
