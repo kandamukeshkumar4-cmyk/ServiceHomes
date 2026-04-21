@@ -1,0 +1,34 @@
+name: 'servicehomes_analytics'
+version: '1.0.0'
+config-version: 2
+
+profile: 'servicehomes'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+packages-install-path: dbt_packages
+
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  servicehomes_analytics:
+    bronze:
+      +materialized: table
+      +schema: bronze
+    silver:
+      +materialized: view
+      +schema: silver
+    gold:
+      +materialized: table
+      +schema: gold
+      obt:
+        +schema: gold
+      star:
+        +schema: gold

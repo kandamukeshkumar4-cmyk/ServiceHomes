@@ -1,0 +1,14 @@
+servicehomes:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: YOUR_SNOWFLAKE_ACCOUNT
+      user: YOUR_USER
+      password: YOUR_PASSWORD
+      role: YOUR_ROLE
+      database: SERVICEHOMES
+      warehouse: YOUR_WAREHOUSE
+      schema: bronze
+      threads: 4
+      client_session_keep_alive: false

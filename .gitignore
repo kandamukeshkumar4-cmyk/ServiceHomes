@@ -1,0 +1,67 @@
+# Compiled output
+**/dist/
+**/tmp/
+**/out-tsc/
+**/bazel-out/
+**/target/
+**/build/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Angular
+.angular/
+.sass-cache/
+coverage/
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+.mvn/wrapper/maven-wrapper.jar
+
+# Spring Boot
+*.log
+*.logs
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Docker volumes
+infra/docker/volumes/
+
+# Misc
+*.swp
+*.swo
+*~

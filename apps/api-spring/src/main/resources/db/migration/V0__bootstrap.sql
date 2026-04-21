@@ -1,0 +1,2 @@
+-- Placeholder for future migrations
+-- Phase 0 bootstrap: no schema changes yet

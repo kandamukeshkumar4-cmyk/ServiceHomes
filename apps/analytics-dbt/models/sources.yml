@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: raw_events
+    database: SERVICEHOMES
+    schema: raw
+    tables:
+      - name: listing_events
+      - name: reservation_events
+      - name: search_events
+      - name: user_events
