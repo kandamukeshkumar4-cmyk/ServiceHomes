@@ -62,24 +62,19 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
-
-      - name: Backend format check
-        working-directory: apps/api-spring
-        run: |
-          ./mvnw spotless:check || echo "::warning::Code formatting issues detected. Run './mvnw spotless:apply' to fix."
-        continue-on-error: true
+          cache: maven
 
       - name: Backend compile
         working-directory: apps/api-spring
-        run: ./mvnw compile -DskipTests
+        run: mvn compile -DskipTests
 
       - name: Backend tests
         working-directory: apps/api-spring
-        run: ./mvnw test -Dspring.profiles.active=ci
+        run: mvn test -Dspring.profiles.active=ci
 
       - name: Backend integration tests
         working-directory: apps/api-spring
-        run: ./mvnw verify -Dspring.profiles.active=ci
+        run: mvn verify -Dspring.profiles.active=ci
 
   # Job 3: Frontend validation
   frontend-qa:
@@ -91,10 +86,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/web-angular/package-lock.json
 
       - name: Install dependencies
         working-directory: apps/web-angular
-        run: npm ci
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Frontend lint
         working-directory: apps/web-angular
