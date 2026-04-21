@@ -1,10 +1,13 @@
 package com.servicehomes.api.listings;
 
-import com.servicehomes.api.config.WithMockJwt;
+import static com.servicehomes.api.config.WithMockJwt.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.servicehomes.api.listings.application.dto.CreateListingRequest;
 import com.servicehomes.api.listings.application.dto.ListingDto;
 import com.servicehomes.api.listings.domain.*;
-import org.junit.jupiter.api.AfterEach;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,14 +21,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -60,14 +59,8 @@ class ListingIntegrationTest {
     @Autowired
     private ListingRepository listingRepository;
 
-    @AfterEach
-    void tearDown() {
-        WithMockJwt.clear();
-    }
-
     @Test
     void createListing() throws Exception {
-        WithMockJwt.setup(SEED_HOST_ID);
         ListingCategory category = categoryRepository.findAll().get(0);
 
         var request = new CreateListingRequest(
@@ -88,6 +81,7 @@ class ListingIntegrationTest {
         );
 
         mockMvc.perform(post("/listings")
+                .with(jwt(SEED_HOST_ID))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())

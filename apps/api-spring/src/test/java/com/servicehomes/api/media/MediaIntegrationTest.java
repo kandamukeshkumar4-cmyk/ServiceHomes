@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.bean.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,6 +35,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,7 +44,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("ci")
+@Import(MediaIntegrationTest.MockS3Config.class)
 class MediaIntegrationTest {
+
+    @Configuration
+    static class MockS3Config {
+        @Bean
+        S3Client s3Client() {
+            S3Client mock = mock(S3Client.class);
+            doNothing().when(mock).putObject(any(PutObjectRequest.class), any());
+            return mock;
+        }
+
+        @Bean
+        S3Presigner s3Presigner() throws Exception {
+            S3Presigner mock = mock(S3Presigner.class);
+            PresignedPutObjectRequest presignedRequest = PresignedPutObjectRequest.builder()
+                .url(URI.create("https://mock-bucket.s3.us-east-1.amazonaws.com/test.jpg").toURL())
+                .build();
+            when(mock.presignPutObject(any(PutObjectPresignRequest.class))).thenReturn(presignedRequest);
+            return mock;
+        }
+    }
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgis/postgis:15-3.4").asCompatibleSubstituteFor("postgres"))
@@ -55,12 +79,6 @@ class MediaIntegrationTest {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
     }
-
-    @MockBean
-    private S3Client s3Client;
-
-    @MockBean
-    private S3Presigner s3Presigner;
 
     @Autowired
     private MockMvc mockMvc;
@@ -79,7 +97,7 @@ class MediaIntegrationTest {
     private static final UUID SEED_HOST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         ListingCategory category = categoryRepository.findAll().isEmpty()
             ? categoryRepository.save(ListingCategory.builder().name("Test").icon("test").description("Test").build())
             : categoryRepository.findAll().get(0);
@@ -101,12 +119,6 @@ class MediaIntegrationTest {
             .build();
         listing = listingRepository.save(listing);
         listingId = listing.getId();
-
-        PresignedPutObjectRequest presignedRequest = PresignedPutObjectRequest.builder()
-            .url(URI.create("https://mock-bucket.s3.us-east-1.amazonaws.com/test.jpg").toURL())
-            .build();
-        when(s3Presigner.presignPutObject(any(PutObjectPresignRequest.class))).thenReturn(presignedRequest);
-        doNothing().when(s3Client).putObject(any(PutObjectRequest.class), any());
     }
 
     @Test

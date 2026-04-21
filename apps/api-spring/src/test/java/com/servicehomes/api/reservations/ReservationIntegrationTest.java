@@ -1,6 +1,9 @@
 package com.servicehomes.api.reservations;
 
-import com.servicehomes.api.config.WithMockJwt;
+import static com.servicehomes.api.config.WithMockJwt.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingCategory;
 import com.servicehomes.api.listings.domain.ListingCategoryRepository;
@@ -10,7 +13,6 @@ import com.servicehomes.api.reservations.application.dto.QuoteRequest;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +31,6 @@ import org.testcontainers.utility.DockerImageName;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -97,11 +96,6 @@ class ReservationIntegrationTest {
         listingId = listing.getId();
     }
 
-    @AfterEach
-    void tearDown() {
-        WithMockJwt.clear();
-    }
-
     @Test
     void quoteReturnsCorrectPricing() throws Exception {
         QuoteRequest request = new QuoteRequest(listingId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5), 2);
@@ -130,13 +124,12 @@ class ReservationIntegrationTest {
 
     @Test
     void createReservationSucceedsForPublishedListing() throws Exception {
-        WithMockJwt.setup(SEED_GUEST_ID);
-
         CreateReservationRequest request = new CreateReservationRequest(
             listingId, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 5), 2
         );
 
         mockMvc.perform(post("/reservations")
+                .with(jwt(SEED_GUEST_ID))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
@@ -147,13 +140,12 @@ class ReservationIntegrationTest {
 
     @Test
     void createReservationRejectsOwnListing() throws Exception {
-        WithMockJwt.setup(SEED_HOST_ID);
-
         CreateReservationRequest request = new CreateReservationRequest(
             listingId, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 5), 2
         );
 
         mockMvc.perform(post("/reservations")
+                .with(jwt(SEED_HOST_ID))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
@@ -177,13 +169,12 @@ class ReservationIntegrationTest {
             .build();
         reservationRepository.save(existing);
 
-        WithMockJwt.setup(SEED_GUEST_ID);
-
         CreateReservationRequest request = new CreateReservationRequest(
             listingId, LocalDate.of(2026, 7, 3), LocalDate.of(2026, 7, 8), 2
         );
 
         mockMvc.perform(post("/reservations")
+                .with(jwt(SEED_GUEST_ID))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
@@ -192,13 +183,12 @@ class ReservationIntegrationTest {
 
     @Test
     void createReservationRejectsExceedingGuestCapacity() throws Exception {
-        WithMockJwt.setup(SEED_GUEST_ID);
-
         CreateReservationRequest request = new CreateReservationRequest(
             listingId, LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 5), 10
         );
 
         mockMvc.perform(post("/reservations")
+                .with(jwt(SEED_GUEST_ID))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
