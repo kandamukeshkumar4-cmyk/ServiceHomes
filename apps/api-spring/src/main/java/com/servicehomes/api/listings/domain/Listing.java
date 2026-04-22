@@ -97,6 +97,7 @@ public class Listing {
     private Set<ListingAmenity> amenities = new HashSet<>();
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("startDate ASC, endDate ASC")
     @Builder.Default
     private List<ListingAvailabilityRule> availabilityRules = new ArrayList<>();
 

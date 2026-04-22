@@ -20,7 +20,7 @@ export class HostAccommodationsComponent implements OnInit {
   }
 
   load() {
-    this.listingService.getMyListings().subscribe(data => this.listings = data);
+    this.listingService.getMyListings().subscribe(page => this.listings = page.content);
   }
 
   publish(id: string) {

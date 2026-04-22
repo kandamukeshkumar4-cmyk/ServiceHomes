@@ -1,6 +1,8 @@
 package com.servicehomes.api.reservations;
 
 import com.servicehomes.api.listings.domain.Listing;
+import com.servicehomes.api.listings.domain.ListingAvailabilityRule;
+import com.servicehomes.api.listings.domain.ListingAvailabilityRuleRepository;
 import com.servicehomes.api.listings.domain.ListingCategory;
 import com.servicehomes.api.listings.domain.ListingCategoryRepository;
 import com.servicehomes.api.listings.domain.ListingPolicy;
@@ -64,6 +66,9 @@ class ReservationIntegrationTest {
     private ListingRepository listingRepository;
 
     @Autowired
+    private ListingAvailabilityRuleRepository availabilityRuleRepository;
+
+    @Autowired
     private ReservationRepository reservationRepository;
 
     private static final UUID SEED_HOST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
@@ -125,6 +130,23 @@ class ReservationIntegrationTest {
             .build());
     }
 
+    private void addAvailabilityRule(
+        UUID targetListingId,
+        ListingAvailabilityRule.RuleType ruleType,
+        LocalDate startDate,
+        LocalDate endDate,
+        BigDecimal value
+    ) {
+        Listing listing = listingRepository.findById(targetListingId).orElseThrow();
+        availabilityRuleRepository.save(ListingAvailabilityRule.builder()
+            .listing(listing)
+            .ruleType(ruleType)
+            .startDate(startDate)
+            .endDate(endDate)
+            .value(value)
+            .build());
+    }
+
     @Test
     void quoteReturnsCorrectPricing() throws Exception {
         QuoteRequest request = new QuoteRequest(listingId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5), 2);
@@ -139,6 +161,27 @@ class ReservationIntegrationTest {
             .andExpect(jsonPath("$.cleaningFee").value(20.00))
             .andExpect(jsonPath("$.serviceFee").value(10.00))
             .andExpect(jsonPath("$.totalAmount").value(430.00));
+    }
+
+    @Test
+    void quoteAppliesPriceOverrides() throws Exception {
+        addAvailabilityRule(
+            listingId,
+            ListingAvailabilityRule.RuleType.PRICE_OVERRIDE,
+            LocalDate.of(2026, 5, 2),
+            LocalDate.of(2026, 5, 3),
+            new BigDecimal("150.00")
+        );
+        QuoteRequest request = new QuoteRequest(listingId, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5), 2);
+
+        mockMvc.perform(post("/reservations/quote")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalNights").value(4))
+            .andExpect(jsonPath("$.nightlyPrice").value(125.00))
+            .andExpect(jsonPath("$.subtotal").value(500.00))
+            .andExpect(jsonPath("$.totalAmount").value(530.00));
     }
 
     @Test
@@ -225,6 +268,50 @@ class ReservationIntegrationTest {
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").value("Dates are not available for this listing"));
+    }
+
+    @Test
+    void createReservationRejectsBlockedDates() throws Exception {
+        addAvailabilityRule(
+            listingId,
+            ListingAvailabilityRule.RuleType.BLOCKED_DATE,
+            LocalDate.of(2026, 7, 2),
+            LocalDate.of(2026, 7, 3),
+            null
+        );
+
+        CreateReservationRequest request = new CreateReservationRequest(
+            listingId, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 5), 2
+        );
+
+        mockMvc.perform(post("/reservations")
+                .header("X-Test-User-Id", SEED_GUEST_AUTH0_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Dates are not available for this listing"));
+    }
+
+    @Test
+    void createReservationRejectsMinimumNightOverrides() throws Exception {
+        addAvailabilityRule(
+            listingId,
+            ListingAvailabilityRule.RuleType.MIN_NIGHTS_OVERRIDE,
+            LocalDate.of(2026, 8, 1),
+            LocalDate.of(2026, 8, 5),
+            new BigDecimal("5")
+        );
+
+        CreateReservationRequest request = new CreateReservationRequest(
+            listingId, LocalDate.of(2026, 8, 1), LocalDate.of(2026, 8, 5), 2
+        );
+
+        mockMvc.perform(post("/reservations")
+                .header("X-Test-User-Id", SEED_GUEST_AUTH0_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Minimum nights requirement not met for selected dates"));
     }
 
     @Test

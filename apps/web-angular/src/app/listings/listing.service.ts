@@ -1,14 +1,23 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Listing, CreateListingPayload, ListingCategory, ListingAmenity } from './listing.model';
+import {
+  Listing,
+  CreateListingPayload,
+  ListingCategory,
+  ListingAmenity,
+  ListingAvailabilityResponse,
+  ListingAvailabilityRule,
+  ListingCalendarResponse,
+  ListingPage
+} from './listing.model';
 
 @Injectable({ providedIn: 'root' })
 export class ListingService {
   private http = inject(HttpClient);
 
-  getMyListings(): Observable<Listing[]> {
-    return this.http.get<Listing[]>('/api/listings/my');
+  getMyListings(): Observable<ListingPage> {
+    return this.http.get<ListingPage>('/api/listings/my');
   }
 
   getById(id: string): Observable<Listing> {
@@ -29,6 +38,26 @@ export class ListingService {
 
   unpublish(id: string): Observable<Listing> {
     return this.http.post<Listing>(`/api/listings/${id}/unpublish`, {});
+  }
+
+  getAvailability(id: string): Observable<ListingAvailabilityResponse> {
+    return this.http.get<ListingAvailabilityResponse>(`/api/listings/${id}/availability`);
+  }
+
+  updateAvailability(id: string, rules: ListingAvailabilityRule[]): Observable<ListingAvailabilityResponse> {
+    return this.http.put<ListingAvailabilityResponse>(`/api/listings/${id}/availability`, { rules });
+  }
+
+  getCalendar(id: string, startDate?: string, endDate?: string): Observable<ListingCalendarResponse> {
+    const params = new URLSearchParams();
+    if (startDate) {
+      params.set('startDate', startDate);
+    }
+    if (endDate) {
+      params.set('endDate', endDate);
+    }
+    const query = params.toString();
+    return this.http.get<ListingCalendarResponse>(`/api/listings/${id}/calendar${query ? `?${query}` : ''}`);
   }
 
   getCategories(): Observable<ListingCategory[]> {

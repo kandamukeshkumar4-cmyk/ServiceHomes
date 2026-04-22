@@ -11,5 +11,6 @@ export const routes: Routes = [
   { path: 'host/accommodations', canActivate: [authGuard], loadComponent: () => import('./host/host-accommodations.component').then(m => m.HostAccommodationsComponent) },
   { path: 'host/reservations', canActivate: [authGuard], loadComponent: () => import('./host/host-reservations.component').then(m => m.HostReservationsComponent) },
   { path: 'listings/new', canActivate: [authGuard], loadComponent: () => import('./listings/listing-create.component').then(m => m.ListingCreateComponent) },
-  { path: 'listings/:id/edit', canActivate: [authGuard], loadComponent: () => import('./listings/listing-edit.component').then(m => m.ListingEditComponent) }
+  { path: 'listings/:id/edit', canActivate: [authGuard], loadComponent: () => import('./listings/listing-edit.component').then(m => m.ListingEditComponent) },
+  { path: 'listings/:id/availability', canActivate: [authGuard], loadComponent: () => import('./listings/listing-availability.component').then(m => m.ListingAvailabilityComponent) }
 ];

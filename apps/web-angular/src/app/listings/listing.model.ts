@@ -22,6 +22,14 @@ export interface Listing {
   amenities: ListingAmenity[];
 }
 
+export interface ListingPage {
+  content: Listing[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
 export interface ListingCategory {
   id: string;
   name: string;
@@ -93,4 +101,37 @@ export interface ListingCardDto {
   bedrooms: number;
   beds: number;
   bathrooms: number;
+}
+
+export type ListingAvailabilityRuleType = 'BLOCKED_DATE' | 'MIN_NIGHTS_OVERRIDE' | 'PRICE_OVERRIDE';
+
+export interface ListingAvailabilityRule {
+  id?: string;
+  ruleType: ListingAvailabilityRuleType;
+  startDate: string;
+  endDate: string;
+  value?: number | null;
+}
+
+export interface ListingAvailabilityResponse {
+  listingId: string;
+  baseNightlyPrice: number;
+  defaultMinNights: number;
+  rules: ListingAvailabilityRule[];
+}
+
+export interface ListingCalendarDay {
+  date: string;
+  blocked: boolean;
+  minNights: number;
+  nightlyPrice: number;
+  minNightsOverride: boolean;
+  priceOverride: boolean;
+}
+
+export interface ListingCalendarResponse {
+  listingId: string;
+  startDate: string;
+  endDate: string;
+  days: ListingCalendarDay[];
 }

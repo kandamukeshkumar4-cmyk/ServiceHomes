@@ -72,6 +72,60 @@ paths:
         '200':
           description: Unpublished listing
 
+  /listings/{id}/availability:
+    get:
+      summary: Get host availability rules
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Listing availability rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingAvailability'
+    put:
+      summary: Replace host availability rules
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateListingAvailabilityRequest'
+      responses:
+        '200':
+          description: Updated listing availability rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingAvailability'
+
+  /listings/{id}/calendar:
+    get:
+      summary: Get host listing calendar day view
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Listing calendar day view
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingCalendar'
+
   /listings/search:
     get:
       summary: Search published listings
@@ -394,6 +448,24 @@ components:
         isCover:
           type: boolean
 
+    AvailabilityRule:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ruleType:
+          type: string
+          enum: [BLOCKED_DATE, MIN_NIGHTS_OVERRIDE, PRICE_OVERRIDE]
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        value:
+          type: number
+
     Listing:
       type: object
       properties:
@@ -440,6 +512,55 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AmenityDto'
+
+    ListingAvailability:
+      type: object
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        baseNightlyPrice:
+          type: number
+        defaultMinNights:
+          type: integer
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityRule'
+
+    ListingCalendarDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        blocked:
+          type: boolean
+        minNights:
+          type: integer
+        nightlyPrice:
+          type: number
+        minNightsOverride:
+          type: boolean
+        priceOverride:
+          type: boolean
+
+    ListingCalendar:
+      type: object
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingCalendarDay'
 
     ListingCard:
       type: object
@@ -556,6 +677,28 @@ components:
           format: date
         guests:
           type: integer
+
+    UpdateListingAvailabilityRequest:
+      type: object
+      required: [rules]
+      properties:
+        rules:
+          type: array
+          items:
+            type: object
+            required: [ruleType, startDate, endDate]
+            properties:
+              ruleType:
+                type: string
+                enum: [BLOCKED_DATE, MIN_NIGHTS_OVERRIDE, PRICE_OVERRIDE]
+              startDate:
+                type: string
+                format: date
+              endDate:
+                type: string
+                format: date
+              value:
+                type: number
 
     Reservation:
       type: object
