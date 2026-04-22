@@ -2,7 +2,7 @@ openAPI: 3.1.0
 info:
   title: ServiceHomes API
   version: 0.0.1
-  description: ServiceHomes REST API contract
+  description: ServiceHomes REST API contract with Auth0 JWT authentication outside the local and ci profiles
 
 servers:
   - url: http://localhost:8080/api
@@ -250,6 +250,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Auth0-issued access token. Local and ci profiles bypass external Auth0 validation for developer and test workflows.
   schemas:
     ListingCategory:
       type: object

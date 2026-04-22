@@ -89,16 +89,20 @@ If you want to use real authentication:
 3. Create an **API** for the Spring Boot backend
 4. Update these files with your Auth0 credentials:
 
-**`apps/web-angular/src/main.ts`**
+**`apps/web-angular/src/environments/environment.ts`**
 ```typescript
-provideAuth0({
-  domain: 'your-tenant.auth0.com',
-  clientId: 'YOUR_CLIENT_ID',
-  authorizationParams: {
-    redirect_uri: window.location.origin,
-    audience: 'YOUR_API_IDENTIFIER'
+export const environment = {
+  production: true,
+  apiBaseUrl: '/api',
+  auth: {
+    enabled: true,
+    domain: 'your-tenant.auth0.com',
+    clientId: 'YOUR_CLIENT_ID',
+    audience: 'YOUR_API_IDENTIFIER',
+    useRefreshTokens: true,
+    cacheLocation: 'localstorage' as const
   }
-})
+};
 ```
 
 **`apps/api-spring/src/main/resources/application.yml`**
@@ -112,6 +116,8 @@ auth0:
 ```bash
 cd apps/api-spring && ./mvnw spring-boot:run
 ```
+
+`apps/web-angular/src/environments/environment.development.ts` keeps Auth0 disabled for local Angular development so the frontend can use the backend's local auth bypass out of the box.
 
 ## API Endpoints
 
