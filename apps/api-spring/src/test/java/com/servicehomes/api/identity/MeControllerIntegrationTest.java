@@ -14,6 +14,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -45,16 +46,16 @@ class MeControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Test
-    void meBootstrapsLocalUserFromJwtClaims() throws Exception {
+    void meReturnsSeededLocalUserForLocalJwt() throws Exception {
         String localAuth0Id = "00000000-0000-0000-0000-000000000001";
 
-        assertThat(userRepository.findByAuth0Id(localAuth0Id)).isEmpty();
+        assertThat(userRepository.findByAuth0Id(localAuth0Id)).isPresent();
 
         mockMvc.perform(get("/me"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.email").value("local@example.com"))
             .andExpect(jsonPath("$.emailVerified").value(true))
-            .andExpect(jsonPath("$.roles[0]").value("TRAVELER"))
+            .andExpect(jsonPath("$.roles", hasItems("HOST", "TRAVELER")))
             .andExpect(jsonPath("$.profile.displayName").value("LocalUser"));
 
         assertThat(userRepository.findByAuth0Id(localAuth0Id)).isPresent();
