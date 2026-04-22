@@ -1,21 +1,56 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/servicehomes
-    username: servicehomes
-    password: servicehomes
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:servicehomes}}
+    username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:servicehomes}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${POSTGRES_PASSWORD:servicehomes}}
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
   flyway:
     enabled: true
+  mvc:
+    servlet:
+      path: /api
 
 server:
-  port: 8080
+  port: ${APP_SERVER_PORT:8080}
   servlet:
-    context-path: /api
+    context-path: /
+
+management:
+  server:
+    port: ${MANAGEMENT_SERVER_PORT:${server.port}}
+  endpoints:
+    web:
+      base-path: /
+      path-mapping:
+        health: health
+
+auth0:
+  domain: ${AUTH0_DOMAIN:local.invalid}
+  audience: ${AUTH0_AUDIENCE:servicehomes-local}
+
+aws:
+  s3:
+    endpoint: ${AWS_S3_ENDPOINT:http://localhost:9000}
+    access-key: ${AWS_ACCESS_KEY_ID:servicehomes}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:servicehomes123}
+  ses:
+    endpoint: ${AWS_SES_ENDPOINT:}
+    access-key: ${AWS_ACCESS_KEY_ID:servicehomes}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:servicehomes123}
+
+messaging:
+  email:
+    enabled: ${MESSAGING_EMAIL_ENABLED:false}
+    from-address: ${MESSAGING_EMAIL_FROM:no-reply@servicehomes.local}
 
 logging:
   level:
     com.servicehomes: DEBUG
     org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG

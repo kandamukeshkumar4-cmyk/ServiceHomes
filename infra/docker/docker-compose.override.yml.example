@@ -1,0 +1,32 @@
+services:
+  api:
+    image: maven:3.9-eclipse-temurin-21
+    working_dir: /workspace
+    volumes:
+      - ../../apps/api-spring:/workspace
+      - maven_cache:/root/.m2
+      - ./scripts/wait-for-postgres.sh:/workspace/wait-for-postgres.sh:ro
+    entrypoint:
+      - /bin/sh
+      - -c
+      - chmod +x /workspace/wait-for-postgres.sh && /workspace/wait-for-postgres.sh && mvn spring-boot:run -Dspring-boot.run.profiles=local
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+
+  web:
+    image: node:20-alpine
+    working_dir: /workspace
+    volumes:
+      - ../../apps/web-angular:/workspace
+      - web_node_modules:/workspace/node_modules
+    entrypoint:
+      - /bin/sh
+      - -c
+      - npm ci && npm run start -- --host 0.0.0.0 --poll 2000
+    ports:
+      - "4200:4200"
+
+volumes:
+  maven_cache:
+  web_node_modules:

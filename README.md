@@ -10,6 +10,44 @@ A production-style home services and short-term rental platform.
 | API | Spring Boot 3 + Java 21 + PostgreSQL | `apps/api-spring` |
 | Analytics | dbt + Snowflake | `apps/analytics-dbt` |
 
+## Quick Start (Docker)
+
+### Prerequisites
+
+- Docker Desktop
+
+### 1. Create local env files
+
+```bash
+cp .env.example .env
+cp .env.local.example .env.local
+```
+
+The `local` Spring profile keeps Auth0 disabled, so the placeholder Auth0 values in `.env` do not block local startup.
+
+### 2. Start the full stack
+
+```bash
+docker compose -f infra/docker/docker-compose.yml up --build
+```
+
+Optional wrapper:
+
+```bash
+./scripts/start-local.sh
+```
+
+### 3. Verify the stack
+
+```bash
+curl http://localhost:8080/health
+curl http://localhost:4200
+```
+
+- `http://localhost:8080/health` should return a `200` health payload.
+- `http://localhost:4200` should return the Angular `index.html`.
+- Nginx proxies `/api/*` traffic from the web container to the Spring Boot API container.
+
 ## Quick Start (Local Development — No Auth0 Required)
 
 ### Prerequisites
@@ -25,7 +63,7 @@ A production-style home services and short-term rental platform.
 make up
 ```
 
-This starts PostgreSQL (with PostGIS) and LocalStack (S3) via Docker Compose.
+This starts PostgreSQL (with PostGIS) and MinIO (S3-compatible storage) via Docker Compose for the native workflow.
 
 ### 2. Run backend
 
@@ -123,7 +161,7 @@ cd apps/api-spring && ./mvnw spring-boot:run
 
 | Endpoint | Description |
 |----------|-------------|
-| `GET /api/health` | Health check |
+| `GET /health` | Health check |
 | `GET /api/me` | Current user profile |
 | `PATCH /api/me/profile` | Update current user's profile |
 | `POST /api/me/profile/avatar-upload-url` | Get a presigned avatar upload target |
