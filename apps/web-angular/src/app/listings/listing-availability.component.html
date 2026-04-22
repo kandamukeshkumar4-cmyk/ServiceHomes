@@ -1,0 +1,171 @@
+<ng-container *ngIf="listing; else loadingState">
+  <div class="p-4 max-w-72rem mx-auto">
+    <a routerLink="/host/accommodations" class="text-600 no-underline inline-flex align-items-center gap-2 mb-3">
+      <span>←</span>
+      <span>Back to host listings</span>
+    </a>
+
+    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-start gap-3 mb-4">
+      <div>
+        <h1 class="text-2xl font-bold mt-0 mb-2">{{ listing.title }} availability</h1>
+        <p class="text-600 m-0">{{ listing.location.city }}, {{ listing.location.country }}</p>
+      </div>
+      <div class="surface-100 border-round-lg p-3 min-w-15rem">
+        <p class="m-0 text-600 text-sm">Base nightly price</p>
+        <p class="m-0 text-xl font-bold">{{ formatCurrency(availability?.baseNightlyPrice ?? listing.nightlyPrice) }}</p>
+        <p class="m-0 text-600 text-sm mt-2">Default minimum stay</p>
+        <p class="m-0 text-lg font-semibold">{{ availability?.defaultMinNights ?? listing.policy.minNights }} night{{ (availability?.defaultMinNights ?? listing.policy.minNights) === 1 ? '' : 's' }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="error" class="surface-100 border-round-lg p-3 text-red-600 mb-3">
+      {{ error }}
+    </div>
+
+    <div class="grid gap-4">
+      <div class="col-12 lg:col-5">
+        <div class="surface-0 shadow-1 border-round-xl p-4">
+          <h2 class="text-xl font-bold mt-0 mb-2">Manage rules</h2>
+          <p class="text-600 mt-0 mb-4">Block nights, raise the minimum stay, or override the nightly price for a date range.</p>
+
+          <div class="flex flex-column gap-3">
+            <div class="flex flex-column gap-2">
+              <label for="ruleType">Rule type</label>
+              <select id="ruleType" class="p-inputtext" [(ngModel)]="newRuleType">
+                <option value="BLOCKED_DATE">Blocked dates</option>
+                <option value="MIN_NIGHTS_OVERRIDE">Minimum nights override</option>
+                <option value="PRICE_OVERRIDE">Price override</option>
+              </select>
+            </div>
+
+            <div class="grid gap-3">
+              <div class="col-12 md:col-6 flex flex-column gap-2">
+                <label for="ruleStart">Start date</label>
+                <input id="ruleStart" type="date" class="p-inputtext" [(ngModel)]="newRuleStart" />
+              </div>
+              <div class="col-12 md:col-6 flex flex-column gap-2">
+                <label for="ruleEnd">End date</label>
+                <input id="ruleEnd" type="date" class="p-inputtext" [(ngModel)]="newRuleEnd" />
+              </div>
+            </div>
+
+            <div *ngIf="newRuleType !== 'BLOCKED_DATE'" class="flex flex-column gap-2">
+              <label for="ruleValue">{{ newRuleType === 'MIN_NIGHTS_OVERRIDE' ? 'Minimum nights' : 'Nightly price (USD)' }}</label>
+              <input
+                id="ruleValue"
+                type="number"
+                class="p-inputtext"
+                [(ngModel)]="newRuleValue"
+                [step]="newRuleType === 'MIN_NIGHTS_OVERRIDE' ? 1 : 0.01"
+                [min]="newRuleType === 'MIN_NIGHTS_OVERRIDE' ? 1 : 0"
+              />
+            </div>
+
+            <button type="button" class="p-button p-button-primary" (click)="addRule()">Add rule</button>
+          </div>
+
+          <div class="mt-4">
+            <div class="flex justify-content-between align-items-center mb-2">
+              <h3 class="text-lg font-bold m-0">Draft rules</h3>
+              <span class="text-600 text-sm">{{ draftRules.length }} total</span>
+            </div>
+
+            <div *ngIf="draftRules.length === 0" class="surface-100 border-round-lg p-3 text-600">
+              No availability rules yet. Guests can still request any open dates that satisfy the listing policy.
+            </div>
+
+            <div *ngIf="draftRules.length > 0" class="flex flex-column gap-2">
+              <div *ngFor="let rule of draftRules; let index = index" class="surface-100 border-round-lg p-3">
+                <div class="flex justify-content-between gap-3 align-items-start">
+                  <div>
+                    <p class="font-semibold m-0">{{ ruleTypeLabel(rule.ruleType) }}</p>
+                    <p class="text-600 text-sm m-0 mt-1">{{ rule.startDate }} to {{ rule.endDate }}</p>
+                    <p class="m-0 mt-2">{{ ruleValueLabel(rule) }}</p>
+                  </div>
+                  <button type="button" class="p-button p-button-sm p-button-text p-button-danger" (click)="removeRule(index)">Remove</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-2 mt-4">
+            <button type="button" class="p-button p-button-primary flex-1" (click)="save()" [disabled]="saving || !hasUnsavedChanges">
+              {{ saving ? 'Saving...' : 'Save availability' }}
+            </button>
+            <button type="button" class="p-button p-button-outlined flex-1" (click)="resetDraft()" [disabled]="saving || !hasUnsavedChanges">
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 lg:col-7">
+        <div class="surface-0 shadow-1 border-round-xl p-4">
+          <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-end gap-3 mb-3">
+            <div>
+              <h2 class="text-xl font-bold mt-0 mb-2">Calendar preview</h2>
+              <p class="text-600 m-0">Review the currently saved availability for each day. Save changes to refresh the calendar.</p>
+            </div>
+            <div class="flex flex-column md:flex-row gap-2">
+              <div class="flex flex-column gap-1">
+                <label for="calendarStart">Start</label>
+                <input id="calendarStart" type="date" class="p-inputtext" [(ngModel)]="calendarStart" />
+              </div>
+              <div class="flex flex-column gap-1">
+                <label for="calendarEnd">End</label>
+                <input id="calendarEnd" type="date" class="p-inputtext" [(ngModel)]="calendarEnd" />
+              </div>
+              <button type="button" class="p-button p-button-outlined align-self-end" (click)="refreshCalendar()">Refresh</button>
+            </div>
+          </div>
+
+          <div *ngIf="calendarError" class="surface-100 border-round-lg p-3 text-red-600 mb-3">
+            {{ calendarError }}
+          </div>
+
+          <div class="flex gap-2 flex-wrap mb-3">
+            <span class="px-3 py-2 border-round-full bg-red-100 text-red-700 text-sm">Blocked date</span>
+            <span class="px-3 py-2 border-round-full bg-blue-100 text-blue-700 text-sm">Override active</span>
+            <span class="px-3 py-2 border-round-full surface-100 text-700 text-sm">Base policy only</span>
+          </div>
+
+          <div *ngIf="calendarDays.length === 0" class="surface-100 border-round-lg p-3 text-600">
+            No calendar data is available for the selected range.
+          </div>
+
+          <div *ngIf="calendarDays.length > 0" class="calendar-grid">
+            <div *ngFor="let day of calendarDays" [ngClass]="dayCardClasses(day)">
+              <div class="flex justify-content-between align-items-start gap-2 mb-2">
+                <div>
+                  <p class="font-semibold m-0">{{ formatCalendarDay(day.date) }}</p>
+                  <p class="text-600 text-xs m-0">{{ formatCalendarWeekday(day.date) }}</p>
+                </div>
+                <span *ngIf="day.blocked" class="text-xs font-semibold text-red-700">Blocked</span>
+              </div>
+
+              <p class="m-0 text-sm">
+                {{ formatCurrency(day.nightlyPrice) }}
+                <span class="text-600">/ night</span>
+              </p>
+              <p class="m-0 text-sm mt-2">
+                {{ day.minNights }} night{{ day.minNights === 1 ? '' : 's' }} minimum
+              </p>
+
+              <div class="flex flex-wrap gap-2 mt-3">
+                <span *ngIf="day.minNightsOverride" class="px-2 py-1 border-round-full bg-blue-100 text-blue-700 text-xs">Min stay override</span>
+                <span *ngIf="day.priceOverride" class="px-2 py-1 border-round-full bg-blue-100 text-blue-700 text-xs">Price override</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #loadingState>
+  <div class="p-4 max-w-60rem mx-auto">
+    <p *ngIf="error" class="text-red-600">{{ error }}</p>
+    <p *ngIf="!error" class="text-600">Loading availability tools...</p>
+  </div>
+</ng-template>

@@ -128,6 +128,9 @@ cd apps/api-spring && ./mvnw spring-boot:run
 | `GET /api/listings/search` | Search published listings |
 | `POST /api/listings` | Create listing (host) |
 | `GET /api/listings/my` | My listings (host) |
+| `GET /api/listings/{id}/availability` | Get host availability rules |
+| `PUT /api/listings/{id}/availability` | Replace host availability rules |
+| `GET /api/listings/{id}/calendar` | Get host calendar day view |
 | `POST /api/reservations` | Create reservation |
 | `GET /api/reservations/my` | My bookings |
 | `POST /api/reservations/{id}/accept` | Accept a pending booking request (host) |
@@ -149,6 +152,7 @@ Migrations run automatically on startup via Flyway:
 | `V5__outbox_events.sql` | Analytics outbox events |
 | `V6__seed_data.sql` | Sample users and listings |
 | `V7__align_local_seed_auth0_id.sql` | Align local JWT identity with the seeded local user |
+| `V8__listing_availability_indexes.sql` | Availability rule query indexes |
 
 ## Analytics
 

@@ -7,6 +7,7 @@ Avro/JSON schemas for analytics events.
 - `listing_viewed.avsc` — traveler views a listing
 - `listing_created.avsc` — host creates a listing
 - `listing_updated.avsc` — host updates a listing
+- `listing_availability_updated.avsc` — host replaces calendar availability rules
 - `listing_published.avsc` — host publishes a listing
 - `listing_unpublished.avsc` — host unpublishes a listing
 - `search_executed.avsc` — traveler executes a search

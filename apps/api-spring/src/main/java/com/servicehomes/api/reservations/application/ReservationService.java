@@ -4,6 +4,7 @@ import com.servicehomes.api.analytics.application.EventPublisher;
 import com.servicehomes.api.identity.domain.Profile;
 import com.servicehomes.api.identity.domain.User;
 import com.servicehomes.api.identity.domain.UserRepository;
+import com.servicehomes.api.listings.application.AvailabilityService;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingPhoto;
 import com.servicehomes.api.listings.domain.ListingRepository;
@@ -30,22 +31,19 @@ public class ReservationService {
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
     private final EventPublisher eventPublisher;
+    private final AvailabilityService availabilityService;
 
     public QuoteResponse quote(QuoteRequest request) {
         Listing listing = listingRepository.findById(request.listingId())
             .orElseThrow(() -> new IllegalArgumentException("Listing not found"));
 
-        int nights = (int) ChronoUnit.DAYS.between(request.checkIn(), request.checkOut());
-        if (nights <= 0) {
-            throw new IllegalArgumentException("Check-out must be after check-in");
-        }
+        AvailabilityService.StayEvaluation stayEvaluation = availabilityService.evaluateStay(
+            listing,
+            request.checkIn(),
+            request.checkOut()
+        );
 
-        BigDecimal subtotal = listing.getNightlyPrice().multiply(BigDecimal.valueOf(nights));
-        BigDecimal cleaningFee = listing.getCleaningFee() != null ? listing.getCleaningFee() : BigDecimal.ZERO;
-        BigDecimal serviceFee = listing.getServiceFee() != null ? listing.getServiceFee() : BigDecimal.ZERO;
-        BigDecimal total = subtotal.add(cleaningFee).add(serviceFee);
-
-        return new QuoteResponse(nights, listing.getNightlyPrice(), subtotal, cleaningFee, serviceFee, total);
+        return toQuoteResponse(listing, stayEvaluation);
     }
 
     @Transactional
@@ -73,13 +71,8 @@ public class ReservationService {
             throw new IllegalArgumentException("Exceeds maximum guest capacity");
         }
 
-        if (listing.getPolicy() != null) {
-            if (nights < listing.getPolicy().getMinNights()) {
-                throw new IllegalArgumentException("Minimum nights requirement not met");
-            }
-            if (listing.getPolicy().getMaxNights() != null && nights > listing.getPolicy().getMaxNights()) {
-                throw new IllegalArgumentException("Maximum nights exceeded");
-            }
+        if (listing.getPolicy() != null && listing.getPolicy().getMaxNights() != null && nights > listing.getPolicy().getMaxNights()) {
+            throw new IllegalArgumentException("Maximum nights exceeded");
         }
 
         long overlaps = listingRepository.countOverlappingReservations(listing.getId(), checkIn, checkOut);
@@ -87,7 +80,8 @@ public class ReservationService {
             throw new IllegalArgumentException("Dates are not available for this listing");
         }
 
-        QuoteResponse quote = quote(new QuoteRequest(request.listingId(), checkIn, checkOut, request.guests()));
+        AvailabilityService.StayEvaluation stayEvaluation = availabilityService.evaluateStay(listing, checkIn, checkOut);
+        QuoteResponse quote = toQuoteResponse(listing, stayEvaluation);
 
         Reservation.Status status = listing.getPolicy() != null && listing.getPolicy().isInstantBook()
             ? Reservation.Status.CONFIRMED
@@ -287,6 +281,21 @@ public class ReservationService {
             r.getStatus().name(),
             hostName,
             guestName
+        );
+    }
+
+    private QuoteResponse toQuoteResponse(Listing listing, AvailabilityService.StayEvaluation stayEvaluation) {
+        BigDecimal cleaningFee = listing.getCleaningFee() != null ? listing.getCleaningFee() : BigDecimal.ZERO;
+        BigDecimal serviceFee = listing.getServiceFee() != null ? listing.getServiceFee() : BigDecimal.ZERO;
+        BigDecimal total = stayEvaluation.subtotal().add(cleaningFee).add(serviceFee);
+
+        return new QuoteResponse(
+            stayEvaluation.totalNights(),
+            stayEvaluation.averageNightlyPrice(),
+            stayEvaluation.subtotal(),
+            cleaningFee,
+            serviceFee,
+            total
         );
     }
 }
