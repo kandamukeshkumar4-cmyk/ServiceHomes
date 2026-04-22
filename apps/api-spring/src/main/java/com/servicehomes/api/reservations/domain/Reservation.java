@@ -69,6 +69,6 @@ public class Reservation {
     private Instant updatedAt;
 
     public enum Status {
-        PENDING, CONFIRMED, CANCELLED_BY_GUEST, CANCELLED_BY_HOST, COMPLETED
+        PENDING, CONFIRMED, DECLINED, CANCELLED_BY_GUEST, CANCELLED_BY_HOST, COMPLETED
     }
 }

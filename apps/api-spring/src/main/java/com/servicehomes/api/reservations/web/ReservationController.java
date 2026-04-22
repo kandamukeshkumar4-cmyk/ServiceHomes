@@ -1,5 +1,6 @@
 package com.servicehomes.api.reservations.web;
 
+import com.servicehomes.api.identity.application.CurrentUserService;
 import com.servicehomes.api.reservations.application.ReservationService;
 import com.servicehomes.api.reservations.application.dto.*;
 import jakarta.validation.Valid;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ReservationController {
 
+    private final CurrentUserService currentUserService;
     private final ReservationService reservationService;
 
     @PostMapping("/quote")
@@ -31,7 +33,7 @@ public class ReservationController {
         @AuthenticationPrincipal Jwt jwt,
         @Valid @RequestBody CreateReservationRequest request
     ) {
-        UUID guestId = UUID.fromString(jwt.getSubject());
+        UUID guestId = currentUserService.requireUserId(jwt);
         return ResponseEntity.ok(reservationService.create(guestId, request));
     }
 
@@ -40,7 +42,7 @@ public class ReservationController {
         @AuthenticationPrincipal Jwt jwt,
         @PageableDefault(size = 20) Pageable pageable
     ) {
-        UUID guestId = UUID.fromString(jwt.getSubject());
+        UUID guestId = currentUserService.requireUserId(jwt);
         return ResponseEntity.ok(reservationService.listByGuest(guestId, pageable));
     }
 
@@ -49,7 +51,7 @@ public class ReservationController {
         @AuthenticationPrincipal Jwt jwt,
         @PageableDefault(size = 20) Pageable pageable
     ) {
-        UUID hostId = UUID.fromString(jwt.getSubject());
+        UUID hostId = currentUserService.requireUserId(jwt);
         return ResponseEntity.ok(reservationService.listByHost(hostId, pageable));
     }
 
@@ -63,7 +65,7 @@ public class ReservationController {
         @AuthenticationPrincipal Jwt jwt,
         @PathVariable UUID id
     ) {
-        UUID guestId = UUID.fromString(jwt.getSubject());
+        UUID guestId = currentUserService.requireUserId(jwt);
         return ResponseEntity.ok(reservationService.cancelByGuest(guestId, id));
     }
 
@@ -72,7 +74,25 @@ public class ReservationController {
         @AuthenticationPrincipal Jwt jwt,
         @PathVariable UUID id
     ) {
-        UUID hostId = UUID.fromString(jwt.getSubject());
+        UUID hostId = currentUserService.requireUserId(jwt);
         return ResponseEntity.ok(reservationService.cancelByHost(hostId, id));
+    }
+
+    @PostMapping("/{id}/accept")
+    public ResponseEntity<ReservationDto> acceptByHost(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID id
+    ) {
+        UUID hostId = currentUserService.requireUserId(jwt);
+        return ResponseEntity.ok(reservationService.acceptByHost(hostId, id));
+    }
+
+    @PostMapping("/{id}/decline")
+    public ResponseEntity<ReservationDto> declineByHost(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID id
+    ) {
+        UUID hostId = currentUserService.requireUserId(jwt);
+        return ResponseEntity.ok(reservationService.declineByHost(hostId, id));
     }
 }

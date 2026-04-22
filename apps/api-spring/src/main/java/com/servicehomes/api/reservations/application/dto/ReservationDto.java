@@ -21,5 +21,6 @@ public record ReservationDto(
     BigDecimal serviceFee,
     BigDecimal totalAmount,
     String status,
-    String hostDisplayName
+    String hostDisplayName,
+    String guestDisplayName
 ) {}

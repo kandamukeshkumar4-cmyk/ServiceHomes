@@ -31,11 +31,13 @@
         <span class="text-600">Status</span>
         <span class="font-bold" [class.text-green-700]="booking.status === 'CONFIRMED'"
               [class.text-yellow-700]="booking.status === 'PENDING'"
+              [class.text-orange-700]="booking.status === 'DECLINED'"
               [class.text-red-700]="booking.status.includes('CANCELLED')">
-          {{ booking.status }}
+          {{ statusLabel(booking.status) }}
         </span>
       </div>
     </div>
+    <p class="text-600 text-sm mt-3 mb-0">{{ statusMessage() }}</p>
   </div>
 
   <div class="surface-0 shadow-1 border-round-lg p-3 mb-3">

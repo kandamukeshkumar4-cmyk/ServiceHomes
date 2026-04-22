@@ -3,6 +3,7 @@ package com.servicehomes.api.reservations;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingCategory;
 import com.servicehomes.api.listings.domain.ListingCategoryRepository;
+import com.servicehomes.api.listings.domain.ListingPolicy;
 import com.servicehomes.api.listings.domain.ListingRepository;
 import com.servicehomes.api.reservations.application.dto.CreateReservationRequest;
 import com.servicehomes.api.reservations.application.dto.QuoteRequest;
@@ -67,11 +68,17 @@ class ReservationIntegrationTest {
 
     private static final UUID SEED_HOST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
     private static final UUID SEED_GUEST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12");
+    private static final String SEED_HOST_AUTH0_ID = "auth0|seed-host-1";
+    private static final String SEED_GUEST_AUTH0_ID = "auth0|seed-guest-1";
 
     private UUID listingId;
 
     @BeforeEach
     void setUp() {
+        listingId = createListing(false).getId();
+    }
+
+    private Listing createListing(boolean instantBook) {
         ListingCategory category = categoryRepository.findAll().isEmpty()
             ? categoryRepository.save(ListingCategory.builder().name("Test").icon("test").description("Test").build())
             : categoryRepository.findAll().get(0);
@@ -91,8 +98,31 @@ class ReservationIntegrationTest {
             .serviceFee(new BigDecimal("10.00"))
             .status(Listing.Status.PUBLISHED)
             .build();
-        listing = listingRepository.save(listing);
-        listingId = listing.getId();
+
+        ListingPolicy policy = ListingPolicy.builder()
+            .listing(listing)
+            .minNights(1)
+            .instantBook(instantBook)
+            .build();
+        listing.setPolicy(policy);
+
+        return listingRepository.save(listing);
+    }
+
+    private Reservation createPendingReservation() {
+        return reservationRepository.save(Reservation.builder()
+            .listing(listingRepository.findById(listingId).orElseThrow())
+            .guestId(SEED_GUEST_ID)
+            .checkIn(LocalDate.of(2026, 9, 1))
+            .checkOut(LocalDate.of(2026, 9, 5))
+            .guests(2)
+            .totalNights(4)
+            .nightlyPrice(new BigDecimal("100.00"))
+            .cleaningFee(new BigDecimal("20.00"))
+            .serviceFee(new BigDecimal("10.00"))
+            .totalAmount(new BigDecimal("430.00"))
+            .status(Reservation.Status.PENDING)
+            .build());
     }
 
     @Test
@@ -128,13 +158,30 @@ class ReservationIntegrationTest {
         );
 
         mockMvc.perform(post("/reservations")
-                .header("X-Test-User-Id", SEED_GUEST_ID.toString())
+                .header("X-Test-User-Id", SEED_GUEST_AUTH0_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.listingId").value(listingId.toString()))
             .andExpect(jsonPath("$.totalNights").value(4))
-            .andExpect(jsonPath("$.totalAmount").value(430.00));
+            .andExpect(jsonPath("$.totalAmount").value(430.00))
+            .andExpect(jsonPath("$.status").value("PENDING"));
+    }
+
+    @Test
+    void createReservationInstantBookConfirmsImmediately() throws Exception {
+        UUID instantBookListingId = createListing(true).getId();
+        CreateReservationRequest request = new CreateReservationRequest(
+            instantBookListingId, LocalDate.of(2026, 6, 10), LocalDate.of(2026, 6, 14), 2
+        );
+
+        mockMvc.perform(post("/reservations")
+                .header("X-Test-User-Id", SEED_GUEST_AUTH0_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.listingId").value(instantBookListingId.toString()))
+            .andExpect(jsonPath("$.status").value("CONFIRMED"));
     }
 
     @Test
@@ -144,7 +191,7 @@ class ReservationIntegrationTest {
         );
 
         mockMvc.perform(post("/reservations")
-                .header("X-Test-User-Id", SEED_HOST_ID.toString())
+                .header("X-Test-User-Id", SEED_HOST_AUTH0_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
@@ -173,7 +220,7 @@ class ReservationIntegrationTest {
         );
 
         mockMvc.perform(post("/reservations")
-                .header("X-Test-User-Id", SEED_GUEST_ID.toString())
+                .header("X-Test-User-Id", SEED_GUEST_AUTH0_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
@@ -187,10 +234,40 @@ class ReservationIntegrationTest {
         );
 
         mockMvc.perform(post("/reservations")
-                .header("X-Test-User-Id", SEED_GUEST_ID.toString())
+                .header("X-Test-User-Id", SEED_GUEST_AUTH0_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").value("Exceeds maximum guest capacity"));
+    }
+
+    @Test
+    void hostAcceptsPendingReservation() throws Exception {
+        Reservation reservation = createPendingReservation();
+
+        mockMvc.perform(post("/reservations/{id}/accept", reservation.getId())
+                .header("X-Test-User-Id", SEED_HOST_AUTH0_ID))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("CONFIRMED"));
+    }
+
+    @Test
+    void hostDeclinesPendingReservation() throws Exception {
+        Reservation reservation = createPendingReservation();
+
+        mockMvc.perform(post("/reservations/{id}/decline", reservation.getId())
+                .header("X-Test-User-Id", SEED_HOST_AUTH0_ID))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("DECLINED"));
+    }
+
+    @Test
+    void hostCannotCancelPendingReservation() throws Exception {
+        Reservation reservation = createPendingReservation();
+
+        mockMvc.perform(post("/reservations/{id}/cancel-by-host", reservation.getId())
+                .header("X-Test-User-Id", SEED_HOST_AUTH0_ID))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Reservation cannot be cancelled"));
     }
 }
