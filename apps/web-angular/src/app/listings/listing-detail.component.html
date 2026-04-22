@@ -35,6 +35,15 @@
           <span *ngFor="let amenity of listing.amenities" class="px-3 py-2 surface-100 border-round-lg text-sm">{{ amenity.name }}</span>
         </div>
       </div>
+
+      <div class="surface-0 shadow-1 border-round-lg p-3 mb-3">
+        <h2 class="text-xl font-bold mb-2">Where you'll be staying</h2>
+        <app-listing-map
+          [latitude]="listing.location.latitude"
+          [longitude]="listing.location.longitude"
+          [title]="listing.title">
+        </app-listing-map>
+      </div>
     </div>
 
     <div class="col-12 md:col-4">

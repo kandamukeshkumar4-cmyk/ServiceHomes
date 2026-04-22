@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/listings/{listingId}/photos")
@@ -16,6 +18,11 @@ import java.util.UUID;
 public class MediaController {
 
     private final MediaService mediaService;
+
+    @GetMapping
+    public ResponseEntity<List<ListingPhoto>> listPhotos(@PathVariable UUID listingId) {
+        return ResponseEntity.ok(mediaService.listPhotos(listingId));
+    }
 
     @PostMapping("/presigned-url")
     public ResponseEntity<PresignedUploadResponse> presignedUrl(

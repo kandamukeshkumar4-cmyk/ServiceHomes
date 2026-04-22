@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 
@@ -34,13 +34,19 @@ import { FormsModule } from '@angular/forms';
   styles: []
 })
 export class SearchBarComponent {
+  private router = inject(Router);
+
   location = '';
   checkIn = '';
   checkOut = '';
   guests = 1;
 
   search() {
-    // Emit search event or navigate with query params
-    // For now this is a shell component
+    const params: Record<string, string> = {};
+    if (this.location) params['locationQuery'] = this.location;
+    if (this.checkIn) params['checkIn'] = this.checkIn;
+    if (this.checkOut) params['checkOut'] = this.checkOut;
+    if (this.guests > 1) params['guests'] = String(this.guests);
+    this.router.navigate(['/home'], { queryParams: params });
   }
 }

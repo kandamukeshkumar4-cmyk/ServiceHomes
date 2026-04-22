@@ -6,13 +6,14 @@ import { HttpClient } from '@angular/common/http';
 import { ListingService } from '../listings/listing.service';
 import { Listing, ListingPhoto } from '../listings/listing.model';
 import { AppAuthService } from '../core/auth.service';
+import { ListingMapComponent } from './listing-map.component';
 
 
 
 @Component({
   selector: 'app-listing-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ListingMapComponent],
   templateUrl: './listing-detail.component.html',
   styles: []
 })

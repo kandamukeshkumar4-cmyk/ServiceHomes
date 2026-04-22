@@ -1,0 +1,92 @@
+﻿2026-04-21T19:17:09.0356306Z ##[group]Run actions/checkout@v4
+2026-04-21T19:17:09.0356716Z with:
+2026-04-21T19:17:09.0356920Z   repository: kandamukeshkumar4-cmyk/ServiceHomes
+2026-04-21T19:17:09.0357427Z   token: ***
+2026-04-21T19:17:09.0357589Z   ssh-strict: true
+2026-04-21T19:17:09.0357733Z   ssh-user: git
+2026-04-21T19:17:09.0357891Z   persist-credentials: true
+2026-04-21T19:17:09.0358058Z   clean: true
+2026-04-21T19:17:09.0358215Z   sparse-checkout-cone-mode: true
+2026-04-21T19:17:09.0358397Z   fetch-depth: 1
+2026-04-21T19:17:09.0358552Z   fetch-tags: false
+2026-04-21T19:17:09.0358695Z   show-progress: true
+2026-04-21T19:17:09.0358850Z   lfs: false
+2026-04-21T19:17:09.0358982Z   submodules: false
+2026-04-21T19:17:09.0359137Z   set-safe-directory: true
+2026-04-21T19:17:09.0359416Z env:
+2026-04-21T19:17:09.0359800Z   JAVA_VERSION: 21
+2026-04-21T19:17:09.0359953Z   NODE_VERSION: 20
+2026-04-21T19:17:09.0360094Z   PYTHON_VERSION: 3.11
+2026-04-21T19:17:09.0360263Z ##[endgroup]
+2026-04-21T19:17:09.1241064Z Syncing repository: kandamukeshkumar4-cmyk/ServiceHomes
+2026-04-21T19:17:09.1242168Z ##[group]Getting Git version info
+2026-04-21T19:17:09.1242481Z Working directory is '/home/runner/work/ServiceHomes/ServiceHomes'
+2026-04-21T19:17:09.1243114Z [command]/usr/bin/git version
+2026-04-21T19:17:09.3041600Z git version 2.53.0
+2026-04-21T19:17:09.3062844Z ##[endgroup]
+2026-04-21T19:17:09.3089462Z Temporarily overriding HOME='/home/runner/work/_temp/fb2cf98e-871d-48d1-8dca-60445de42bed' before making global git config changes
+2026-04-21T19:17:09.3090226Z Adding repository directory to the temporary git global config as a safe directory
+2026-04-21T19:17:09.3090924Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ServiceHomes/ServiceHomes
+2026-04-21T19:17:09.3114665Z Deleting the contents of '/home/runner/work/ServiceHomes/ServiceHomes'
+2026-04-21T19:17:09.3117530Z ##[group]Initializing the repository
+2026-04-21T19:17:09.3121147Z [command]/usr/bin/git init /home/runner/work/ServiceHomes/ServiceHomes
+2026-04-21T19:17:09.3198720Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-04-21T19:17:09.3199383Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-04-21T19:17:09.3199961Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-04-21T19:17:09.3200414Z hint: call:
+2026-04-21T19:17:09.3200609Z hint:
+2026-04-21T19:17:09.3200915Z hint: 	git config --global init.defaultBranch <name>
+2026-04-21T19:17:09.3201289Z hint:
+2026-04-21T19:17:09.3201633Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-04-21T19:17:09.3202217Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-04-21T19:17:09.3202637Z hint:
+2026-04-21T19:17:09.3203029Z hint: 	git branch -m <name>
+2026-04-21T19:17:09.3203310Z hint:
+2026-04-21T19:17:09.3203675Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-04-21T19:17:09.3204349Z Initialized empty Git repository in /home/runner/work/ServiceHomes/ServiceHomes/.git/
+2026-04-21T19:17:09.3209871Z [command]/usr/bin/git remote add origin https://github.com/kandamukeshkumar4-cmyk/ServiceHomes
+2026-04-21T19:17:09.3235792Z ##[endgroup]
+2026-04-21T19:17:09.3236271Z ##[group]Disabling automatic garbage collection
+2026-04-21T19:17:09.3239656Z [command]/usr/bin/git config --local gc.auto 0
+2026-04-21T19:17:09.3263398Z ##[endgroup]
+2026-04-21T19:17:09.3263699Z ##[group]Setting up auth
+2026-04-21T19:17:09.3269729Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-04-21T19:17:09.3294009Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-04-21T19:17:09.3530791Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-04-21T19:17:09.3557228Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-04-21T19:17:09.3739830Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-04-21T19:17:09.3772993Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-04-21T19:17:09.3960841Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-04-21T19:17:09.3989968Z ##[endgroup]
+2026-04-21T19:17:09.3990521Z ##[group]Fetching the repository
+2026-04-21T19:17:09.3997511Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +c3b7ca9d3a2a8fb349697add2f7b0f117994a34e:refs/remotes/pull/2/merge
+2026-04-21T19:17:09.9467428Z From https://github.com/kandamukeshkumar4-cmyk/ServiceHomes
+2026-04-21T19:17:09.9467869Z  * [new ref]         c3b7ca9d3a2a8fb349697add2f7b0f117994a34e -> pull/2/merge
+2026-04-21T19:17:09.9491760Z ##[endgroup]
+2026-04-21T19:17:09.9492171Z ##[group]Determining the checkout info
+2026-04-21T19:17:09.9494242Z ##[endgroup]
+2026-04-21T19:17:09.9498367Z [command]/usr/bin/git sparse-checkout disable
+2026-04-21T19:17:09.9528605Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-04-21T19:17:09.9549140Z ##[group]Checking out the ref
+2026-04-21T19:17:09.9552235Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/2/merge
+2026-04-21T19:17:09.9644094Z Note: switching to 'refs/remotes/pull/2/merge'.
+2026-04-21T19:17:09.9644382Z 
+2026-04-21T19:17:09.9644610Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-04-21T19:17:09.9645166Z changes and commit them, and you can discard any commits you make in this
+2026-04-21T19:17:09.9645723Z state without impacting any branches by switching back to a branch.
+2026-04-21T19:17:09.9646083Z 
+2026-04-21T19:17:09.9646293Z If you want to create a new branch to retain commits you create, you may
+2026-04-21T19:17:09.9646813Z do so (now or later) by using -c with the switch command. Example:
+2026-04-21T19:17:09.9647103Z 
+2026-04-21T19:17:09.9647219Z   git switch -c <new-branch-name>
+2026-04-21T19:17:09.9647416Z 
+2026-04-21T19:17:09.9647537Z Or undo this operation with:
+2026-04-21T19:17:09.9647717Z 
+2026-04-21T19:17:09.9647818Z   git switch -
+2026-04-21T19:17:09.9647964Z 
+2026-04-21T19:17:09.9648262Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-04-21T19:17:09.9648490Z 
+2026-04-21T19:17:09.9648749Z HEAD is now at c3b7ca9 Merge 6a68ce96116f9f9e0b679c50edea5997cf4bc345 into ddb409f3e09e272cfd054a6e3d833c259315b126
+2026-04-21T19:17:09.9651325Z ##[endgroup]
+2026-04-21T19:17:09.9678616Z [command]/usr/bin/git log -1 --format=%H
+2026-04-21T19:17:09.9696982Z c3b7ca9d3a2a8fb349697add2f7b0f117994a34e

@@ -1,5 +1,6 @@
 package com.servicehomes.api.listings.web;
 
+import com.servicehomes.api.analytics.application.EventPublisher;
 import com.servicehomes.api.listings.application.ListingSearchService;
 import com.servicehomes.api.listings.application.dto.ListingCardDto;
 import com.servicehomes.api.listings.application.dto.SearchListingsRequest;
@@ -8,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/listings/search")
@@ -15,6 +18,7 @@ import java.util.List;
 public class ListingSearchController {
 
     private final ListingSearchService searchService;
+    private final EventPublisher eventPublisher;
 
     @GetMapping
     public ResponseEntity<List<ListingCardDto>> search(
@@ -35,6 +39,17 @@ public class ListingSearchController {
             locationQuery, categoryId, guests, checkIn, checkOut,
             minPrice, maxPrice, amenityIds, swLat, swLng, neLat, neLng
         );
-        return ResponseEntity.ok(searchService.search(request));
+        var results = searchService.search(request);
+        eventPublisher.publish("search_executed", "search", UUID.randomUUID().toString(), Map.of(
+            "locationQuery", locationQuery,
+            "categoryId", categoryId != null ? categoryId.toString() : null,
+            "guests", guests,
+            "checkIn", checkIn,
+            "checkOut", checkOut,
+            "minPrice", minPrice,
+            "maxPrice", maxPrice,
+            "resultCount", results.size()
+        ));
+        return ResponseEntity.ok(results);
     }
 }

@@ -1,0 +1,211 @@
+﻿2026-04-21T19:18:44.5105548Z Current runner version: '2.333.1'
+2026-04-21T19:18:44.5139792Z ##[group]Runner Image Provisioner
+2026-04-21T19:18:44.5141686Z Hosted Compute Agent
+2026-04-21T19:18:44.5142574Z Version: 20260415.520
+2026-04-21T19:18:44.5143647Z Commit: af089020f5f67b61ccc91db6c07980876c02bf7b
+2026-04-21T19:18:44.5144999Z Build Date: 2026-04-15T18:07:08Z
+2026-04-21T19:18:44.5146217Z Worker ID: {e072e293-39eb-4deb-82c1-56320a2a8a9e}
+2026-04-21T19:18:44.5147597Z Azure Region: eastus2
+2026-04-21T19:18:44.5148832Z ##[endgroup]
+2026-04-21T19:18:44.5151606Z ##[group]Operating System
+2026-04-21T19:18:44.5152782Z Ubuntu
+2026-04-21T19:18:44.5153529Z 24.04.4
+2026-04-21T19:18:44.5154327Z LTS
+2026-04-21T19:18:44.5155115Z ##[endgroup]
+2026-04-21T19:18:44.5155976Z ##[group]Runner Image
+2026-04-21T19:18:44.5156883Z Image: ubuntu-24.04
+2026-04-21T19:18:44.5157777Z Version: 20260420.95.1
+2026-04-21T19:18:44.5159803Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260420.95/images/ubuntu/Ubuntu2404-Readme.md
+2026-04-21T19:18:44.5162922Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260420.95
+2026-04-21T19:18:44.5164519Z ##[endgroup]
+2026-04-21T19:18:44.5166552Z ##[group]GITHUB_TOKEN Permissions
+2026-04-21T19:18:44.5169333Z Contents: read
+2026-04-21T19:18:44.5170183Z Issues: write
+2026-04-21T19:18:44.5171061Z Metadata: read
+2026-04-21T19:18:44.5172322Z PullRequests: write
+2026-04-21T19:18:44.5173141Z ##[endgroup]
+2026-04-21T19:18:44.5176004Z Secret source: Actions
+2026-04-21T19:18:44.5177443Z Prepare workflow directory
+2026-04-21T19:18:44.5734447Z Prepare all required actions
+2026-04-21T19:18:44.5790483Z Getting action download info
+2026-04-21T19:18:44.8280229Z Download action repository 'actions/github-script@v7' (SHA:f28e40c7f34bde8b3046d885e986cb6290c5673b)
+2026-04-21T19:18:45.3117249Z Complete job name: qa-gate
+2026-04-21T19:18:45.3764092Z ##[group]Run if [ "success" != "success" ]; then
+2026-04-21T19:18:45.3764882Z [36;1mif [ "success" != "success" ]; then[0m
+2026-04-21T19:18:45.3765534Z [36;1m  echo "::error::Backend QA failed"[0m
+2026-04-21T19:18:45.3766104Z [36;1m  exit 1[0m
+2026-04-21T19:18:45.3766508Z [36;1mfi[0m
+2026-04-21T19:18:45.3766945Z [36;1mif [ "success" != "success" ]; then[0m
+2026-04-21T19:18:45.3767541Z [36;1m  echo "::error::Frontend QA failed"[0m
+2026-04-21T19:18:45.3768120Z [36;1m  exit 1[0m
+2026-04-21T19:18:45.3768578Z [36;1mfi[0m
+2026-04-21T19:18:45.3769043Z [36;1mif [ "success" != "success" ]; then[0m
+2026-04-21T19:18:45.3769724Z [36;1m  echo "::warning::dbt QA failed (non-blocking)"[0m
+2026-04-21T19:18:45.3770346Z [36;1mfi[0m
+2026-04-21T19:18:45.3770829Z [36;1mif [ "success" != "success" ]; then[0m
+2026-04-21T19:18:45.3771826Z [36;1m  echo "::warning::Docs QA failed (non-blocking)"[0m
+2026-04-21T19:18:45.3772519Z [36;1mfi[0m
+2026-04-21T19:18:45.3773062Z [36;1mecho "✅ All required QA checks passed"[0m
+2026-04-21T19:18:45.3892819Z shell: /usr/bin/bash -e {0}
+2026-04-21T19:18:45.3893640Z env:
+2026-04-21T19:18:45.3894040Z   JAVA_VERSION: 21
+2026-04-21T19:18:45.3894498Z   NODE_VERSION: 20
+2026-04-21T19:18:45.3894934Z   PYTHON_VERSION: 3.11
+2026-04-21T19:18:45.3895387Z ##[endgroup]
+2026-04-21T19:18:45.4048317Z ✅ All required QA checks passed
+2026-04-21T19:18:45.4225406Z ##[group]Run actions/github-script@v7
+2026-04-21T19:18:45.4226010Z with:
+2026-04-21T19:18:45.4230366Z   script: const results = {
+  rebase: '',
+  backend: 'success',
+  frontend: 'success',
+  dbt: 'success',
+  docs: 'success',
+  security: 'success'
+};
+
+const status = (result) => result === 'success' ? '✅' : '❌';
+
+const body = `## No-Mistakes QA Pipeline Results
+
+| Check | Status |
+|-------|--------|
+| Rebase | ${status(results.rebase)} |
+| Backend | ${status(results.backend)} |
+| Frontend | ${status(results.frontend)} |
+| dbt | ${status(results.dbt)} |
+| Docs | ${status(results.docs)} |
+| Security | ${status(results.security)} |
+
+${Object.values(results).every(r => r === 'success') ? '✅ All checks passed! Ready to merge.' : '⚠️ Some checks failed. Please review and fix.'}
+`;
+
+github.rest.issues.createComment({
+  issue_number: context.issue.number,
+  owner: context.repo.owner,
+  repo: context.repo.repo,
+  body: body
+});
+
+2026-04-21T19:18:45.4235628Z   github-token: ***
+2026-04-21T19:18:45.4236110Z   debug: false
+2026-04-21T19:18:45.4236548Z   user-agent: actions/github-script
+2026-04-21T19:18:45.4237092Z   result-encoding: json
+2026-04-21T19:18:45.4237525Z   retries: 0
+2026-04-21T19:18:45.4237977Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-04-21T19:18:45.4238661Z env:
+2026-04-21T19:18:45.4239030Z   JAVA_VERSION: 21
+2026-04-21T19:18:45.4239449Z   NODE_VERSION: 20
+2026-04-21T19:18:45.4239861Z   PYTHON_VERSION: 3.11
+2026-04-21T19:18:45.4240294Z ##[endgroup]
+2026-04-21T19:18:46.1918052Z ##[group]Run actions/github-script@v7
+2026-04-21T19:18:46.1919255Z with:
+2026-04-21T19:18:46.1920568Z   github-token: ***
+2026-04-21T19:18:46.1933817Z   script: const prNumber = context.issue.number;
+
+// Approve the PR
+await github.rest.pulls.createReview({
+  owner: context.repo.owner,
+  repo: context.repo.repo,
+  pull_number: prNumber,
+  event: 'APPROVE',
+  body: 'Auto-approved by no-mistakes QA pipeline ✅'
+});
+console.log('PR approved');
+
+// Enable auto-merge
+try {
+  await github.rest.pulls.update({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: prNumber,
+    auto_merge: {
+      merge_method: 'squash'
+    }
+  });
+  console.log('Auto-merge enabled');
+} catch (e) {
+  console.log('Auto-merge not available, attempting direct merge');
+  try {
+    await github.rest.pulls.merge({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      pull_number: prNumber,
+      merge_method: 'squash'
+    });
+    console.log('PR merged');
+  } catch (e2) {
+    console.log('Merge failed: ' + e2.message);
+  }
+}
+
+2026-04-21T19:18:46.1946837Z   debug: false
+2026-04-21T19:18:46.1947735Z   user-agent: actions/github-script
+2026-04-21T19:18:46.1948881Z   result-encoding: json
+2026-04-21T19:18:46.1949813Z   retries: 0
+2026-04-21T19:18:46.1950775Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-04-21T19:18:46.1952262Z env:
+2026-04-21T19:18:46.1953033Z   JAVA_VERSION: 21
+2026-04-21T19:18:46.1953896Z   NODE_VERSION: 20
+2026-04-21T19:18:46.1954766Z   PYTHON_VERSION: 3.11
+2026-04-21T19:18:46.1955675Z ##[endgroup]
+2026-04-21T19:18:46.6239242Z RequestError [HttpError]: Unprocessable Entity: "GitHub Actions is not permitted to approve pull requests."
+2026-04-21T19:18:46.6243861Z     at /home/runner/work/_actions/actions/github-script/v7/dist/index.js:9537:21
+2026-04-21T19:18:46.6247475Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-04-21T19:18:46.6252742Z     at async eval (eval at callAsyncFunction (/home/runner/work/_actions/actions/github-script/v7/dist/index.js:36187:16), <anonymous>:6:1)
+2026-04-21T19:18:46.6257902Z     at async main (/home/runner/work/_actions/actions/github-script/v7/dist/index.js:36285:20) {
+2026-04-21T19:18:46.6260770Z   status: 422,
+2026-04-21T19:18:46.6262165Z   response: {
+2026-04-21T19:18:46.6264457Z     url: 'https://api.github.com/repos/kandamukeshkumar4-cmyk/ServiceHomes/pulls/2/reviews',
+2026-04-21T19:18:46.6267268Z     status: 422,
+2026-04-21T19:18:46.6268498Z     headers: {
+2026-04-21T19:18:46.6269871Z       'access-control-allow-origin': '*',
+2026-04-21T19:18:46.6277181Z       'access-control-expose-headers': 'ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset',
+2026-04-21T19:18:46.6285958Z       'content-length': '220',
+2026-04-21T19:18:46.6287793Z       'content-security-policy': "default-src 'none'",
+2026-04-21T19:18:46.6290089Z       'content-type': 'application/json; charset=utf-8',
+2026-04-21T19:18:46.6292351Z       date: 'Tue, 21 Apr 2026 19:18:46 GMT',
+2026-04-21T19:18:46.6295023Z       'referrer-policy': 'origin-when-cross-origin, strict-origin-when-cross-origin',
+2026-04-21T19:18:46.6298245Z       server: 'github.com',
+2026-04-21T19:18:46.6300592Z       'strict-transport-security': 'max-age=31536000; includeSubdomains; preload',
+2026-04-21T19:18:46.6303824Z       vary: 'Accept-Encoding, Accept, X-Requested-With',
+2026-04-21T19:18:46.6306286Z       'x-accepted-github-permissions': 'pull_requests=write',
+2026-04-21T19:18:46.6308585Z       'x-content-type-options': 'nosniff',
+2026-04-21T19:18:46.6310434Z       'x-frame-options': 'deny',
+2026-04-21T19:18:46.6312493Z       'x-github-api-version-selected': '2022-11-28',
+2026-04-21T19:18:46.6314865Z       'x-github-media-type': 'github.v3; format=json',
+2026-04-21T19:18:46.6317639Z       'x-github-request-id': 'AC02:63D7C:5E804B:178B1C7:69E7CD96',
+2026-04-21T19:18:46.6319929Z       'x-ratelimit-limit': '5000',
+2026-04-21T19:18:46.6321859Z       'x-ratelimit-remaining': '4997',
+2026-04-21T19:18:46.6323761Z       'x-ratelimit-reset': '1776801261',
+2026-04-21T19:18:46.6325602Z       'x-ratelimit-resource': 'core',
+2026-04-21T19:18:46.6327367Z       'x-ratelimit-used': '3',
+2026-04-21T19:18:46.6328992Z       'x-xss-protection': '0'
+2026-04-21T19:18:46.6330498Z     },
+2026-04-21T19:18:46.6331796Z     data: {
+2026-04-21T19:18:46.6333090Z       message: 'Unprocessable Entity',
+2026-04-21T19:18:46.6334825Z       errors: [Array],
+2026-04-21T19:18:46.6337671Z       documentation_url: 'https://docs.github.com/rest/pulls/reviews#create-a-review-for-a-pull-request',
+2026-04-21T19:18:46.6340948Z       status: '422'
+2026-04-21T19:18:46.6342418Z     }
+2026-04-21T19:18:46.6343525Z   },
+2026-04-21T19:18:46.6344651Z   request: {
+2026-04-21T19:18:46.6345885Z     method: 'POST',
+2026-04-21T19:18:46.6348359Z     url: 'https://api.github.com/repos/kandamukeshkumar4-cmyk/ServiceHomes/pulls/2/reviews',
+2026-04-21T19:18:46.6351424Z     headers: {
+2026-04-21T19:18:46.6352908Z       accept: 'application/vnd.github.v3+json',
+2026-04-21T19:18:46.6355899Z       'user-agent': 'actions/github-script octokit-core.js/5.0.1 Node.js/20.20.1 (linux; x64)',
+2026-04-21T19:18:46.6358907Z       authorization: 'token [REDACTED]',
+2026-04-21T19:18:46.6360925Z       'content-type': 'application/json; charset=utf-8'
+2026-04-21T19:18:46.6363019Z     },
+2026-04-21T19:18:46.6365288Z     body: '{"event":"APPROVE","body":"Auto-approved by no-mistakes QA pipeline ✅"}',
+2026-04-21T19:18:46.6367819Z     request: {
+2026-04-21T19:18:46.6369064Z       agent: [Agent],
+2026-04-21T19:18:46.6370478Z       fetch: [Function: proxyFetch],
+2026-04-21T19:18:46.6372449Z       hook: [Function: bound bound register]
+2026-04-21T19:18:46.6374166Z     }
+2026-04-21T19:18:46.6375256Z   }
+2026-04-21T19:18:46.6376322Z }
+2026-04-21T19:18:46.6411960Z ##[error]Unhandled error: HttpError: Unprocessable Entity: "GitHub Actions is not permitted to approve pull requests."
+2026-04-21T19:18:46.7027752Z Cleaning up orphan processes
+2026-04-21T19:18:46.7500323Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/github-script@v7. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

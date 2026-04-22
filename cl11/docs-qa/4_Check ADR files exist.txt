@@ -1,0 +1,10 @@
+﻿2026-04-21T19:18:38.4956848Z ##[group]Run if [ ! -f "docs/adr/ADR-001-architecture.md" ]; then
+2026-04-21T19:18:38.4957790Z [36;1mif [ ! -f "docs/adr/ADR-001-architecture.md" ]; then[0m
+2026-04-21T19:18:38.4958488Z [36;1m  echo "::warning::Missing ADR files"[0m
+2026-04-21T19:18:38.4959045Z [36;1mfi[0m
+2026-04-21T19:18:38.5009059Z shell: /usr/bin/bash -e {0}
+2026-04-21T19:18:38.5009566Z env:
+2026-04-21T19:18:38.5009941Z   JAVA_VERSION: 21
+2026-04-21T19:18:38.5010345Z   NODE_VERSION: 20
+2026-04-21T19:18:38.5010760Z   PYTHON_VERSION: 3.11
+2026-04-21T19:18:38.5011182Z ##[endgroup]

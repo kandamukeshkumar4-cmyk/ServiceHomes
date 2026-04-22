@@ -65,3 +65,7 @@ infra/docker/volumes/
 *.swp
 *.swo
 *~
+ci-logs/
+ci-logs2/
+backend-logs.zip
+backend-logs2.zip

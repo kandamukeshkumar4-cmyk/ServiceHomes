@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -53,17 +53,28 @@ export class PhotoManagerComponent implements OnInit {
   private http = inject(HttpClient);
 
   @Input() listingId = '';
-  photos: ListingPhoto[] = [];
+  @Input() photos: ListingPhoto[] = [];
+  @Output() photosChange = new EventEmitter<ListingPhoto[]>();
+
   showUrlInput = false;
   urlInput = '';
 
   ngOnInit() {
-    this.loadPhotos();
+    if (this.listingId) {
+      this.loadPhotos();
+    }
   }
 
   loadPhotos() {
-    // In a real implementation we'd fetch from a dedicated endpoint
-    // For now we rely on the parent component passing photos or we fetch listing
+    this.http.get<ListingPhoto[]>(`/api/listings/${this.listingId}/photos`).subscribe({
+      next: (data) => {
+        this.photos = data;
+        this.photosChange.emit(this.photos);
+      },
+      error: () => {
+        this.photos = [];
+      }
+    });
   }
 
   onFilesSelected(event: Event) {
@@ -135,6 +146,6 @@ export class PhotoManagerComponent implements OnInit {
   }
 
   emitChanges() {
-    // Parent component can listen if needed
+    this.photosChange.emit(this.photos);
   }
 }

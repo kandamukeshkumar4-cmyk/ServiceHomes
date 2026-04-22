@@ -1,16 +1,20 @@
 package com.servicehomes.api.listings.web;
 
+import com.servicehomes.api.analytics.application.EventPublisher;
 import com.servicehomes.api.listings.application.ListingService;
 import com.servicehomes.api.listings.application.dto.CreateListingRequest;
 import com.servicehomes.api.listings.application.dto.ListingDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -19,6 +23,7 @@ import java.util.UUID;
 public class ListingController {
 
     private final ListingService listingService;
+    private final EventPublisher eventPublisher;
 
     @PostMapping
     public ResponseEntity<ListingDto> create(
@@ -30,14 +35,19 @@ public class ListingController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<ListingDto>> myListings(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<Page<ListingDto>> myListings(
+        @AuthenticationPrincipal Jwt jwt,
+        @PageableDefault(size = 20) Pageable pageable
+    ) {
         UUID hostId = UUID.fromString(jwt.getClaimAsString("sub"));
-        return ResponseEntity.ok(listingService.listByHost(hostId));
+        return ResponseEntity.ok(listingService.listByHost(hostId, pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ListingDto> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(listingService.getById(id));
+        ListingDto dto = listingService.getById(id);
+        eventPublisher.publish("listing_viewed", "listing", id.toString(), Map.of("listingId", id.toString()));
+        return ResponseEntity.ok(dto);
     }
 
     @PutMapping("/{id}")

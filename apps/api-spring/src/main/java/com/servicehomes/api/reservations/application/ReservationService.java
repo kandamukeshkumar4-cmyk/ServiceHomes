@@ -11,6 +11,8 @@ import com.servicehomes.api.reservations.application.dto.*;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,6 +82,11 @@ public class ReservationService {
             if (listing.getPolicy().getMaxNights() != null && nights > listing.getPolicy().getMaxNights()) {
                 throw new IllegalArgumentException("Maximum nights exceeded");
             }
+        }
+
+        long overlaps = listingRepository.countOverlappingReservations(listing.getId(), checkIn, checkOut);
+        if (overlaps > 0) {
+            throw new IllegalArgumentException("Dates are not available for this listing");
         }
 
         QuoteResponse quote = quote(new QuoteRequest(request.listingId(), checkIn, checkOut, request.guests()));
@@ -156,18 +163,14 @@ public class ReservationService {
         return toDto(reservation);
     }
 
-    public List<ReservationDto> listByGuest(UUID guestId) {
-        return reservationRepository.findAll().stream()
-            .filter(r -> r.getGuestId().equals(guestId))
-            .map(this::toDto)
-            .collect(Collectors.toList());
+    public Page<ReservationDto> listByGuest(UUID guestId, Pageable pageable) {
+        return reservationRepository.findByGuestId(guestId, pageable)
+            .map(this::toDto);
     }
 
-    public List<ReservationDto> listByHost(UUID hostId) {
-        return reservationRepository.findAll().stream()
-            .filter(r -> r.getListing().getHostId().equals(hostId))
-            .map(this::toDto)
-            .collect(Collectors.toList());
+    public Page<ReservationDto> listByHost(UUID hostId, Pageable pageable) {
+        return reservationRepository.findByHostId(hostId, pageable)
+            .map(this::toDto);
     }
 
     public ReservationDto getById(UUID reservationId) {

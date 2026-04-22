@@ -1,0 +1,45 @@
+﻿2026-04-21T19:18:45.4225371Z ##[group]Run actions/github-script@v7
+2026-04-21T19:18:45.4226005Z with:
+2026-04-21T19:18:45.4230318Z   script: const results = {
+  rebase: '',
+  backend: 'success',
+  frontend: 'success',
+  dbt: 'success',
+  docs: 'success',
+  security: 'success'
+};
+
+const status = (result) => result === 'success' ? '✅' : '❌';
+
+const body = `## No-Mistakes QA Pipeline Results
+
+| Check | Status |
+|-------|--------|
+| Rebase | ${status(results.rebase)} |
+| Backend | ${status(results.backend)} |
+| Frontend | ${status(results.frontend)} |
+| dbt | ${status(results.dbt)} |
+| Docs | ${status(results.docs)} |
+| Security | ${status(results.security)} |
+
+${Object.values(results).every(r => r === 'success') ? '✅ All checks passed! Ready to merge.' : '⚠️ Some checks failed. Please review and fix.'}
+`;
+
+github.rest.issues.createComment({
+  issue_number: context.issue.number,
+  owner: context.repo.owner,
+  repo: context.repo.repo,
+  body: body
+});
+
+2026-04-21T19:18:45.4235615Z   github-token: ***
+2026-04-21T19:18:45.4236069Z   debug: false
+2026-04-21T19:18:45.4236544Z   user-agent: actions/github-script
+2026-04-21T19:18:45.4237089Z   result-encoding: json
+2026-04-21T19:18:45.4237516Z   retries: 0
+2026-04-21T19:18:45.4237974Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-04-21T19:18:45.4238655Z env:
+2026-04-21T19:18:45.4239027Z   JAVA_VERSION: 21
+2026-04-21T19:18:45.4239446Z   NODE_VERSION: 20
+2026-04-21T19:18:45.4239858Z   PYTHON_VERSION: 3.11
+2026-04-21T19:18:45.4240292Z ##[endgroup]

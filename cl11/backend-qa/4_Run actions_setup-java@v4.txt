@@ -1,0 +1,39 @@
+﻿2026-04-21T19:17:09.9889789Z ##[group]Run actions/setup-java@v4
+2026-04-21T19:17:09.9889997Z with:
+2026-04-21T19:17:09.9890133Z   java-version: 21
+2026-04-21T19:17:09.9890287Z   distribution: temurin
+2026-04-21T19:17:09.9890440Z   cache: maven
+2026-04-21T19:17:09.9890585Z   java-package: jdk
+2026-04-21T19:17:09.9890726Z   check-latest: false
+2026-04-21T19:17:09.9890890Z   server-id: github
+2026-04-21T19:17:09.9891047Z   server-username: GITHUB_ACTOR
+2026-04-21T19:17:09.9891229Z   server-password: GITHUB_TOKEN
+2026-04-21T19:17:09.9891409Z   overwrite-settings: true
+2026-04-21T19:17:09.9891572Z   job-status: success
+2026-04-21T19:17:09.9891810Z   token: ***
+2026-04-21T19:17:09.9891946Z env:
+2026-04-21T19:17:09.9892083Z   JAVA_VERSION: 21
+2026-04-21T19:17:09.9892228Z   NODE_VERSION: 20
+2026-04-21T19:17:09.9892377Z   PYTHON_VERSION: 3.11
+2026-04-21T19:17:09.9892578Z ##[endgroup]
+2026-04-21T19:17:10.1421864Z ##[group]Installed distributions
+2026-04-21T19:17:10.1470095Z Resolved Java 21.0.10+7 from tool-cache
+2026-04-21T19:17:10.1470710Z Setting Java 21.0.10+7 as the default
+2026-04-21T19:17:10.1480130Z Creating toolchains.xml for JDK version 21 from temurin
+2026-04-21T19:17:10.1535706Z Writing to /home/runner/.m2/toolchains.xml
+2026-04-21T19:17:10.1536194Z 
+2026-04-21T19:17:10.1536312Z Java configuration:
+2026-04-21T19:17:10.1537571Z   Distribution: temurin
+2026-04-21T19:17:10.1537824Z   Version: 21.0.10+7
+2026-04-21T19:17:10.1538245Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.10-7/x64
+2026-04-21T19:17:10.1538574Z 
+2026-04-21T19:17:10.1538987Z ##[endgroup]
+2026-04-21T19:17:10.1554521Z Creating settings.xml with server-id: github
+2026-04-21T19:17:10.1554919Z Writing to /home/runner/.m2/settings.xml
+2026-04-21T19:17:10.4989315Z Cache hit for: setup-java-Linux-x64-maven-326f8f4c2954041cd34b0eb45f1dccf0cf58b2e906331897d8a94bf1b0e78cc5
+2026-04-21T19:17:11.7043301Z Received 37748736 of 104021009 (36.3%), 36.0 MBs/sec
+2026-04-21T19:17:12.0886432Z Received 104021009 of 104021009 (100.0%), 71.6 MBs/sec
+2026-04-21T19:17:12.0886796Z Cache Size: ~99 MB (104021009 B)
+2026-04-21T19:17:12.0908476Z [command]/usr/bin/tar -xf /home/runner/work/_temp/561cc274-60c6-413e-8f78-0279c7d3a8bc/cache.tzst -P -C /home/runner/work/ServiceHomes/ServiceHomes --use-compress-program unzstd
+2026-04-21T19:17:12.2822595Z Cache restored successfully
+2026-04-21T19:17:12.2867279Z Cache restored from key: setup-java-Linux-x64-maven-326f8f4c2954041cd34b0eb45f1dccf0cf58b2e906331897d8a94bf1b0e78cc5

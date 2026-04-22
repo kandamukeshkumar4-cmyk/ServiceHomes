@@ -1,0 +1,26 @@
+﻿2026-04-21T19:16:50.0073841Z ##[group]Run dbt test
+2026-04-21T19:16:50.0074105Z [36;1mdbt test[0m
+2026-04-21T19:16:50.0095909Z shell: /usr/bin/bash -e {0}
+2026-04-21T19:16:50.0096130Z env:
+2026-04-21T19:16:50.0096306Z   JAVA_VERSION: 21
+2026-04-21T19:16:50.0096492Z   NODE_VERSION: 20
+2026-04-21T19:16:50.0096921Z   PYTHON_VERSION: 3.11
+2026-04-21T19:16:50.0097198Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-21T19:16:50.0097621Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+2026-04-21T19:16:50.0098033Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-21T19:16:50.0098385Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-21T19:16:50.0098730Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+2026-04-21T19:16:50.0099080Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+2026-04-21T19:16:50.0099366Z ##[endgroup]
+2026-04-21T19:16:51.5271436Z [0m19:16:51  Running with dbt=1.11.8
+2026-04-21T19:16:52.0344367Z [0m19:16:52  Registered adapter: snowflake=1.11.4
+2026-04-21T19:16:52.4763532Z [0m19:16:52  Found 16 models, 1 snapshot, 11 data tests, 8 sources, 523 macros
+2026-04-21T19:16:52.4793704Z [0m19:16:52  
+2026-04-21T19:16:52.4798787Z [0m19:16:52  Concurrency: 4 threads (target='dev')
+2026-04-21T19:16:52.4803085Z [0m19:16:52  
+2026-04-21T19:16:56.3157320Z [0m19:16:56  
+2026-04-21T19:16:56.3162051Z [0m19:16:56  Finished running  in 0 hours 0 minutes and 3.83 seconds (3.83s).
+2026-04-21T19:16:56.3168436Z [0m19:16:56  Encountered an error:
+2026-04-21T19:16:56.3168920Z Database Error
+2026-04-21T19:16:56.3169635Z   290404 (08001): 404 Not Found: post YOUR-SNOWFLAKE-ACCOUNT.snowflakecomputing.com:443/session/v1/login-request
+2026-04-21T19:16:56.8084812Z ##[error]Process completed with exit code 2.

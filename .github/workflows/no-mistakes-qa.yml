@@ -199,7 +199,7 @@ jobs:
   # Job 7: Final gate - all checks must pass
   qa-gate:
     runs-on: ubuntu-latest
-    needs: [backend-qa, frontend-qa, dbt-qa, docs-qa, security-qa]
+    needs: [rebase-check, backend-qa, frontend-qa, dbt-qa, docs-qa, security-qa]
     if: always()
     steps:
       - name: Check all QA jobs passed
@@ -256,3 +256,5 @@ jobs:
               repo: context.repo.repo,
               body: body
             });
+
+

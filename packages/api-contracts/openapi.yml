@@ -127,10 +127,457 @@ paths:
         '200':
           description: Search results
 
+  /listings/categories:
+    get:
+      summary: List all listing categories
+      responses:
+        '200':
+          description: List of categories
+
+  /listings/amenities:
+    get:
+      summary: List all listing amenities
+      responses:
+        '200':
+          description: List of amenities
+
+  /listings/my:
+    get:
+      summary: List current user's listings (paginated)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated list of listings
+
+  /reservations:
+    post:
+      summary: Create reservation
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Created reservation
+
+  /reservations/quote:
+    post:
+      summary: Get price quote
+      responses:
+        '200':
+          description: Price quote
+
+  /reservations/my:
+    get:
+      summary: List current user's reservations (paginated)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated list of reservations
+
+  /reservations/host:
+    get:
+      summary: List host's reservations (paginated)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated list of reservations
+
+  /reservations/{id}:
+    get:
+      summary: Get reservation by ID
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Reservation detail
+
+  /reservations/{id}/cancel:
+    post:
+      summary: Cancel reservation as guest
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cancelled reservation
+
+  /reservations/{id}/cancel-by-host:
+    post:
+      summary: Cancel reservation as host
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cancelled reservation
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  schemas: {}
+  schemas:
+    ListingCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        icon:
+          type: string
+        description:
+          type: string
+
+    AmenityDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        icon:
+          type: string
+        category:
+          type: string
+
+    ListingLocation:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+
+    ListingPolicy:
+      type: object
+      properties:
+        checkInTime:
+          type: string
+        checkOutTime:
+          type: string
+        minNights:
+          type: integer
+        maxNights:
+          type: integer
+        cancellationPolicy:
+          type: string
+          enum: [FLEXIBLE, MODERATE, STRICT]
+        instantBook:
+          type: boolean
+
+    ListingPhoto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+        orderIndex:
+          type: integer
+        isCover:
+          type: boolean
+
+    Listing:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        hostId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          $ref: '#/components/schemas/ListingCategory'
+        propertyType:
+          type: string
+        maxGuests:
+          type: integer
+        bedrooms:
+          type: integer
+        beds:
+          type: integer
+        bathrooms:
+          type: integer
+        nightlyPrice:
+          type: number
+        cleaningFee:
+          type: number
+        serviceFee:
+          type: number
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, UNPUBLISHED]
+        location:
+          $ref: '#/components/schemas/ListingLocation'
+        policy:
+          $ref: '#/components/schemas/ListingPolicy'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingPhoto'
+        amenities:
+          type: array
+          items:
+            $ref: '#/components/schemas/AmenityDto'
+
+    ListingCard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        coverUrl:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        nightlyPrice:
+          type: number
+        categoryName:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        maxGuests:
+          type: integer
+        bedrooms:
+          type: integer
+        beds:
+          type: integer
+        bathrooms:
+          type: integer
+
+    PageListing:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Listing'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        number:
+          type: integer
+        size:
+          type: integer
+
+    PageReservation:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reservation'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        number:
+          type: integer
+        size:
+          type: integer
+
+    CreateListingRequest:
+      type: object
+      required: [title, description, categoryId, propertyType, maxGuests, bedrooms, beds, bathrooms, nightlyPrice]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+        propertyType:
+          type: string
+        maxGuests:
+          type: integer
+        bedrooms:
+          type: integer
+        beds:
+          type: integer
+        bathrooms:
+          type: integer
+        nightlyPrice:
+          type: number
+        cleaningFee:
+          type: number
+        serviceFee:
+          type: number
+        location:
+          $ref: '#/components/schemas/ListingLocation'
+        policy:
+          $ref: '#/components/schemas/ListingPolicy'
+        amenityIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    CreateReservationRequest:
+      type: object
+      required: [listingId, checkIn, checkOut, guests]
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        checkIn:
+          type: string
+          format: date
+        checkOut:
+          type: string
+          format: date
+        guests:
+          type: integer
+
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        listingId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        coverUrl:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        guestId:
+          type: string
+          format: uuid
+        checkIn:
+          type: string
+          format: date
+        checkOut:
+          type: string
+          format: date
+        guests:
+          type: integer
+        totalNights:
+          type: integer
+        nightlyPrice:
+          type: number
+        cleaningFee:
+          type: number
+        serviceFee:
+          type: number
+        totalAmount:
+          type: number
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, CANCELLED_BY_GUEST, CANCELLED_BY_HOST, COMPLETED]
+        hostName:
+          type: string
+
+    QuoteRequest:
+      type: object
+      required: [listingId, checkIn, checkOut, guests]
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        checkIn:
+          type: string
+          format: date
+        checkOut:
+          type: string
+          format: date
+        guests:
+          type: integer
+
+    QuoteResponse:
+      type: object
+      properties:
+        totalNights:
+          type: integer
+        nightlyPrice:
+          type: number
+        subtotal:
+          type: number
+        cleaningFee:
+          type: number
+        serviceFee:
+          type: number
+        totalAmount:
+          type: number
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+        role:
+          type: string
+          enum: [GUEST, HOST, ADMIN]
