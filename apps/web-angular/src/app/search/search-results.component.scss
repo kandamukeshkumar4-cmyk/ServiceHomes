@@ -1,0 +1,112 @@
+.search-results-page {
+  background:
+    radial-gradient(circle at top left, rgba(191, 219, 254, 0.45), transparent 28%),
+    linear-gradient(180deg, #f8fbff 0%, #ffffff 35%, #f8fafc 100%);
+  min-height: 100%;
+}
+
+.search-results-page__hero {
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 4.4rem;
+  z-index: 40;
+}
+
+.chip-button {
+  align-items: center;
+  background: #eff6ff;
+  border: 1px solid rgba(59, 130, 246, 0.16);
+  border-radius: 999px;
+  color: #1d4ed8;
+  display: inline-flex;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+}
+
+.view-toggle {
+  background: #eff6ff;
+  border: 1px solid rgba(59, 130, 246, 0.16);
+  border-radius: 999px;
+  display: inline-flex;
+  padding: 0.2rem;
+}
+
+.view-toggle__button {
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+}
+
+.view-toggle__button--active {
+  background: #2563eb;
+  color: #fff;
+}
+
+.search-map-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 28rem) minmax(0, 1fr);
+  min-height: 36rem;
+}
+
+.search-map-layout__list {
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.search-map-layout__map {
+  min-height: 36rem;
+}
+
+.search-skeleton__media,
+.search-skeleton__line {
+  animation: shimmer 1.2s linear infinite;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  border-radius: 1rem;
+}
+
+.search-skeleton__media {
+  height: 12rem;
+}
+
+.search-skeleton__line {
+  height: 0.9rem;
+}
+
+.search-skeleton__line--short {
+  width: 70%;
+}
+
+.search-skeleton__line--price {
+  width: 40%;
+}
+
+.empty-state {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(191, 219, 254, 0.32));
+  border-radius: 999px;
+  display: flex;
+  height: 5rem;
+  justify-content: center;
+  width: 5rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@media (max-width: 991px) {
+  .search-map-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .search-map-layout__map {
+    min-height: 28rem;
+  }
+}

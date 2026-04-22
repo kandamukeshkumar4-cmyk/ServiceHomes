@@ -1,0 +1,78 @@
+<aside class="filter-panel border-round-2xl p-3">
+  <div class="flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="m-0 text-base font-semibold">Filters</h3>
+      <p class="m-0 text-600 text-sm">Refine by price, space, stay rules, and property type.</p>
+    </div>
+    <button type="button" class="p-button p-button-text p-button-sm" (click)="clearAll()">Reset</button>
+  </div>
+
+  <div class="mb-4">
+    <label class="text-xs font-semibold text-700">Sort</label>
+    <select class="p-inputtext w-full mt-2" [ngModel]="filters.sort" (ngModelChange)="updateSort($event)">
+      <option value="relevance">Relevance</option>
+      <option value="priceAsc">Price: low to high</option>
+      <option value="priceDesc">Price: high to low</option>
+      <option value="newest">Newest</option>
+    </select>
+  </div>
+
+  <div class="mb-4">
+    <div class="flex justify-content-between align-items-center">
+      <label class="text-xs font-semibold text-700">Price range</label>
+      <span class="text-600 text-sm">
+        {{ filters.minPrice ?? 0 }} - {{ filters.maxPrice ?? 1000 }}
+      </span>
+    </div>
+    <input type="range" min="0" max="1000" step="10" class="w-full mt-2" [ngModel]="filters.minPrice ?? 0" (ngModelChange)="updateMinPrice($event)" />
+    <input type="range" min="0" max="1000" step="10" class="w-full mt-2" [ngModel]="filters.maxPrice ?? 1000" (ngModelChange)="updateMaxPrice($event)" />
+  </div>
+
+  <div class="mb-4">
+    <div class="flex justify-content-between align-items-center">
+      <label class="text-xs font-semibold text-700">Bedrooms</label>
+      <button type="button" class="p-button p-button-text p-button-sm" (click)="clearBedrooms()">Any</button>
+    </div>
+    <div class="flex align-items-center gap-2 mt-2">
+      <button type="button" class="stepper-button surface-0" (click)="updateBedrooms(-1)" [disabled]="(filters.bedrooms ?? 1) <= 1">-</button>
+      <span class="font-medium">{{ filters.bedrooms ?? 1 }}+</span>
+      <button type="button" class="stepper-button surface-0" (click)="updateBedrooms(1)">+</button>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <label class="text-xs font-semibold text-700">Property type</label>
+    <div class="flex flex-column gap-2 mt-2">
+      <label *ngFor="let option of propertyTypeOptions" class="flex align-items-center gap-2 text-sm text-700">
+        <input type="checkbox" [checked]="isChecked(option)" (change)="togglePropertyType(option, $any($event.target).checked)" />
+        <span>{{ option }}</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <label class="text-xs font-semibold text-700">Guests</label>
+    <div class="flex align-items-center gap-2 mt-2">
+      <button type="button" class="stepper-button surface-0" (click)="updateGuests(-1)" [disabled]="filters.guests <= 1">-</button>
+      <span class="font-medium">{{ filters.guests }}</span>
+      <button type="button" class="stepper-button surface-0" (click)="updateGuests(1)">+</button>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <label class="text-xs font-semibold text-700">Dates</label>
+    <div class="grid mt-2">
+      <div class="col-6">
+        <input type="date" class="p-inputtext w-full" [ngModel]="filters.checkIn" (ngModelChange)="updateDate('checkIn', $event)" />
+      </div>
+      <div class="col-6">
+        <input type="date" class="p-inputtext w-full" [ngModel]="filters.checkOut" (ngModelChange)="updateDate('checkOut', $event)" />
+      </div>
+    </div>
+  </div>
+
+  <label class="flex align-items-center gap-2 text-sm text-700">
+    <input type="checkbox" [checked]="filters.instantBook" (change)="updateInstantBook($any($event.target).checked)" />
+    <span>Instant Book only</span>
+  </label>
+</aside>

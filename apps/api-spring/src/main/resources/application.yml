@@ -37,6 +37,17 @@ aws:
     endpoint: ${AWS_S3_ENDPOINT:}
     access-key: ${AWS_ACCESS_KEY_ID:}
     secret-key: ${AWS_SECRET_ACCESS_KEY:}
+  ses:
+    region: ${AWS_SES_REGION:${AWS_REGION:us-east-1}}
+    endpoint: ${AWS_SES_ENDPOINT:}
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
+
+messaging:
+  email:
+    enabled: ${MESSAGING_EMAIL_ENABLED:false}
+    from-address: ${MESSAGING_EMAIL_FROM:no-reply@servicehomes.example.com}
+    quiet-period-minutes: ${MESSAGING_EMAIL_QUIET_PERIOD_MINUTES:5}
 
 logging:
   level:

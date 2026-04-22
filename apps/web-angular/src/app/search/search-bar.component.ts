@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { SearchStateService } from './search-state.service';
 
 
 @Component({
@@ -35,18 +37,34 @@ import { FormsModule } from '@angular/forms';
 })
 export class SearchBarComponent {
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
+  private searchState = inject(SearchStateService);
 
   location = '';
   checkIn = '';
   checkOut = '';
   guests = 1;
 
+  constructor() {
+    this.searchState.filters$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((filters) => {
+        this.location = filters.locationQuery;
+        this.checkIn = filters.checkIn ?? '';
+        this.checkOut = filters.checkOut ?? '';
+        this.guests = filters.guests;
+      });
+  }
+
   search() {
-    const params: Record<string, string> = {};
-    if (this.location) params['locationQuery'] = this.location;
-    if (this.checkIn) params['checkIn'] = this.checkIn;
-    if (this.checkOut) params['checkOut'] = this.checkOut;
-    if (this.guests > 1) params['guests'] = String(this.guests);
-    this.router.navigate(['/home'], { queryParams: params });
+    const filters = {
+      ...this.searchState.snapshot,
+      locationQuery: this.location.trim(),
+      checkIn: this.checkIn || null,
+      checkOut: this.checkOut || null,
+      guests: Math.max(1, this.guests),
+      page: 0
+    };
+    this.router.navigate(['/search'], { queryParams: this.searchState.toQueryParams(filters) });
   }
 }
