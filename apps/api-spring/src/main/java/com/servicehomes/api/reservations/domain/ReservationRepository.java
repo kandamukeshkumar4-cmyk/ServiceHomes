@@ -38,11 +38,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
             r.status IN ('CONFIRMED', 'DECLINED')
             OR (
               r.status = 'PENDING'
-              AND r.created_at <= :referenceTime - interval '24 hours'
+              AND r.created_at <= :cutoffTime
             )
           )
         """, nativeQuery = true)
-    long countRequestsEligibleForResponseRate(@Param("hostId") UUID hostId, @Param("referenceTime") Instant referenceTime);
+    long countRequestsEligibleForResponseRate(@Param("hostId") UUID hostId, @Param("cutoffTime") Instant cutoffTime);
 
     @Query(value = """
         SELECT COUNT(*)

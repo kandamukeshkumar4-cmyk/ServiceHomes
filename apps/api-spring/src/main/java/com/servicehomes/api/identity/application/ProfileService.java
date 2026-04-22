@@ -115,7 +115,8 @@ public class ProfileService {
 
         Profile profile = ensureProfile(host);
         List<ListingCardDto> listings = listingSearchRepository.findPublishedByHostId(hostId);
-        long eligibleRequests = reservationRepository.countRequestsEligibleForResponseRate(hostId, Instant.now());
+        Instant responseDeadlineCutoff = Instant.now().minus(Duration.ofHours(24));
+        long eligibleRequests = reservationRepository.countRequestsEligibleForResponseRate(hostId, responseDeadlineCutoff);
         long respondedWithin24h = reservationRepository.countRequestsRespondedWithin24Hours(hostId);
         Integer responseRate = eligibleRequests == 0
             ? null
