@@ -12,14 +12,14 @@ echo ""
 
 # Check if no-mistakes remote exists
 if ! git remote | grep -q "no-mistakes"; then
-    echo "❌ no-mistakes remote not found."
+    echo "no-mistakes remote not found."
     echo "Run: ./scripts/install-no-mistakes.sh"
     exit 1
 fi
 
 # Check for uncommitted changes
 if ! git diff-index --quiet HEAD --; then
-    echo "⚠️  You have uncommitted changes."
+    echo "You have uncommitted changes."
     read -p "Commit them now? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -32,9 +32,9 @@ if ! git diff-index --quiet HEAD --; then
     fi
 fi
 
-echo "🚀 Pushing to no-mistakes gate..."
+echo "Pushing to no-mistakes gate..."
 git push no-mistakes "$BRANCH"
 
 echo ""
-echo "✅ Push initiated!"
+echo "Push initiated."
 echo "Run 'no-mistakes' to monitor the pipeline."
