@@ -1,2 +1,0 @@
-﻿2026-04-21T19:18:29.6186268Z Post job cleanup.
-2026-04-21T19:18:29.7536409Z Cache hit occurred on the primary key setup-java-Linux-x64-maven-326f8f4c2954041cd34b0eb45f1dccf0cf58b2e906331897d8a94bf1b0e78cc5, not saving cache.
