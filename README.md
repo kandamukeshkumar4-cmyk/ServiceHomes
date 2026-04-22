@@ -125,6 +125,10 @@ cd apps/api-spring && ./mvnw spring-boot:run
 |----------|-------------|
 | `GET /api/health` | Health check |
 | `GET /api/me` | Current user profile |
+| `PATCH /api/me/profile` | Update current user's profile |
+| `POST /api/me/profile/avatar-upload-url` | Get a presigned avatar upload target |
+| `POST /api/me/become-host` | Enable hosting for the current user |
+| `GET /api/hosts/{hostId}` | Public host profile and stats |
 | `GET /api/listings/search` | Search published listings |
 | `POST /api/listings` | Create listing (host) |
 | `GET /api/listings/my` | My listings (host) |
@@ -153,6 +157,7 @@ Migrations run automatically on startup via Flyway:
 | `V6__seed_data.sql` | Sample users and listings |
 | `V7__align_local_seed_auth0_id.sql` | Align local JWT identity with the seeded local user |
 | `V8__listing_availability_indexes.sql` | Availability rule query indexes |
+| `V9__profile_fields.sql` | Host/profile enrichment fields and profile languages |
 
 ## Analytics
 
@@ -198,6 +203,12 @@ Spring Boot 3 (modular monolith)
 - [Architecture Decision Records](docs/adr/)
 - [API Contracts](packages/api-contracts/)
 - [Event Schemas](packages/event-schemas/)
+
+## User Profiles and Hosting
+
+- The account page now supports editing display name, bio, phone number, location, languages, and avatar uploads through a presigned S3 flow.
+- `POST /api/me/become-host` promotes an email-verified traveler account by adding the `HOST` role without removing traveler access.
+- Public host profiles at `/hosts/{hostId}` expose biography, membership age, response-rate stats, and the host's published listings.
 
 ## License
 

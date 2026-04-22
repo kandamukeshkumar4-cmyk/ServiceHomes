@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Repository
@@ -25,4 +26,33 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
         ORDER BY r.checkIn DESC
         """)
     Page<Reservation> findByHostId(@Param("hostId") UUID hostId, Pageable pageable);
+
+    @Query(value = """
+        SELECT COUNT(*)
+        FROM reservations r
+        JOIN listings l ON l.id = r.listing_id
+        JOIN listing_policies p ON p.listing_id = l.id
+        WHERE l.host_id = :hostId
+          AND p.instant_book = false
+          AND (
+            r.status IN ('CONFIRMED', 'DECLINED')
+            OR (
+              r.status = 'PENDING'
+              AND r.created_at <= :cutoffTime
+            )
+          )
+        """, nativeQuery = true)
+    long countRequestsEligibleForResponseRate(@Param("hostId") UUID hostId, @Param("cutoffTime") Instant cutoffTime);
+
+    @Query(value = """
+        SELECT COUNT(*)
+        FROM reservations r
+        JOIN listings l ON l.id = r.listing_id
+        JOIN listing_policies p ON p.listing_id = l.id
+        WHERE l.host_id = :hostId
+          AND p.instant_book = false
+          AND r.status IN ('CONFIRMED', 'DECLINED')
+          AND r.updated_at <= r.created_at + interval '24 hours'
+        """, nativeQuery = true)
+    long countRequestsRespondedWithin24Hours(@Param("hostId") UUID hostId);
 }

@@ -37,6 +37,16 @@
       </div>
 
       <div class="surface-0 shadow-1 border-round-lg p-3 mb-3">
+        <div class="flex justify-content-between align-items-center gap-3">
+          <div>
+            <h2 class="text-xl font-bold mb-1">Meet the host</h2>
+            <p class="text-600 m-0">View the public host profile for response stats and other published listings.</p>
+          </div>
+          <a [routerLink]="['/hosts', listing.hostId]" class="p-button p-button-outlined no-underline white-space-nowrap">View host profile</a>
+        </div>
+      </div>
+
+      <div class="surface-0 shadow-1 border-round-lg p-3 mb-3">
         <h2 class="text-xl font-bold mb-2">Where you'll be staying</h2>
         <app-listing-map
           [latitude]="listing.location.latitude"
