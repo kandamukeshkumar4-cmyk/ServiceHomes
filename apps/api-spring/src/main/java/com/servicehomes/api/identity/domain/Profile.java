@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -42,6 +44,19 @@ public class Profile {
 
     @Column(name = "phone_number", length = 32)
     private String phoneNumber;
+
+    @Column(length = 255)
+    private String location;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+        name = "profile_languages",
+        joinColumns = @JoinColumn(name = "profile_id")
+    )
+    @OrderColumn(name = "sort_order")
+    @Column(name = "language", length = 64, nullable = false)
+    @Builder.Default
+    private List<String> languages = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -60,4 +60,20 @@ public interface ListingSearchRepository extends JpaRepository<Listing, UUID> {
         @Param("neLat") Double neLat,
         @Param("neLng") Double neLng
     );
+
+    @Query("""
+        SELECT new com.servicehomes.api.listings.application.dto.ListingCardDto(
+            l.id, l.title,
+            (SELECT p.url FROM ListingPhoto p WHERE p.listing = l AND p.isCover = true),
+            loc.city, loc.country, l.nightlyPrice, c.name, loc.latitude, loc.longitude,
+            l.maxGuests, l.bedrooms, l.beds, l.bathrooms
+        )
+        FROM Listing l
+        JOIN l.location loc
+        JOIN l.category c
+        WHERE l.status = 'PUBLISHED'
+          AND l.hostId = :hostId
+        ORDER BY COALESCE(l.publishedAt, l.createdAt) DESC
+        """)
+    List<com.servicehomes.api.listings.application.dto.ListingCardDto> findPublishedByHostId(@Param("hostId") UUID hostId);
 }

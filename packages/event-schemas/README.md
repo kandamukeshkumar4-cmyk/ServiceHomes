@@ -15,6 +15,8 @@ Avro/JSON schemas for analytics events.
 - `reservation_confirmed.avsc` — reservation is confirmed, including instant book and host acceptance
 - `reservation_declined.avsc` — host declines a pending reservation request
 - `reservation_cancelled.avsc` — reservation is cancelled
+- `profile_updated.avsc` — traveler or host updates their profile details
+- `became_host.avsc` — traveler account is promoted to include host capabilities
 
 ## Outbox Table
 
