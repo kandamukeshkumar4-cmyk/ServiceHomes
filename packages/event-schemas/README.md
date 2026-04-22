@@ -15,6 +15,10 @@ Avro/JSON schemas for analytics events.
 - `reservation_confirmed.avsc` — reservation is confirmed, including instant book and host acceptance
 - `reservation_declined.avsc` — host declines a pending reservation request
 - `reservation_cancelled.avsc` — reservation is cancelled
+- `review_created.avsc` — guest leaves a review after an eligible stay
+- `host_response_added.avsc` — host posts a response to a listing review
+- `listing_saved.avsc` — traveler saves a listing for later
+- `listing_unsaved.avsc` — traveler removes a saved listing
 - `profile_updated.avsc` — traveler or host updates their profile details
 - `became_host.avsc` — traveler account is promoted to include host capabilities
 

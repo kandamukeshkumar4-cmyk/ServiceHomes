@@ -27,6 +27,10 @@ export class BookingDetailComponent implements OnInit {
     return this.booking ? ['PENDING', 'CONFIRMED'].includes(this.booking.status) : false;
   }
 
+  canMessageHost(): boolean {
+    return this.booking ? ['PENDING', 'CONFIRMED'].includes(this.booking.status) : false;
+  }
+
   statusLabel(status: string): string {
     if (status === 'PENDING') return 'Awaiting host approval';
     if (status === 'DECLINED') return 'Declined by host';

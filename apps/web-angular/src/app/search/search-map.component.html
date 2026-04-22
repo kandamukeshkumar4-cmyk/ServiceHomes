@@ -1,0 +1,27 @@
+<div class="search-map">
+  <div class="search-map__toolbar">
+    <div class="search-map__summary">
+      <span class="search-map__summary-label">{{ visibleResultsLabel }}</span>
+      <strong>{{ visibleResultCount }}</strong>
+    </div>
+
+    <button
+      *ngIf="isSearchAreaDirty"
+      type="button"
+      class="search-map__cta"
+      [disabled]="loading"
+      (click)="requestSearchArea()">
+      Search this area
+    </button>
+  </div>
+
+  <div #mapContainer class="search-map__canvas"></div>
+
+  <div class="search-map__status" *ngIf="loading">
+    Updating map results...
+  </div>
+
+  <div class="search-map__hint" *ngIf="!loading && !hasResults">
+    Move the map to explore a different area.
+  </div>
+</div>

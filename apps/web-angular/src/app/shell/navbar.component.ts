@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AppAuthService } from '../core/auth.service';
+import { NotificationService } from '../core/notification.service';
 
 @Component({
   selector: 'app-navbar',
@@ -17,6 +18,13 @@ import { AppAuthService } from '../core/auth.service';
         </ng-container>
         <ng-template #authReady>
           <ng-container *ngIf="auth.isAuthenticated$ | async; else loggedOut">
+            <a routerLink="/saved" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Saved</a>
+            <a routerLink="/inbox" routerLinkActive="text-primary font-bold" class="text-700 no-underline navbar-link-with-badge">
+              <span>Messages</span>
+              <span *ngIf="(notifications.unreadMessagesCount$ | async) as unreadCount" class="navbar-badge" [class.navbar-badge--hidden]="unreadCount < 1">
+                {{ unreadCount }}
+              </span>
+            </a>
             <a routerLink="/bookings" routerLinkActive="text-primary font-bold" class="text-700 no-underline">My Bookings</a>
             <a routerLink="/host/accommodations" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Host</a>
             <a routerLink="/account" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Account</a>
@@ -32,8 +40,30 @@ import { AppAuthService } from '../core/auth.service';
   `,
   styles: [`
     .navbar { position: sticky; top: 0; z-index: 1000; }
+    .navbar-link-with-badge {
+      align-items: center;
+      display: inline-flex;
+      gap: 0.45rem;
+    }
+    .navbar-badge {
+      align-items: center;
+      background: #dc2626;
+      border-radius: 999px;
+      color: #fff;
+      display: inline-flex;
+      font-size: 0.7rem;
+      font-weight: 700;
+      height: 1.15rem;
+      justify-content: center;
+      min-width: 1.15rem;
+      padding: 0 0.3rem;
+    }
+    .navbar-badge--hidden {
+      display: none;
+    }
   `]
 })
 export class NavbarComponent {
   auth = inject(AppAuthService);
+  notifications = inject(NotificationService);
 }

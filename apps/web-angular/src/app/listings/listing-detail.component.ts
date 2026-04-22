@@ -1,29 +1,38 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, ViewChild, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ListingService } from '../listings/listing.service';
 import { Listing, ListingPhoto } from '../listings/listing.model';
 import { AppAuthService } from '../core/auth.service';
 import { ListingMapComponent } from './listing-map.component';
 import { ReservationQuote, ReservationRecord } from '../bookings/reservation.model';
+import { ReviewFormComponent, ReviewSubmission } from '../reviews/review-form.component';
+import { ReviewListComponent } from '../reviews/review-list.component';
+import { ListingReview, ReviewReservationOption, ReviewsApiService } from '../reviews/reviews-api.service';
 
 
 @Component({
   selector: 'app-listing-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, ListingMapComponent, RouterLink],
+  imports: [CommonModule, FormsModule, ListingMapComponent, RouterLink, ReviewFormComponent, ReviewListComponent],
   templateUrl: './listing-detail.component.html',
   styles: []
 })
 export class ListingDetailComponent implements OnInit {
+  @ViewChild(ReviewFormComponent) reviewForm?: ReviewFormComponent;
+
+  private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private listingService = inject(ListingService);
   private http = inject(HttpClient);
+  private reviewsApi = inject(ReviewsApiService);
   auth = inject(AppAuthService);
 
   listing: Listing | null = null;
+  currentUserId: string | null = null;
   checkIn = '';
   checkOut = '';
   guests = 1;
@@ -38,6 +47,18 @@ export class ListingDetailComponent implements OnInit {
   reviewingQuote = false;
   creatingReservation = false;
   createdReservation: ReservationRecord | null = null;
+  reviews: ListingReview[] = [];
+  averageRating = 0;
+  reviewCount = 0;
+  reviewsLoading = false;
+  reviewsLoaded = false;
+  reviewsError = '';
+  eligibleReservations: ReviewReservationOption[] = [];
+  eligibleReservationsLoading = false;
+  reviewSubmitError = '';
+  reviewSubmitting = false;
+  hostResponseError = '';
+  hostResponseSubmittingFor: string | null = null;
 
   get coverPhoto(): ListingPhoto | undefined {
     return this.listing?.photos.find(p => p.isCover) || this.listing?.photos[0];
@@ -76,11 +97,29 @@ export class ListingDetailComponent implements OnInit {
     return 'The host can now accept or decline your request. No payment was collected in this demo checkout.';
   }
 
+  get isHostViewer(): boolean {
+    return !!this.currentUserId && this.currentUserId === this.listing?.hostId;
+  }
+
+  get canLeaveReview(): boolean {
+    return !!this.currentUserId && !this.isHostViewer && this.eligibleReservations.length > 0;
+  }
+
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id') || '';
-    this.listingService.getById(id).subscribe(l => {
-      this.listing = l;
-    });
+    this.auth.me
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(me => {
+        this.currentUserId = me?.id ?? null;
+        this.loadEligibleReservations();
+      });
+
+    this.listingService.getById(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(l => {
+        this.listing = l;
+        this.loadReviews();
+      });
   }
 
   reviewBooking() {
@@ -141,5 +180,100 @@ export class ListingDetailComponent implements OnInit {
         this.creatingReservation = false;
       }
     });
+  }
+
+  submitReview(submission: ReviewSubmission) {
+    this.reviewSubmitError = '';
+    this.reviewSubmitting = true;
+
+    this.reviewsApi.createReview(submission.reservationId, submission.rating, submission.comment)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.reviewSubmitError = '';
+          this.reviewSubmitting = false;
+          this.reviewForm?.reset();
+          this.loadReviews();
+        },
+        error: error => {
+          this.reviewSubmitError = error?.error?.message || 'Unable to publish your review.';
+          this.reviewSubmitting = false;
+        }
+      });
+  }
+
+  submitHostResponse(event: { reviewId: string; response: string }) {
+    this.hostResponseError = '';
+    this.hostResponseSubmittingFor = event.reviewId;
+
+    this.reviewsApi.addHostResponse(event.reviewId, event.response)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: updatedReview => {
+          this.hostResponseError = '';
+          this.reviews = this.reviews.map(review => review.id === updatedReview.id ? updatedReview : review);
+          this.hostResponseSubmittingFor = null;
+        },
+        error: error => {
+          this.hostResponseError = error?.error?.message || 'Unable to save the host response.';
+          this.hostResponseSubmittingFor = null;
+        }
+      });
+  }
+
+  private loadReviews() {
+    if (!this.listing) {
+      return;
+    }
+
+    this.reviewsLoading = true;
+    this.reviewsError = '';
+
+    this.reviewsApi.getListingReviews(this.listing.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: response => {
+          this.averageRating = response.averageRating;
+          this.reviewCount = response.reviewCount;
+          this.reviews = response.content;
+          this.reviewsLoading = false;
+          this.reviewsLoaded = true;
+          this.loadEligibleReservations();
+        },
+        error: error => {
+          this.reviewsError = error?.error?.message || 'Unable to load reviews right now.';
+          this.reviewsLoading = false;
+          this.reviewsLoaded = true;
+          this.loadEligibleReservations();
+        }
+      });
+  }
+
+  private loadEligibleReservations() {
+    if (!this.listing || !this.currentUserId || this.isHostViewer || !this.reviewsLoaded) {
+      this.eligibleReservationsLoading = false;
+      if (this.isHostViewer) {
+        this.eligibleReservations = [];
+      }
+      return;
+    }
+
+    this.eligibleReservationsLoading = true;
+
+    this.reviewsApi.getEligibleReservations(
+      this.listing.id,
+      this.reviews.map(review => review.reservationId)
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: reservations => {
+          this.eligibleReservations = reservations;
+          this.eligibleReservationsLoading = false;
+        },
+        error: () => {
+          this.eligibleReservations = [];
+          this.eligibleReservationsLoading = false;
+        }
+      });
   }
 }
