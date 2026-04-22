@@ -31,6 +31,7 @@ import org.testcontainers.utility.DockerImageName;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -155,16 +156,36 @@ class ProfileControllerIntegrationTest {
         Listing publishedTwo = createListing(host.getId(), "Harbor Apartment", Listing.Status.PUBLISHED, false);
         createListing(host.getId(), "Draft Test Listing", Listing.Status.DRAFT, false);
 
-        Reservation quickResponse = createReservation(publishedOne, Reservation.Status.CONFIRMED);
+        Reservation quickResponse = createReservation(
+            publishedOne,
+            Reservation.Status.CONFIRMED,
+            LocalDate.of(2026, 11, 1),
+            LocalDate.of(2026, 11, 4)
+        );
         overrideReservationTimes(quickResponse.getId(), Instant.now().minusSeconds(72 * 3600), Instant.now().minusSeconds(69 * 3600));
 
-        Reservation lateResponse = createReservation(publishedOne, Reservation.Status.DECLINED);
+        Reservation lateResponse = createReservation(
+            publishedOne,
+            Reservation.Status.DECLINED,
+            LocalDate.of(2026, 11, 1),
+            LocalDate.of(2026, 11, 4)
+        );
         overrideReservationTimes(lateResponse.getId(), Instant.now().minusSeconds(96 * 3600), Instant.now().minusSeconds(69 * 3600));
 
-        Reservation overduePending = createReservation(publishedTwo, Reservation.Status.PENDING);
+        Reservation overduePending = createReservation(
+            publishedTwo,
+            Reservation.Status.PENDING,
+            LocalDate.of(2026, 11, 1),
+            LocalDate.of(2026, 11, 4)
+        );
         overrideReservationTimes(overduePending.getId(), Instant.now().minusSeconds(80 * 3600), Instant.now().minusSeconds(80 * 3600));
 
-        Reservation recentPending = createReservation(publishedTwo, Reservation.Status.PENDING);
+        Reservation recentPending = createReservation(
+            publishedTwo,
+            Reservation.Status.PENDING,
+            LocalDate.of(2026, 11, 6),
+            LocalDate.of(2026, 11, 9)
+        );
         overrideReservationTimes(recentPending.getId(), Instant.now().minusSeconds(2 * 3600), Instant.now().minusSeconds(2 * 3600));
 
         mockMvc.perform(get("/hosts/{hostId}", host.getId()))
@@ -253,13 +274,22 @@ class ProfileControllerIntegrationTest {
     }
 
     private Reservation createReservation(Listing listing, Reservation.Status status) {
+        return createReservation(
+            listing,
+            status,
+            LocalDate.of(2026, 11, 1),
+            LocalDate.of(2026, 11, 4)
+        );
+    }
+
+    private Reservation createReservation(Listing listing, Reservation.Status status, LocalDate checkIn, LocalDate checkOut) {
         return reservationRepository.save(Reservation.builder()
             .listing(listing)
             .guestId(SEED_GUEST_ID)
-            .checkIn(java.time.LocalDate.of(2026, 11, 1))
-            .checkOut(java.time.LocalDate.of(2026, 11, 4))
+            .checkIn(checkIn)
+            .checkOut(checkOut)
             .guests(2)
-            .totalNights(3)
+            .totalNights((int) java.time.temporal.ChronoUnit.DAYS.between(checkIn, checkOut))
             .nightlyPrice(new BigDecimal("180.00"))
             .cleaningFee(new BigDecimal("25.00"))
             .serviceFee(new BigDecimal("12.00"))
