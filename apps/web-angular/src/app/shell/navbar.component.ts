@@ -12,12 +12,18 @@ import { AppAuthService } from '../core/auth.service';
       <a routerLink="/home" class="text-2xl font-bold text-primary no-underline">ServiceHomes</a>
       <div class="flex align-items-center gap-3">
         <a routerLink="/home" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Home</a>
-        <ng-container *ngIf="auth.isAuthenticated$ | async; else loggedOut">
-          <a routerLink="/bookings" routerLinkActive="text-primary font-bold" class="text-700 no-underline">My Bookings</a>
-          <a routerLink="/host/accommodations" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Host</a>
-          <a routerLink="/account" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Account</a>
-          <button pButton class="p-button-text p-button-sm" (click)="auth.logout()">Log out</button>
+        <ng-container *ngIf="auth.isLoading$ | async; else authReady">
+          <span class="text-600 text-sm">Loading account...</span>
         </ng-container>
+        <ng-template #authReady>
+          <ng-container *ngIf="auth.isAuthenticated$ | async; else loggedOut">
+            <a routerLink="/bookings" routerLinkActive="text-primary font-bold" class="text-700 no-underline">My Bookings</a>
+            <a routerLink="/host/accommodations" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Host</a>
+            <a routerLink="/account" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Account</a>
+            <span *ngIf="auth.isLocalMode" class="px-2 py-1 surface-100 border-round text-600 text-sm">Local Auth</span>
+            <button *ngIf="auth.usesAuth0" pButton class="p-button-text p-button-sm" (click)="auth.logout()">Log out</button>
+          </ng-container>
+        </ng-template>
         <ng-template #loggedOut>
           <button pButton class="p-button-primary p-button-sm" (click)="auth.login()">Log in</button>
         </ng-template>

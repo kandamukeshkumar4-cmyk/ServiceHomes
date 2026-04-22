@@ -1,17 +1,16 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '@auth0/auth0-angular';
+import { CanActivateFn } from '@angular/router';
 import { map, take } from 'rxjs/operators';
+import { AppAuthService } from './auth.service';
 
 export const authGuard: CanActivateFn = () => {
-  const auth = inject(AuthService);
-  const router = inject(Router);
+  const auth = inject(AppAuthService);
 
   return auth.isAuthenticated$.pipe(
     take(1),
     map(isAuth => {
       if (!isAuth) {
-        auth.loginWithRedirect();
+        auth.login();
         return false;
       }
       return true;
