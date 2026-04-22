@@ -1,5 +1,6 @@
 <div class="p-4 max-w-60rem mx-auto">
   <h1 class="text-2xl font-bold mb-4">My Bookings</h1>
+  <p class="text-600 mt-0 mb-3" *ngIf="bookings.length > 0">{{ totalBookings }} trip{{ totalBookings === 1 ? '' : 's' }} in your booking history</p>
 
   <div *ngIf="bookings.length === 0" class="surface-100 p-4 border-round-lg text-center">
     <p class="text-600">You have no bookings yet.</p>
@@ -20,9 +21,11 @@
                   [class.text-green-700]="booking.status === 'CONFIRMED'"
                   [class.bg-yellow-100]="booking.status === 'PENDING'"
                   [class.text-yellow-700]="booking.status === 'PENDING'"
+                  [class.bg-orange-100]="booking.status === 'DECLINED'"
+                  [class.text-orange-700]="booking.status === 'DECLINED'"
                   [class.bg-red-100]="booking.status.includes('CANCELLED')"
                   [class.text-red-700]="booking.status.includes('CANCELLED')">
-              {{ booking.status }}
+              {{ statusLabel(booking.status) }}
             </span>
           </div>
           <p class="text-600 text-sm m-0">{{ booking.listingCity }}, {{ booking.listingCountry }}</p>

@@ -52,7 +52,8 @@
           <span class="text-xl font-bold">${{ listing.nightlyPrice }}</span>
           <span class="text-600">/ night</span>
         </div>
-        <div class="flex flex-column gap-2 mb-3">
+
+        <div *ngIf="bookingStep === 'dates'" class="flex flex-column gap-2 mb-3">
           <div class="grid gap-1">
             <div class="col-6 flex flex-column gap-1">
               <label class="text-xs font-bold">Check in</label>
@@ -67,9 +68,19 @@
             <label class="text-xs font-bold">Guests</label>
             <input type="number" class="p-inputtext" [max]="listing.maxGuests" min="1" [(ngModel)]="guests" />
           </div>
+          <div class="surface-100 border-round-lg p-2 text-sm text-700">
+            <strong>{{ listing.policy.instantBook ? 'Instant book' : 'Request to book' }}</strong>
+            <div class="mt-1">
+              {{ listing.policy.instantBook ? 'This host confirms eligible stays right away.' : 'The host will review and accept or decline your request.' }}
+            </div>
+          </div>
         </div>
 
-        <div *ngIf="showQuote" class="mb-3">
+        <div *ngIf="bookingStep === 'checkout'" class="mb-3">
+          <div class="surface-100 border-round-lg p-3 mb-3">
+            <div class="text-sm font-semibold mb-1">Review your stay</div>
+            <div class="text-sm text-700">{{ checkIn }} to {{ checkOut }} · {{ guests }} guest{{ guests === 1 ? '' : 's' }}</div>
+          </div>
           <div class="flex justify-content-between text-sm mb-1">
             <span>${{ quoteNightlyPrice }} x {{ quoteNights }} nights</span>
             <span>${{ quoteSubtotal }}</span>
@@ -86,12 +97,41 @@
             <span>Total</span>
             <span>${{ quoteTotal }}</span>
           </div>
+          <div class="surface-100 border-round-lg p-3 mt-3">
+            <div class="font-semibold mb-1">Payment</div>
+            <div class="text-sm text-700">No payment will be collected in this demo. Confirming below only creates the reservation or booking request.</div>
+          </div>
         </div>
 
-        <button class="p-button p-button-primary w-full" (click)="reserve()" [disabled]="!auth.isAuthenticated$">
-          {{ (auth.isAuthenticated$ | async) ? 'Reserve' : 'Log in to reserve' }}
+        <div *ngIf="bookingStep === 'complete'" class="surface-100 border-round-lg p-3 mb-3">
+          <div class="font-semibold mb-1">{{ completionTitle }}</div>
+          <div class="text-sm text-700">{{ completionMessage }}</div>
+          <div class="mt-2 text-sm" *ngIf="createdReservation">
+            Status: <strong>{{ createdReservation.status === 'PENDING' ? 'Awaiting host approval' : createdReservation.status }}</strong>
+          </div>
+        </div>
+
+        <div *ngIf="bookingError" class="surface-100 border-round-lg p-2 text-sm text-red-700 mb-3">
+          {{ bookingError }}
+        </div>
+
+        <button *ngIf="bookingStep === 'dates'" class="p-button p-button-primary w-full" (click)="reviewBooking()" [disabled]="!(auth.isAuthenticated$ | async) || reviewingQuote">
+          {{ reviewingQuote ? 'Reviewing...' : ((auth.isAuthenticated$ | async) ? reviewActionLabel : 'Log in to book') }}
         </button>
-        <div class="mt-3 text-center text-600 text-sm">You won't be charged yet</div>
+
+        <div *ngIf="bookingStep === 'checkout'" class="flex flex-column gap-2">
+          <button class="p-button p-button-primary w-full" (click)="reserve()" [disabled]="creatingReservation">
+            {{ creatingReservation ? 'Submitting...' : confirmActionLabel }}
+          </button>
+          <button class="p-button p-button-outlined w-full" (click)="editTrip()" [disabled]="creatingReservation">Edit trip details</button>
+        </div>
+
+        <div *ngIf="bookingStep === 'complete' && createdReservation" class="flex flex-column gap-2">
+          <a [routerLink]="['/bookings', createdReservation.id]" class="p-button p-button-primary no-underline text-center">View reservation</a>
+          <button class="p-button p-button-outlined w-full" (click)="editTrip()">Book different dates</button>
+        </div>
+
+        <div class="mt-3 text-center text-600 text-sm">You won't be charged in this demo checkout.</div>
       </div>
     </div>
   </div>

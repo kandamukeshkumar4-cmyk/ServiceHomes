@@ -7,13 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, UUID> {
 
-    Page<Reservation> findByGuestId(UUID guestId, Pageable pageable);
+    @Query("""
+        SELECT r FROM Reservation r
+        WHERE r.guestId = :guestId
+        ORDER BY r.checkIn DESC
+        """)
+    Page<Reservation> findByGuestId(@Param("guestId") UUID guestId, Pageable pageable);
 
     @Query("""
         SELECT r FROM Reservation r JOIN r.listing l

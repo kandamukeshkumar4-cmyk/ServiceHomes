@@ -166,16 +166,36 @@ paths:
       summary: Create reservation
       security:
         - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReservationRequest'
       responses:
         '200':
           description: Created reservation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
 
   /reservations/quote:
     post:
       summary: Get price quote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequest'
       responses:
         '200':
           description: Price quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
 
   /reservations/my:
     get:
@@ -196,6 +216,10 @@ paths:
       responses:
         '200':
           description: Paginated list of reservations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationPage'
 
   /reservations/host:
     get:
@@ -216,6 +240,10 @@ paths:
       responses:
         '200':
           description: Paginated list of reservations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationPage'
 
   /reservations/{id}:
     get:
@@ -225,6 +253,10 @@ paths:
       responses:
         '200':
           description: Reservation detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
 
   /reservations/{id}/cancel:
     post:
@@ -234,6 +266,10 @@ paths:
       responses:
         '200':
           description: Cancelled reservation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
 
   /reservations/{id}/cancel-by-host:
     post:
@@ -243,6 +279,36 @@ paths:
       responses:
         '200':
           description: Cancelled reservation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+
+  /reservations/{id}/accept:
+    post:
+      summary: Accept reservation as host
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Confirmed reservation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+
+  /reservations/{id}/decline:
+    post:
+      summary: Decline reservation as host
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Declined reservation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
 
 components:
   securitySchemes:
@@ -500,13 +566,13 @@ components:
         listingId:
           type: string
           format: uuid
-        title:
+        listingTitle:
           type: string
-        coverUrl:
+        listingCoverUrl:
           type: string
-        city:
+        listingCity:
           type: string
-        country:
+        listingCountry:
           type: string
         guestId:
           type: string
@@ -531,9 +597,31 @@ components:
           type: number
         status:
           type: string
-          enum: [PENDING, CONFIRMED, CANCELLED_BY_GUEST, CANCELLED_BY_HOST, COMPLETED]
-        hostName:
+          enum: [PENDING, CONFIRMED, DECLINED, CANCELLED_BY_GUEST, CANCELLED_BY_HOST, COMPLETED]
+        hostDisplayName:
           type: string
+        guestDisplayName:
+          type: string
+
+    ReservationPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reservation'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        number:
+          type: integer
+        size:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
 
     QuoteRequest:
       type: object

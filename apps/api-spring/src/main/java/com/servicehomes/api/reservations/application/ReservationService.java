@@ -17,12 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -130,37 +128,82 @@ public class ReservationService {
             throw new IllegalArgumentException("Not authorized");
         }
 
-        if (reservation.getStatus() == Reservation.Status.CANCELLED_BY_GUEST ||
-            reservation.getStatus() == Reservation.Status.CANCELLED_BY_HOST ||
-            reservation.getStatus() == Reservation.Status.COMPLETED) {
+        if (!isGuestCancellable(reservation.getStatus())) {
             throw new IllegalArgumentException("Reservation cannot be cancelled");
         }
 
-        reservation.setStatus(Reservation.Status.CANCELLED_BY_GUEST);
-        eventPublisher.publish("reservation_cancelled", "reservation", reservationId.toString(),
-            java.util.Map.of("by", "guest", "listingId", reservation.getListing().getId().toString()));
-        return toDto(reservation);
+        return transitionStatus(
+            reservation,
+            Reservation.Status.CANCELLED_BY_GUEST,
+            "reservation_cancelled",
+            Map.of(
+                "by", "guest",
+                "listingId", reservation.getListing().getId().toString(),
+                "guestId", reservation.getGuestId().toString(),
+                "status", Reservation.Status.CANCELLED_BY_GUEST.name()
+            )
+        );
     }
 
     @Transactional
     public ReservationDto cancelByHost(UUID hostId, UUID reservationId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
-
-        if (!reservation.getListing().getHostId().equals(hostId)) {
-            throw new IllegalArgumentException("Not authorized");
-        }
-
-        if (reservation.getStatus() == Reservation.Status.CANCELLED_BY_GUEST ||
-            reservation.getStatus() == Reservation.Status.CANCELLED_BY_HOST ||
-            reservation.getStatus() == Reservation.Status.COMPLETED) {
+        Reservation reservation = getHostReservation(hostId, reservationId);
+        if (reservation.getStatus() == Reservation.Status.PENDING || !isHostCancellable(reservation.getStatus())) {
             throw new IllegalArgumentException("Reservation cannot be cancelled");
         }
 
-        reservation.setStatus(Reservation.Status.CANCELLED_BY_HOST);
-        eventPublisher.publish("reservation_cancelled", "reservation", reservationId.toString(),
-            java.util.Map.of("by", "host", "listingId", reservation.getListing().getId().toString()));
-        return toDto(reservation);
+        return transitionStatus(
+            reservation,
+            Reservation.Status.CANCELLED_BY_HOST,
+            "reservation_cancelled",
+            Map.of(
+                "by", "host",
+                "listingId", reservation.getListing().getId().toString(),
+                "guestId", reservation.getGuestId().toString(),
+                "status", Reservation.Status.CANCELLED_BY_HOST.name()
+            )
+        );
+    }
+
+    @Transactional
+    public ReservationDto acceptByHost(UUID hostId, UUID reservationId) {
+        Reservation reservation = getHostReservation(hostId, reservationId);
+        if (reservation.getStatus() != Reservation.Status.PENDING) {
+            throw new IllegalArgumentException("Only pending reservations can be accepted");
+        }
+
+        return transitionStatus(
+            reservation,
+            Reservation.Status.CONFIRMED,
+            "reservation_confirmed",
+            Map.of(
+                "listingId", reservation.getListing().getId().toString(),
+                "guestId", reservation.getGuestId().toString(),
+                "totalAmount", reservation.getTotalAmount().toString(),
+                "status", Reservation.Status.CONFIRMED.name(),
+                "decisionBy", "host"
+            )
+        );
+    }
+
+    @Transactional
+    public ReservationDto declineByHost(UUID hostId, UUID reservationId) {
+        Reservation reservation = getHostReservation(hostId, reservationId);
+        if (reservation.getStatus() != Reservation.Status.PENDING) {
+            throw new IllegalArgumentException("Only pending reservations can be declined");
+        }
+
+        return transitionStatus(
+            reservation,
+            Reservation.Status.DECLINED,
+            "reservation_declined",
+            Map.of(
+                "listingId", reservation.getListing().getId().toString(),
+                "guestId", reservation.getGuestId().toString(),
+                "status", Reservation.Status.DECLINED.name(),
+                "decisionBy", "host"
+            )
+        );
     }
 
     public Page<ReservationDto> listByGuest(UUID guestId, Pageable pageable) {
@@ -179,12 +222,45 @@ public class ReservationService {
         return toDto(reservation);
     }
 
+    private Reservation getHostReservation(UUID hostId, UUID reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+
+        if (!reservation.getListing().getHostId().equals(hostId)) {
+            throw new IllegalArgumentException("Not authorized");
+        }
+        return reservation;
+    }
+
+    private boolean isGuestCancellable(Reservation.Status status) {
+        return status == Reservation.Status.PENDING || status == Reservation.Status.CONFIRMED;
+    }
+
+    private boolean isHostCancellable(Reservation.Status status) {
+        return status == Reservation.Status.CONFIRMED;
+    }
+
+    private ReservationDto transitionStatus(
+        Reservation reservation,
+        Reservation.Status status,
+        String eventName,
+        Map<String, String> payload
+    ) {
+        reservation.setStatus(status);
+        eventPublisher.publish(eventName, "reservation", reservation.getId().toString(), payload);
+        return toDto(reservation);
+    }
+
     private ReservationDto toDto(Reservation r) {
         Listing l = r.getListing();
         String hostName = userRepository.findById(l.getHostId())
             .map(User::getProfile)
             .map(Profile::getDisplayName)
             .orElse("Host");
+        String guestName = userRepository.findById(r.getGuestId())
+            .map(User::getProfile)
+            .map(Profile::getDisplayName)
+            .orElse("Guest");
 
         String coverUrl = l.getPhotos().stream()
             .filter(ListingPhoto::isCover)
@@ -209,7 +285,8 @@ public class ReservationService {
             r.getServiceFee(),
             r.getTotalAmount(),
             r.getStatus().name(),
-            hostName
+            hostName,
+            guestName
         );
     }
 }

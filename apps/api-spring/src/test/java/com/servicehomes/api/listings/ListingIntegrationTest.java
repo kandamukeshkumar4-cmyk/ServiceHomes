@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ListingIntegrationTest {
 
     private static final UUID SEED_HOST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+    private static final String SEED_HOST_AUTH0_ID = "auth0|seed-host-1";
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgis/postgis:15-3.4").asCompatibleSubstituteFor("postgres"))
@@ -80,7 +81,7 @@ class ListingIntegrationTest {
         );
 
         mockMvc.perform(post("/listings")
-                .header("X-Test-User-Id", SEED_HOST_ID.toString())
+                .header("X-Test-User-Id", SEED_HOST_AUTH0_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())

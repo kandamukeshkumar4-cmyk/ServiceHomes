@@ -2,19 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-
-interface HostReservation {
-  id: string;
-  listingId: string;
-  listingTitle: string;
-  listingCoverUrl: string;
-  checkIn: string;
-  checkOut: string;
-  guests: number;
-  totalNights: number;
-  totalAmount: number;
-  status: string;
-}
+import { ReservationPage, ReservationRecord } from '../bookings/reservation.model';
 
 @Component({
   selector: 'app-host-reservations',
@@ -25,18 +13,40 @@ interface HostReservation {
 })
 export class HostReservationsComponent implements OnInit {
   private http = inject(HttpClient);
-  reservations: HostReservation[] = [];
+  reservations: ReservationRecord[] = [];
+  totalReservations = 0;
 
   ngOnInit() {
     this.load();
   }
 
   load() {
-    this.http.get<HostReservation[]>('/api/reservations/host').subscribe(data => this.reservations = data);
+    this.http.get<ReservationPage>('/api/reservations/host').subscribe(page => {
+      this.reservations = page.content;
+      this.totalReservations = page.totalElements;
+    });
   }
 
   canCancel(status: string): boolean {
-    return status === 'PENDING' || status === 'CONFIRMED';
+    return status === 'CONFIRMED';
+  }
+
+  canAcceptOrDecline(status: string): boolean {
+    return status === 'PENDING';
+  }
+
+  statusLabel(status: string): string {
+    if (status === 'PENDING') return 'Needs approval';
+    if (status === 'DECLINED') return 'Declined';
+    return status.replaceAll('_', ' ');
+  }
+
+  accept(id: string) {
+    this.http.post(`/api/reservations/${id}/accept`, {}).subscribe(() => this.load());
+  }
+
+  decline(id: string) {
+    this.http.post(`/api/reservations/${id}/decline`, {}).subscribe(() => this.load());
   }
 
   cancel(id: string) {

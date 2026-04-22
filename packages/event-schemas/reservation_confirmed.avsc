@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "ReservationConfirmed",
+  "namespace": "com.servicehomes.events",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "timestamp", "type": "string" },
+    { "name": "reservationId", "type": "string" },
+    { "name": "listingId", "type": "string" },
+    { "name": "guestId", "type": "string" },
+    { "name": "totalAmount", "type": "string" },
+    { "name": "status", "type": "string" },
+    { "name": "decisionBy", "type": ["null", "string"], "default": null }
+  ]
+}

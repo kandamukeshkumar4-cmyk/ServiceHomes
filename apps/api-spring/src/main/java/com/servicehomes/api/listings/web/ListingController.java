@@ -1,6 +1,7 @@
 package com.servicehomes.api.listings.web;
 
 import com.servicehomes.api.analytics.application.EventPublisher;
+import com.servicehomes.api.identity.application.CurrentUserService;
 import com.servicehomes.api.listings.application.ListingService;
 import com.servicehomes.api.listings.application.dto.CreateListingRequest;
 import com.servicehomes.api.listings.application.dto.ListingDto;
@@ -24,13 +25,14 @@ public class ListingController {
 
     private final ListingService listingService;
     private final EventPublisher eventPublisher;
+    private final CurrentUserService currentUserService;
 
     @PostMapping
     public ResponseEntity<ListingDto> create(
         @AuthenticationPrincipal Jwt jwt,
         @Valid @RequestBody CreateListingRequest request
     ) {
-        UUID hostId = UUID.fromString(jwt.getClaimAsString("sub"));
+        UUID hostId = currentUserService.requireUserId(jwt);
         return ResponseEntity.ok(listingService.create(hostId, request));
     }
 
@@ -39,7 +41,7 @@ public class ListingController {
         @AuthenticationPrincipal Jwt jwt,
         @PageableDefault(size = 20) Pageable pageable
     ) {
-        UUID hostId = UUID.fromString(jwt.getClaimAsString("sub"));
+        UUID hostId = currentUserService.requireUserId(jwt);
         return ResponseEntity.ok(listingService.listByHost(hostId, pageable));
     }
 
@@ -56,7 +58,7 @@ public class ListingController {
         @PathVariable UUID id,
         @Valid @RequestBody CreateListingRequest request
     ) {
-        UUID hostId = UUID.fromString(jwt.getClaimAsString("sub"));
+        UUID hostId = currentUserService.requireUserId(jwt);
         return ResponseEntity.ok(listingService.update(hostId, id, request));
     }
 
@@ -65,7 +67,7 @@ public class ListingController {
         @AuthenticationPrincipal Jwt jwt,
         @PathVariable UUID id
     ) {
-        UUID hostId = UUID.fromString(jwt.getClaimAsString("sub"));
+        UUID hostId = currentUserService.requireUserId(jwt);
         return ResponseEntity.ok(listingService.publish(hostId, id));
     }
 
@@ -74,7 +76,7 @@ public class ListingController {
         @AuthenticationPrincipal Jwt jwt,
         @PathVariable UUID id
     ) {
-        UUID hostId = UUID.fromString(jwt.getClaimAsString("sub"));
+        UUID hostId = currentUserService.requireUserId(jwt);
         return ResponseEntity.ok(listingService.unpublish(hostId, id));
     }
 }

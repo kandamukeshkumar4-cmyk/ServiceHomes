@@ -11,6 +11,8 @@ Avro/JSON schemas for analytics events.
 - `listing_unpublished.avsc` — host unpublishes a listing
 - `search_executed.avsc` — traveler executes a search
 - `reservation_created.avsc` — traveler creates a reservation
+- `reservation_confirmed.avsc` — reservation is confirmed, including instant book and host acceptance
+- `reservation_declined.avsc` — host declines a pending reservation request
 - `reservation_cancelled.avsc` — reservation is cancelled
 
 ## Outbox Table

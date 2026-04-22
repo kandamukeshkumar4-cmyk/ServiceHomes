@@ -130,6 +130,8 @@ cd apps/api-spring && ./mvnw spring-boot:run
 | `GET /api/listings/my` | My listings (host) |
 | `POST /api/reservations` | Create reservation |
 | `GET /api/reservations/my` | My bookings |
+| `POST /api/reservations/{id}/accept` | Accept a pending booking request (host) |
+| `POST /api/reservations/{id}/decline` | Decline a pending booking request (host) |
 
 See `packages/api-contracts/openapi.yml` for the full API specification.
 
@@ -146,6 +148,7 @@ Migrations run automatically on startup via Flyway:
 | `V4__reservation_overlap_constraint.sql` | Exclusion constraint for overlap protection |
 | `V5__outbox_events.sql` | Analytics outbox events |
 | `V6__seed_data.sql` | Sample users and listings |
+| `V7__align_local_seed_auth0_id.sql` | Align local JWT identity with the seeded local user |
 
 ## Analytics
 
