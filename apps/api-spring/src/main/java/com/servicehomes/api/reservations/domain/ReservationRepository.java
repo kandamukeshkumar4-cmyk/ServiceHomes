@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -55,4 +56,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
           AND r.updated_at <= r.created_at + interval '24 hours'
         """, nativeQuery = true)
     long countRequestsRespondedWithin24Hours(@Param("hostId") UUID hostId);
+
+    long countByListing_IdAndStatusIn(UUID listingId, List<Reservation.Status> statuses);
 }
