@@ -33,13 +33,19 @@ Cleaned, deduped, validated views.
 - `dim_host` — hosts
 - `dim_location` — listing locations
 - `dim_date` — date dimension
+- `fct_event` — canonical deduplicated outbox event ledger
 - `fct_reservation` — reservation facts
-- `fct_search` — search event facts
+- `fct_search` — search funnel facts from `search_executed`
+- `fct_listing_event` — listing lifecycle, view, save, and availability events
+- `fct_reservation_event` — reservation create, confirm, decline, and cancellation events
+- `fct_trust_event` — review, host response, profile update, and host conversion events
 - `fct_listing_daily` — daily listing metrics
 
 ### Gold OBT (`models/gold/obt/`)
 
-- `obt_listing_performance` — one big table for listing analytics
+- `obt_listing_performance` — one big table for listing analytics with reservation value and event-derived engagement counts
+
+Dashboard view events are retained in `fct_event` for lineage, but dashboard-specific aggregate marts are intentionally not modeled here. Dashboard aggregates currently read from OLTP for freshness.
 
 ### Snapshots (`snapshots/`)
 

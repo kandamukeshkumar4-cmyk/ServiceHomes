@@ -1,6 +1,41 @@
 version: 2
 
 models:
+  - name: sr_events
+    description: Deduplicated analytics outbox events exported from S3.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: event_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - search_executed
+                  - listing_viewed
+                  - listing_created
+                  - listing_updated
+                  - listing_availability_updated
+                  - listing_published
+                  - listing_unpublished
+                  - listing_saved
+                  - listing_unsaved
+                  - reservation_created
+                  - reservation_confirmed
+                  - reservation_declined
+                  - reservation_cancelled
+                  - review_created
+                  - host_response_added
+                  - profile_updated
+                  - became_host
+                  - host_dashboard_viewed
+                  - guest_dashboard_viewed
+      - name: event_timestamp
+        tests:
+          - not_null
   - name: sr_users
     columns:
       - name: id
@@ -16,7 +51,8 @@ models:
       - name: status
         tests:
           - accepted_values:
-              values: ['DRAFT', 'PUBLISHED', 'UNPUBLISHED']
+              arguments:
+                values: ['DRAFT', 'PUBLISHED', 'UNPUBLISHED']
   - name: sr_reservations
     columns:
       - name: id
@@ -26,7 +62,8 @@ models:
       - name: status
         tests:
           - accepted_values:
-              values: ['PENDING', 'CONFIRMED', 'CANCELLED_BY_GUEST', 'CANCELLED_BY_HOST', 'COMPLETED']
+              arguments:
+                values: ['PENDING', 'CONFIRMED', 'CANCELLED_BY_GUEST', 'CANCELLED_BY_HOST', 'COMPLETED']
   - name: fct_reservation
     columns:
       - name: reservation_id
@@ -35,4 +72,120 @@ models:
           - not_null
       - name: total_amount
         tests:
+          - not_null
+  - name: fct_event
+    description: Canonical deduplicated event ledger at one row per outbox event.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: event_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - search_executed
+                  - listing_viewed
+                  - listing_created
+                  - listing_updated
+                  - listing_availability_updated
+                  - listing_published
+                  - listing_unpublished
+                  - listing_saved
+                  - listing_unsaved
+                  - reservation_created
+                  - reservation_confirmed
+                  - reservation_declined
+                  - reservation_cancelled
+                  - review_created
+                  - host_response_added
+                  - profile_updated
+                  - became_host
+                  - host_dashboard_viewed
+                  - guest_dashboard_viewed
+      - name: event_timestamp
+        tests:
+          - not_null
+  - name: fct_search
+    description: Search funnel facts at one row per search_executed event.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: searched_at
+        tests:
+          - not_null
+      - name: result_count
+        tests:
+          - not_null
+  - name: fct_listing_event
+    description: Listing lifecycle and engagement events at one row per listing-scoped event.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: event_type
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - listing_viewed
+                  - listing_created
+                  - listing_updated
+                  - listing_availability_updated
+                  - listing_published
+                  - listing_unpublished
+                  - listing_saved
+                  - listing_unsaved
+      - name: listing_id
+        tests:
+          - not_null
+  - name: fct_reservation_event
+    description: Reservation funnel events at one row per reservation-scoped event.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: event_type
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - reservation_created
+                  - reservation_confirmed
+                  - reservation_declined
+                  - reservation_cancelled
+      - name: reservation_id
+        tests:
+          - not_null
+  - name: fct_trust_event
+    description: Trust and identity conversion events at one row per review/profile/host event.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: event_type
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - review_created
+                  - host_response_added
+                  - profile_updated
+                  - became_host
+      - name: aggregate_id
+        tests:
+          - not_null
+  - name: obt_listing_performance
+    description: Listing performance OBT with reservation value and event-derived engagement counts.
+    columns:
+      - name: listing_id
+        tests:
+          - unique
           - not_null
