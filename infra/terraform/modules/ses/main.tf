@@ -15,8 +15,12 @@ resource "aws_ses_configuration_set" "main" {
     tls_policy = "Require"
   }
 
-  tracking_options {
-    custom_redirect_domain = var.email_domain != "" ? var.email_domain : null
+  dynamic "tracking_options" {
+    for_each = var.email_domain != "" ? [var.email_domain] : []
+
+    content {
+      custom_redirect_domain = tracking_options.value
+    }
   }
 }
 

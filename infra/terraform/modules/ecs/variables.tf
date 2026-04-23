@@ -78,6 +78,11 @@ variable "db_name" {
   type        = string
 }
 
+variable "db_username" {
+  description = "Database username"
+  type        = string
+}
+
 variable "s3_bucket_name" {
   description = "S3 bucket name for media storage"
   type        = string

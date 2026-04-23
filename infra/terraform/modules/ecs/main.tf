@@ -87,7 +87,7 @@ resource "aws_ecs_task_definition" "api" {
           value = var.aws_region
         },
         {
-          name  = "S3_BUCKET"
+          name  = "AWS_S3_BUCKET"
           value = var.s3_bucket_name
         },
         {
@@ -99,13 +99,17 @@ resource "aws_ecs_task_definition" "api" {
           value = var.auth0_audience
         },
         {
-          name  = "DATABASE_URL"
+          name  = "SPRING_DATASOURCE_URL"
           value = "jdbc:postgresql://${var.rds_endpoint}/${var.db_name}"
+        },
+        {
+          name  = "SPRING_DATASOURCE_USERNAME"
+          value = var.db_username
         }
       ]
       secrets = [
         {
-          name      = "DB_PASSWORD"
+          name      = "SPRING_DATASOURCE_PASSWORD"
           valueFrom = "${var.rds_secret_arn}:password::"
         }
       ]
@@ -130,6 +134,8 @@ resource "aws_ecs_service" "api" {
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.api.arn
   desired_count   = var.desired_count
+
+  health_check_grace_period_seconds = var.environment == "production" ? 180 : 240
 
   network_configuration {
     subnets          = var.private_subnet_ids

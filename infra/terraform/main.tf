@@ -12,19 +12,13 @@ terraform {
     }
   }
 
-  # Backend configuration for remote state storage.
-  # Before running terraform init, create the S3 bucket and DynamoDB table:
-  #   aws s3api create-bucket --bucket servicehomes-terraform-state --region <region>
-  #   aws dynamodb create-table --table-name servicehomes-terraform-lock --attribute-definitions AttributeName=LockId,AttributeType=S --key-schema AttributeName=LockId,KeyType=KEY --billing-mode PAY_PER_REQUEST --region <region>
-  # Then uncomment the block below:
-  #
-  # backend "s3" {
-  #   bucket         = "servicehomes-terraform-state"
-  #   key            = "servicehomes/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "servicehomes-terraform-lock"
-  #   encrypt        = true
-  # }
+  backend "s3" {
+    bucket         = "servicehomes-terraform-state"
+    key            = "servicehomes/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "servicehomes-terraform-lock"
+    encrypt        = true
+  }
 }
 
 provider "aws" {
@@ -128,6 +122,7 @@ module "ecs" {
   rds_endpoint                = module.rds.endpoint
   rds_secret_arn              = module.rds.secret_arn
   db_name                     = var.db_name
+  db_username                 = var.db_username
   s3_bucket_name              = module.frontend.media_bucket_name
   auth0_domain                = var.auth0_domain
   auth0_audience              = var.auth0_audience

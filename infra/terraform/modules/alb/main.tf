@@ -51,12 +51,12 @@ resource "aws_lb_target_group" "api" {
   target_type = "ip"
 
   health_check {
-    path                = "/health"
+    path                = "/api/actuator/health"
     protocol            = "HTTP"
     port                = "8080"
     healthy_threshold   = 2
-    unhealthy_threshold = 3
-    timeout             = 5
+    unhealthy_threshold = 5
+    timeout             = 10
     interval            = 30
     matcher             = "200"
   }

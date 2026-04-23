@@ -44,9 +44,8 @@ resource "aws_iam_role_policy" "ecs_task_execution_logs" {
 }
 
 resource "aws_iam_role_policy" "ecs_task_execution_secrets" {
-  count = var.rds_secret_arn != "" ? 1 : 0
-  name  = "${var.project_name}-${var.environment}-ecs-secrets"
-  role  = aws_iam_role.ecs_task_execution.id
+  name = "${var.project_name}-${var.environment}-ecs-secrets"
+  role = aws_iam_role.ecs_task_execution.id
 
   policy = jsonencode({
     Version = "2012-10-17"
