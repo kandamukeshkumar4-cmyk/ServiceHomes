@@ -84,7 +84,7 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
                 END AS distance_km
                 """.formatted(DISTANCE_EXPRESSION);
         } else {
-            selectClause += "NULL AS distance_km";
+            selectClause += "CAST(NULL AS double precision) AS distance_km";
         }
 
         StringBuilder query = new StringBuilder(selectClause)
