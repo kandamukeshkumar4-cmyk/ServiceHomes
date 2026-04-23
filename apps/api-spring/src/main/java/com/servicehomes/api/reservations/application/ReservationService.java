@@ -8,6 +8,9 @@ import com.servicehomes.api.listings.application.AvailabilityService;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingPhoto;
 import com.servicehomes.api.listings.domain.ListingRepository;
+import com.servicehomes.api.notifications.application.NotificationDispatcher;
+import com.servicehomes.api.notifications.application.dto.NotificationMessage;
+import com.servicehomes.api.notifications.domain.NotificationType;
 import com.servicehomes.api.reservations.application.dto.*;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
@@ -19,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.UUID;
@@ -32,6 +36,7 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final EventPublisher eventPublisher;
     private final AvailabilityService availabilityService;
+    private final NotificationDispatcher notificationDispatcher;
 
     public QuoteResponse quote(QuoteRequest request) {
         Listing listing = listingRepository.findById(request.listingId())
@@ -110,6 +115,10 @@ public class ReservationService {
                 "totalAmount", quote.totalAmount().toString(),
                 "status", status.name()
             ));
+        notifyHostReservationCreated(saved);
+        if (status == Reservation.Status.CONFIRMED) {
+            notifyGuestReservationConfirmed(saved);
+        }
         return toDto(saved);
     }
 
@@ -242,7 +251,66 @@ public class ReservationService {
     ) {
         reservation.setStatus(status);
         eventPublisher.publish(eventName, "reservation", reservation.getId().toString(), payload);
+        if (status == Reservation.Status.CONFIRMED) {
+            notifyGuestReservationConfirmed(reservation);
+        }
         return toDto(reservation);
+    }
+
+    private void notifyHostReservationCreated(Reservation reservation) {
+        Listing listing = reservation.getListing();
+        notificationDispatcher.dispatch(new NotificationMessage(
+            null,
+            listing.getHostId(),
+            userRepository.findById(listing.getHostId()).map(User::getEmail).orElse(null),
+            userRepository.findById(listing.getHostId()).map(user -> displayName(user, "Host")).orElse("Host"),
+            reservation.getGuestId(),
+            NotificationType.RESERVATION_CREATED,
+            "New reservation request",
+            "A guest requested to book " + listing.getTitle() + ".",
+            "/host/reservations",
+            "reservation",
+            reservation.getId(),
+            null,
+            null,
+            reservation.getId(),
+            listing.getId(),
+            "reservation-created-" + reservation.getId(),
+            Map.of(
+                "reservationId", reservation.getId().toString(),
+                "listingId", listing.getId().toString(),
+                "path", "/host/reservations"
+            ),
+            Instant.now()
+        ));
+    }
+
+    private void notifyGuestReservationConfirmed(Reservation reservation) {
+        Listing listing = reservation.getListing();
+        notificationDispatcher.dispatch(new NotificationMessage(
+            null,
+            reservation.getGuestId(),
+            userRepository.findById(reservation.getGuestId()).map(User::getEmail).orElse(null),
+            userRepository.findById(reservation.getGuestId()).map(user -> displayName(user, "Guest")).orElse("Guest"),
+            listing.getHostId(),
+            NotificationType.RESERVATION_CONFIRMED,
+            "Reservation confirmed",
+            "Your stay at " + listing.getTitle() + " is confirmed.",
+            "/bookings/" + reservation.getId(),
+            "reservation",
+            reservation.getId(),
+            null,
+            null,
+            reservation.getId(),
+            listing.getId(),
+            "reservation-confirmed-" + reservation.getId(),
+            Map.of(
+                "reservationId", reservation.getId().toString(),
+                "listingId", listing.getId().toString(),
+                "path", "/bookings/" + reservation.getId()
+            ),
+            Instant.now()
+        ));
     }
 
     private ReservationDto toDto(Reservation r) {
@@ -282,6 +350,19 @@ public class ReservationService {
             hostName,
             guestName
         );
+    }
+
+    private String displayName(User user, String fallback) {
+        if (user == null) {
+            return fallback;
+        }
+
+        Profile profile = user.getProfile();
+        if (profile != null && profile.getDisplayName() != null && !profile.getDisplayName().isBlank()) {
+            return profile.getDisplayName();
+        }
+
+        return user.getEmail() != null && !user.getEmail().isBlank() ? user.getEmail() : fallback;
     }
 
     private QuoteResponse toQuoteResponse(Listing listing, AvailabilityService.StayEvaluation stayEvaluation) {

@@ -61,6 +61,9 @@ Thumbs.db
 # Docker volumes
 infra/docker/volumes/
 
+# Terraform
+**/.terraform/
+
 # Misc
 *.swp
 *.swo

@@ -1,13 +1,15 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
 import { AppAuthService } from '../core/auth.service';
 import { NotificationService } from '../core/notification.service';
+import { NotificationCenterComponent } from '../notifications/notification-center.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ButtonModule, NotificationCenterComponent],
   template: `
     <nav class="navbar flex justify-content-between align-items-center px-4 py-3 surface-0 shadow-1">
       <a routerLink="/home" class="text-2xl font-bold text-primary no-underline">ServiceHomes</a>
@@ -25,6 +27,7 @@ import { NotificationService } from '../core/notification.service';
                 {{ unreadCount }}
               </span>
             </a>
+            <app-notification-center></app-notification-center>
             <a routerLink="/trips" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Trips</a>
             <a routerLink="/host" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Host</a>
             <a routerLink="/account" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Account</a>

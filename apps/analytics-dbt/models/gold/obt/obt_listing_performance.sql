@@ -35,6 +35,28 @@ trust_event_metrics AS (
   FROM {{ ref('fct_trust_event') }}
   WHERE listing_id IS NOT NULL
   GROUP BY 1
+),
+notification_delivery_metrics AS (
+  SELECT
+    listing_id,
+    COUNT_IF(delivery_status = 'REQUESTED') as notification_requested_count,
+    COUNT_IF(delivery_status = 'DELIVERED') as notification_delivered_count,
+    COUNT_IF(delivery_status = 'FAILED') as notification_failed_count,
+    COUNT_IF(channel = 'EMAIL' AND delivery_status = 'DELIVERED') as email_notification_delivered_count,
+    COUNT_IF(channel = 'IN_APP' AND delivery_status = 'DELIVERED') as in_app_notification_delivered_count
+  FROM {{ ref('fct_notification_delivery') }}
+  WHERE listing_id IS NOT NULL
+  GROUP BY 1
+),
+notification_engagement_metrics AS (
+  SELECT
+    listing_id,
+    COUNT_IF(engagement_type = 'OPENED') as notification_open_count,
+    COUNT_IF(engagement_type = 'CLICKED') as notification_click_count,
+    COUNT_IF(engagement_type = 'READ') as notification_read_count
+  FROM {{ ref('fct_notification_engagement') }}
+  WHERE listing_id IS NOT NULL
+  GROUP BY 1
 )
 
 SELECT
@@ -64,10 +86,20 @@ SELECT
   COALESCE(lem.listing_unpublish_count, 0) as listing_unpublish_count,
   COALESCE(lem.availability_update_count, 0) as availability_update_count,
   COALESCE(tem.review_created_count, 0) as review_created_count,
-  COALESCE(tem.host_response_count, 0) as host_response_count
+  COALESCE(tem.host_response_count, 0) as host_response_count,
+  COALESCE(ndm.notification_requested_count, 0) as notification_requested_count,
+  COALESCE(ndm.notification_delivered_count, 0) as notification_delivered_count,
+  COALESCE(ndm.notification_failed_count, 0) as notification_failed_count,
+  COALESCE(ndm.email_notification_delivered_count, 0) as email_notification_delivered_count,
+  COALESCE(ndm.in_app_notification_delivered_count, 0) as in_app_notification_delivered_count,
+  COALESCE(nem.notification_open_count, 0) as notification_open_count,
+  COALESCE(nem.notification_click_count, 0) as notification_click_count,
+  COALESCE(nem.notification_read_count, 0) as notification_read_count
 FROM {{ ref('sr_listings') }} l
 LEFT JOIN {{ ref('dim_location') }} loc ON l.id = loc.listing_id
 LEFT JOIN {{ ref('dim_host') }} h ON l.host_id = h.user_id
 LEFT JOIN reservation_metrics rm ON l.id = rm.listing_id
 LEFT JOIN listing_event_metrics lem ON l.id = lem.listing_id
 LEFT JOIN trust_event_metrics tem ON l.id = tem.listing_id
+LEFT JOIN notification_delivery_metrics ndm ON l.id = ndm.listing_id
+LEFT JOIN notification_engagement_metrics nem ON l.id = nem.listing_id

@@ -33,6 +33,10 @@ models:
                   - became_host
                   - host_dashboard_viewed
                   - guest_dashboard_viewed
+                  - notification_delivery_requested
+                  - notification_delivery_succeeded
+                  - notification_delivery_failed
+                  - notification_engagement_recorded
       - name: event_timestamp
         tests:
           - not_null
@@ -105,6 +109,33 @@ models:
                   - became_host
                   - host_dashboard_viewed
                   - guest_dashboard_viewed
+                  - notification_delivery_requested
+                  - notification_delivery_succeeded
+                  - notification_delivery_failed
+                  - notification_engagement_recorded
+      - name: event_timestamp
+        tests:
+          - not_null
+  - name: sr_notifications
+    description: Normalized notification delivery and engagement events from the canonical outbox stream.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: event_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - notification_delivery_requested
+                  - notification_delivery_succeeded
+                  - notification_delivery_failed
+                  - notification_engagement_recorded
+      - name: notification_id
+        tests:
+          - not_null
       - name: event_timestamp
         tests:
           - not_null
@@ -180,6 +211,41 @@ models:
                   - profile_updated
                   - became_host
       - name: aggregate_id
+        tests:
+          - not_null
+  - name: fct_notification_delivery
+    description: Notification delivery lifecycle facts at one row per delivery event.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: notification_id
+        tests:
+          - not_null
+      - name: delivery_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['REQUESTED', 'DELIVERED', 'FAILED']
+      - name: recipient_user_id
+        tests:
+          - not_null
+  - name: fct_notification_engagement
+    description: Notification recipient engagement facts at one row per engagement event.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: notification_id
+        tests:
+          - not_null
+      - name: engagement_type
+        tests:
+          - not_null
+      - name: recipient_user_id
         tests:
           - not_null
   - name: obt_listing_performance

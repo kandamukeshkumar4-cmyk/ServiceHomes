@@ -13,6 +13,9 @@ import com.servicehomes.api.messaging.domain.Message;
 import com.servicehomes.api.messaging.domain.MessageRepository;
 import com.servicehomes.api.messaging.domain.MessageThread;
 import com.servicehomes.api.messaging.domain.MessageThreadRepository;
+import com.servicehomes.api.notifications.application.NotificationDispatcher;
+import com.servicehomes.api.notifications.application.dto.NotificationMessage;
+import com.servicehomes.api.notifications.domain.NotificationType;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,6 +36,7 @@ public class MessagingService {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final MessageEmailNotifier messageEmailNotifier;
+    private final NotificationDispatcher notificationDispatcher;
 
     @Transactional(readOnly = true)
     public List<InboxThreadDto> getInbox(UUID userId) {
@@ -114,6 +118,33 @@ public class MessagingService {
             displayName(sender, "Guest"),
             thread.getReservation().getListing().getTitle(),
             preview(message.getContent()),
+            message.getCreatedAt()
+        ));
+
+        notificationDispatcher.dispatch(new NotificationMessage(
+            null,
+            recipientId,
+            recipient.getEmail(),
+            displayName(recipient, "Guest"),
+            senderId,
+            NotificationType.MESSAGE_RECEIVED,
+            "New message from " + displayName(sender, "Guest"),
+            preview(message.getContent()),
+            "/reservations/" + thread.getReservation().getId() + "/messages",
+            "message",
+            message.getId(),
+            thread.getId(),
+            message.getId(),
+            thread.getReservation().getId(),
+            thread.getReservation().getListing().getId(),
+            "message-received-" + message.getId(),
+            Map.of(
+                "threadId", thread.getId().toString(),
+                "messageId", message.getId().toString(),
+                "reservationId", thread.getReservation().getId().toString(),
+                "listingId", thread.getReservation().getListing().getId().toString(),
+                "path", "/reservations/" + thread.getReservation().getId() + "/messages"
+            ),
             message.getCreatedAt()
         ));
     }

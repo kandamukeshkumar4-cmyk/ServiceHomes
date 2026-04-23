@@ -5,6 +5,9 @@ import com.servicehomes.api.identity.domain.Profile;
 import com.servicehomes.api.identity.domain.User;
 import com.servicehomes.api.identity.domain.UserRepository;
 import com.servicehomes.api.listings.domain.ListingRepository;
+import com.servicehomes.api.notifications.application.NotificationDispatcher;
+import com.servicehomes.api.notifications.application.dto.NotificationMessage;
+import com.servicehomes.api.notifications.domain.NotificationType;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
 import com.servicehomes.api.reviews.application.dto.AddHostResponseRequest;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,6 +41,7 @@ public class ReviewService {
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
     private final EventPublisher eventPublisher;
+    private final NotificationDispatcher notificationDispatcher;
 
     @Transactional
     public ReviewDto createReview(UUID guestId, UUID reservationId, CreateReviewRequest request) {
@@ -82,6 +87,32 @@ public class ReviewService {
                 "commentLength", normalizedComment.length()
             )
         );
+
+        notificationDispatcher.dispatch(new NotificationMessage(
+            null,
+            reservation.getListing().getHostId(),
+            userRepository.findById(reservation.getListing().getHostId()).map(User::getEmail).orElse(null),
+            userRepository.findById(reservation.getListing().getHostId()).map(user -> displayName(user, "Host")).orElse("Host"),
+            reservation.getGuestId(),
+            NotificationType.REVIEW_RECEIVED,
+            "New review received",
+            "A guest reviewed " + reservation.getListing().getTitle() + ".",
+            "/listings/" + reservation.getListing().getId(),
+            "review",
+            review.getId(),
+            null,
+            null,
+            reservation.getId(),
+            reservation.getListing().getId(),
+            "review-received-" + review.getId(),
+            Map.of(
+                "reviewId", review.getId().toString(),
+                "reservationId", reservation.getId().toString(),
+                "listingId", reservation.getListing().getId().toString(),
+                "path", "/listings/" + reservation.getListing().getId()
+            ),
+            Instant.now()
+        ));
 
         return toDto(review, userRepository.findById(review.getGuestId()).orElse(null));
     }
@@ -168,5 +199,13 @@ public class ReviewService {
             review.getCreatedAt(),
             review.getUpdatedAt()
         );
+    }
+
+    private String displayName(User user, String fallback) {
+        Profile profile = user != null ? user.getProfile() : null;
+        if (profile != null && profile.getDisplayName() != null && !profile.getDisplayName().isBlank()) {
+            return profile.getDisplayName();
+        }
+        return user != null && user.getEmail() != null && !user.getEmail().isBlank() ? user.getEmail() : fallback;
     }
 }

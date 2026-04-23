@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "NotificationEngagementRecorded",
+  "namespace": "com.servicehomes.events",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "timestamp", "type": "string" },
+    { "name": "notificationId", "type": "string" },
+    { "name": "notificationType", "type": "string" },
+    { "name": "engagementType", "type": "string" },
+    { "name": "channel", "type": "string" },
+    { "name": "recipientUserId", "type": "string" },
+    { "name": "senderUserId", "type": ["null", "string"], "default": null },
+    { "name": "threadId", "type": ["null", "string"], "default": null },
+    { "name": "messageId", "type": ["null", "string"], "default": null },
+    { "name": "reservationId", "type": ["null", "string"], "default": null },
+    { "name": "listingId", "type": ["null", "string"], "default": null }
+  ]
+}

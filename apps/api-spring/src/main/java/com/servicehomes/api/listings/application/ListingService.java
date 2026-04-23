@@ -4,6 +4,9 @@ import com.servicehomes.api.analytics.application.EventPublisher;
 import com.servicehomes.api.listings.application.dto.CreateListingRequest;
 import com.servicehomes.api.listings.application.dto.ListingDto;
 import com.servicehomes.api.listings.domain.*;
+import com.servicehomes.api.notifications.application.NotificationDispatcher;
+import com.servicehomes.api.notifications.application.dto.NotificationMessage;
+import com.servicehomes.api.notifications.domain.NotificationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,6 +29,7 @@ public class ListingService {
     private final ListingCategoryRepository categoryRepository;
     private final ListingAmenityRepository amenityRepository;
     private final EventPublisher eventPublisher;
+    private final NotificationDispatcher notificationDispatcher;
 
     @Transactional
     public ListingDto create(UUID hostId, CreateListingRequest req) {
@@ -149,6 +154,29 @@ public class ListingService {
         listing.setPublishedAt(Instant.now());
         eventPublisher.publish("listing_published", "listing", listingId.toString(),
             java.util.Map.of("hostId", hostId.toString()));
+        notificationDispatcher.dispatch(new NotificationMessage(
+            null,
+            hostId,
+            null,
+            "Host",
+            null,
+            NotificationType.LISTING_PUBLISHED,
+            "Listing published",
+            listing.getTitle() + " is now live for guests.",
+            "/listings/" + listingId,
+            "listing",
+            listingId,
+            null,
+            null,
+            null,
+            listingId,
+            "listing-published-" + listingId,
+            Map.of(
+                "listingId", listingId.toString(),
+                "path", "/listings/" + listingId
+            ),
+            Instant.now()
+        ));
         return toDto(listing);
     }
 

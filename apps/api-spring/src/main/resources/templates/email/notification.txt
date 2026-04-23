@@ -1,0 +1,12 @@
+ServiceHomes
+
+Hi {{recipientName}},
+
+{{title}}
+
+{{body}}
+
+Open ServiceHomes:
+{{actionUrl}}
+
+Notification type: {{notificationType}}

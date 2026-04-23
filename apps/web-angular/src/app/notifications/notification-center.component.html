@@ -1,0 +1,40 @@
+<div class="notification-center">
+  <button type="button" class="notification-trigger" aria-label="Notifications" (click)="toggle()">
+    <i class="pi pi-bell"></i>
+    <span *ngIf="notificationService.unreadCount$ | async as unread" class="notification-badge" [class.hidden]="unread < 1">
+      {{ unread > 99 ? '99+' : unread }}
+    </span>
+  </button>
+
+  <section *ngIf="open" class="notification-panel">
+    <header class="notification-panel__header">
+      <div>
+        <p class="eyebrow">Notifications</p>
+        <h2>Recent activity</h2>
+      </div>
+      <button type="button" class="link-button" (click)="markAllAsRead()">Mark all read</button>
+    </header>
+
+    <ng-container *ngIf="notificationService.notifications$ | async as notifications">
+      <button
+        *ngFor="let notification of notifications"
+        type="button"
+        class="notification-item"
+        [class.unread]="!notification.read"
+        (click)="openNotification(notification)">
+        <span class="notification-icon"><i [class]="iconFor(notification.type)"></i></span>
+        <span class="notification-copy">
+          <strong>{{ notification.title }}</strong>
+          <span>{{ notification.body }}</span>
+          <small>{{ notification.createdAt | date:'short' }}</small>
+        </span>
+        <button type="button" class="dismiss-button" aria-label="Dismiss" (click)="dismiss($event, notification)">×</button>
+      </button>
+
+      <div *ngIf="notifications.length === 0" class="empty-state">
+        <i class="pi pi-bell"></i>
+        <p>No notifications yet.</p>
+      </div>
+    </ng-container>
+  </section>
+</div>
