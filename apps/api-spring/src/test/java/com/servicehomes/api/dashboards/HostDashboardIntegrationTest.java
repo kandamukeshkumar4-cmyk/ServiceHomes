@@ -1,6 +1,8 @@
 package com.servicehomes.api.dashboards;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.servicehomes.api.listings.domain.*;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
@@ -62,6 +64,9 @@ class HostDashboardIntegrationTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private ListingCategory category;
 
     @BeforeEach
@@ -88,10 +93,15 @@ class HostDashboardIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.upcomingReservations.length()").value(1))
             .andExpect(jsonPath("$.pendingRequests.length()").value(1))
-            .andExpect(jsonPath("$.occupancyRate", org.hamcrest.Matchers.greaterThan(0.0), Double.class))
             .andExpect(jsonPath("$.mockEarnings").value(org.hamcrest.Matchers.greaterThan(0)))
             .andExpect(jsonPath("$.listingPerformance.length()").value(1))
-            .andExpect(jsonPath("$.listingPerformance[0].bookingCount").value(3));
+            .andExpect(jsonPath("$.listingPerformance[0].bookingCount").value(3))
+            .andExpect(result -> {
+                JsonNode occupancyRate = objectMapper.readTree(result.getResponse().getContentAsString())
+                    .path("occupancyRate");
+                org.junit.jupiter.api.Assertions.assertTrue(occupancyRate.isNumber(), "occupancyRate must be numeric");
+                org.junit.jupiter.api.Assertions.assertTrue(occupancyRate.asDouble() > 0.0, "occupancyRate must be positive");
+            });
     }
 
     @Test
