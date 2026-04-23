@@ -1,32 +1,27 @@
+# Docker Compose override for hot-reload development.
+# Usage: docker compose -f infra/docker/docker-compose.yml -f infra/docker/docker-compose.override.yml up
+#
+# NOTE: This file is an example. Copy to docker-compose.override.yml and adjust paths.
+# On Windows, use absolute paths or adjust volume syntax.
+
 services:
   api:
-    image: maven:3.9-eclipse-temurin-21
-    working_dir: /workspace
-    volumes:
-      - ../../apps/api-spring:/workspace
-      - maven_cache:/root/.m2
-      - ./scripts/wait-for-postgres.sh:/workspace/wait-for-postgres.sh:ro
-    entrypoint:
-      - /bin/sh
-      - -c
-      - chmod +x /workspace/wait-for-postgres.sh && /workspace/wait-for-postgres.sh && mvn spring-boot:run -Dspring-boot.run.profiles=local
-    ports:
-      - "8080:8080"
-      - "5005:5005"
+    # Bind-mount source for Spring DevTools hot reload.
+    # Requires SPRING_PROFILES_ACTIVE=local and spring-devtools on classpath.
+    # volumes:
+    #   - ../../apps/api-spring/src:/build/src:cached
+    environment:
+      # Enable Spring DevTools restart (add spring-boot-devtools dependency to pom.xml)
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+    # For native dev server on host, expose port 8080 and skip Docker build:
+    # ports:
+    #   - "8080:8080"
 
   web:
-    image: node:20-alpine
-    working_dir: /workspace
-    volumes:
-      - ../../apps/web-angular:/workspace
-      - web_node_modules:/workspace/node_modules
-    entrypoint:
-      - /bin/sh
-      - -c
-      - npm ci && npm run start -- --host 0.0.0.0 --poll 2000
-    ports:
-      - "4200:4200"
-
-volumes:
-  maven_cache:
-  web_node_modules:
+    # For Angular dev server hot reload, run ng serve on host and proxy through Docker.
+    # Alternatively, bind-mount source and use ng serve inside container:
+    # volumes:
+    #   - ../../apps/web-angular/src:/build/src:cached
+    # command: npm run watch -- --host 0.0.0.0 --poll 1000
+    # ports:
+    #   - "4200:4200"

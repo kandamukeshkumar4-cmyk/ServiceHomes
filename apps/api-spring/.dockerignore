@@ -1,4 +1,8 @@
 target/
 .idea/
 *.log
+*.logs
 src/test/
+.vscode/
+*.iml
+.git/

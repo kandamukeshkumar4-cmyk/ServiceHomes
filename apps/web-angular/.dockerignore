@@ -2,4 +2,6 @@ node_modules/
 .angular/
 dist/
 coverage/
-npm-debug.log*
+.idea/
+.vscode/
+*.log
