@@ -57,5 +57,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
         """, nativeQuery = true)
     long countRequestsRespondedWithin24Hours(@Param("hostId") UUID hostId);
 
-    long countByListing_IdAndStatusIn(UUID listingId, List<Status> statuses);
+    long countByListing_IdAndStatusIn(UUID listingId, List<Reservation.Status> statuses);
 }

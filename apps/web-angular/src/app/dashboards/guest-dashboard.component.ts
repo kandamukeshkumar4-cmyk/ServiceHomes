@@ -73,7 +73,7 @@ import { DashboardService, GuestDashboardData } from './dashboard.service';
           <h2 class="text-xl font-semibold">Messages</h2>
           <a routerLink="/inbox" class="text-primary no-underline text-sm">
             View inbox
-            <span *ngIf="data.unreadMessageThreads > 0" pBadge [value]="String(data.unreadMessageThreads)" severity="danger"></span>
+            <span *ngIf="data.unreadMessageThreads > 0" pBadge [value]="data.unreadMessageThreads" severity="danger"></span>
           </a>
         </div>
       </ng-container>
@@ -93,7 +93,6 @@ import { DashboardService, GuestDashboardData } from './dashboard.service';
 export class GuestDashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   data: GuestDashboardData | null = null;
-  String = String;
 
   ngOnInit(): void {
     this.dashboardService.getGuestDashboard().subscribe({

@@ -30,11 +30,11 @@ import { DashboardService, HostDashboardData } from './dashboard.service';
           </p-card>
           <p-card>
             <div class="text-sm text-600">30-Day Occupancy</div>
-            <div class="text-2xl font-bold">{{ data.occupancyRate | number:'1.0-0' }}%</div>
+            <div class="text-2xl font-bold">{{ fmtPct(data.occupancyRate) }}%</div>
           </p-card>
           <p-card>
             <div class="text-sm text-600">Earnings (This Month)</div>
-            <div class="text-2xl font-bold">${{ data.mockEarnings | number:'1.0-0' }}</div>
+            <div class="text-2xl font-bold">${{ fmtNum(data.mockEarnings) }}</div>
           </p-card>
         </div>
 
@@ -92,7 +92,7 @@ import { DashboardService, HostDashboardData } from './dashboard.service';
                 </td>
                 <td>{{ item.bookingCount }}</td>
                 <td>
-                  <span *ngIf="item.averageRating">{{ item.averageRating | number:'1.1-1' }} ★</span>
+                  <span *ngIf="item.averageRating">{{ item.averageRating.toFixed(1) }} ★</span>
                   <span *ngIf="!item.averageRating" class="text-600">—</span>
                 </td>
                 <td>{{ item.reviewCount }}</td>
@@ -104,9 +104,9 @@ import { DashboardService, HostDashboardData } from './dashboard.service';
         <!-- Quick Actions -->
         <div class="flex gap-2">
           <a routerLink="/listings/new" pButton class="p-button-primary">Add New Listing</a>
-          <a routerLink="/inbox" pButton class="p-button-outlined">
+            <a routerLink="/inbox" pButton class="p-button-outlined">
             Inbox
-            <span *ngIf="data.unreadMessageThreads > 0" pBadge [value]="String(data.unreadMessageThreads)" severity="danger"></span>
+            <span *ngIf="data.unreadMessageThreads > 0" pBadge [value]="data.unreadMessageThreads" severity="danger"></span>
           </a>
         </div>
       </ng-container>
@@ -126,12 +126,19 @@ import { DashboardService, HostDashboardData } from './dashboard.service';
 export class HostDashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   data: HostDashboardData | null = null;
-  String = String;
 
   ngOnInit(): void {
     this.dashboardService.getHostDashboard().subscribe({
       next: (d) => this.data = d,
       error: (err) => console.error('Failed to load host dashboard', err)
     });
+  }
+
+  fmtNum(n: number): string {
+    return Math.round(n).toLocaleString();
+  }
+
+  fmtPct(n: number): string {
+    return Math.round(n).toString();
   }
 }
