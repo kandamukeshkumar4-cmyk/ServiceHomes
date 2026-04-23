@@ -1,0 +1,63 @@
+<div class="surface-50 border-round-lg p-3 mb-4">
+  <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-start gap-3">
+    <div>
+      <h3 class="text-lg font-semibold m-0">Share your stay</h3>
+      <p class="text-600 text-sm mt-2 mb-0">Only guests with a completed stay can post a review.</p>
+    </div>
+  </div>
+
+  <div class="grid mt-1">
+    <div class="col-12 md:col-6">
+      <label class="block text-sm font-semibold mb-2">Select reservation</label>
+      <select [(ngModel)]="selectedReservationId" class="p-inputtext w-full" [disabled]="submitting">
+        <option *ngFor="let reservation of reservations" [value]="reservation.id">
+          {{ reservation.summary }}
+        </option>
+      </select>
+    </div>
+
+    <div class="col-12 md:col-6">
+      <label class="block text-sm font-semibold mb-2">Rating</label>
+      <div class="flex flex-wrap gap-2">
+        <button
+          *ngFor="let stars of [1, 2, 3, 4, 5]"
+          type="button"
+          class="p-button p-button-sm p-button-outlined rating-chip"
+          [class.active]="rating === stars"
+          (click)="rating = stars"
+          [disabled]="submitting">
+          {{ stars }}★
+        </button>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <label class="block text-sm font-semibold mb-2">Comment</label>
+      <textarea
+        [(ngModel)]="comment"
+        rows="5"
+        class="p-inputtext w-full"
+        maxlength="4000"
+        placeholder="What stood out about your stay?">
+      </textarea>
+      <div class="flex justify-content-between mt-2 text-xs text-600">
+        <span>Be specific and helpful for future guests.</span>
+        <span>{{ comment.length }}/4000</span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="text-sm text-red-600 mt-2">
+    {{ errorMessage }}
+  </div>
+
+  <div class="flex justify-content-end mt-3">
+    <button
+      type="button"
+      class="p-button p-button-primary"
+      (click)="submit()"
+      [disabled]="submitting || !selectedReservationId || !comment.trim()">
+      {{ submitting ? 'Submitting...' : 'Publish review' }}
+    </button>
+  </div>
+</div>

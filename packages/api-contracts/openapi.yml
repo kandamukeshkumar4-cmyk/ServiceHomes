@@ -203,6 +203,11 @@ paths:
     get:
       summary: Search published listings
       parameters:
+        - name: listingId
+          in: query
+          schema:
+            type: string
+            format: uuid
         - name: locationQuery
           in: query
           schema:
@@ -234,6 +239,47 @@ paths:
           in: query
           schema:
             type: number
+        - name: bedrooms
+          in: query
+          schema:
+            type: integer
+        - name: propertyTypes
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: instantBook
+          in: query
+          schema:
+            type: boolean
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lng
+          in: query
+          schema:
+            type: number
+        - name: radiusKm
+          in: query
+          schema:
+            type: number
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [RELEVANCE, PRICE_ASC, PRICE_DESC, NEWEST]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
         - name: swLat
           in: query
           schema:
@@ -253,6 +299,25 @@ paths:
       responses:
         '200':
           description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageListingSearchResult'
+
+  /saved-listings:
+    get:
+      summary: List saved listings for the current traveler
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Saved listing cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListingSearchResult'
 
   /listings/categories:
     get:
@@ -436,6 +501,219 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Reservation'
+
+  /reservations/{id}/messages:
+    get:
+      summary: Get reservation message thread
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Reservation message thread
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageThread'
+    post:
+      summary: Send a reservation message
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+      responses:
+        '200':
+          description: Updated reservation message thread
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageThread'
+
+  /inbox:
+    get:
+      summary: List inbox threads for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Inbox threads sorted by latest activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InboxThread'
+
+  /saved-listings/{listingId}:
+    put:
+      summary: Save a listing for the current traveler
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Listing saved
+    delete:
+      summary: Remove a saved listing for the current traveler
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Listing unsaved
+
+  /reservations/{reservationId}/messages:
+    get:
+      summary: Load the message thread for a reservation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reservationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Reservation thread
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageThread'
+    post:
+      summary: Send a message on a reservation thread
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: reservationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+      responses:
+        '200':
+          description: Updated reservation thread
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageThread'
+
+  /reservations/{id}/review:
+    post:
+      summary: Create a review for an eligible reservation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRequest'
+      responses:
+        '200':
+          description: Created review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+
+  /reviews/{id}/response:
+    post:
+      summary: Add a host response to a review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddHostResponseRequest'
+      responses:
+        '200':
+          description: Review with host response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+
+  /listings/{id}/reviews:
+    get:
+      summary: List reviews for a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Paginated listing reviews and aggregate rating
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingReviewsResponse'
 
 components:
   securitySchemes:
@@ -666,6 +944,55 @@ components:
         bathrooms:
           type: integer
 
+    ListingSearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        coverUrl:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        nightlyPrice:
+          type: number
+        categoryName:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        maxGuests:
+          type: integer
+        bedrooms:
+          type: integer
+        beds:
+          type: integer
+        bathrooms:
+          type: integer
+        distanceKm:
+          type: number
+          nullable: true
+        averageRating:
+          type: number
+          nullable: true
+        reviewCount:
+          type: integer
+        isSaved:
+          type: boolean
+        distanceKm:
+          type: number
+          nullable: true
+        averageRating:
+          type: number
+          nullable: true
+        reviewCount:
+          type: integer
+
     PageListing:
       type: object
       properties:
@@ -819,6 +1146,114 @@ components:
         guestDisplayName:
           type: string
 
+    SendMessageRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          maxLength: 5000
+
+    MessageItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        senderId:
+          type: string
+          format: uuid
+        senderDisplayName:
+          type: string
+        senderAvatarUrl:
+          type: string
+          nullable: true
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
+        mine:
+          type: boolean
+
+    MessageThread:
+      type: object
+      properties:
+        threadId:
+          type: string
+          format: uuid
+          nullable: true
+        reservationId:
+          type: string
+          format: uuid
+        listingId:
+          type: string
+          format: uuid
+        listingTitle:
+          type: string
+        listingCoverUrl:
+          type: string
+          nullable: true
+        guestId:
+          type: string
+          format: uuid
+        hostId:
+          type: string
+          format: uuid
+        counterpartId:
+          type: string
+          format: uuid
+        counterpartName:
+          type: string
+        counterpartAvatarUrl:
+          type: string
+          nullable: true
+        unreadCount:
+          type: integer
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageItem'
+
+    InboxThread:
+      type: object
+      properties:
+        threadId:
+          type: string
+          format: uuid
+        reservationId:
+          type: string
+          format: uuid
+        listingId:
+          type: string
+          format: uuid
+        listingTitle:
+          type: string
+        listingCoverUrl:
+          type: string
+          nullable: true
+        counterpartId:
+          type: string
+          format: uuid
+        counterpartName:
+          type: string
+        counterpartAvatarUrl:
+          type: string
+          nullable: true
+        lastMessagePreview:
+          type: string
+          nullable: true
+        lastMessageAt:
+          type: string
+          format: date-time
+          nullable: true
+        unreadCount:
+          type: integer
+
     ReservationPage:
       type: object
       properties:
@@ -826,6 +1261,107 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Reservation'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        number:
+          type: integer
+        size:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+
+    CreateReviewRequest:
+      type: object
+      required: [rating, comment]
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          maxLength: 4000
+
+    AddHostResponseRequest:
+      type: object
+      required: [response]
+      properties:
+        response:
+          type: string
+          maxLength: 4000
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reservationId:
+          type: string
+          format: uuid
+        listingId:
+          type: string
+          format: uuid
+        guestId:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+        comment:
+          type: string
+        guestDisplayName:
+          type: string
+        guestAvatarUrl:
+          type: string
+          nullable: true
+        hostResponse:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ListingReviewsResponse:
+      type: object
+      properties:
+        averageRating:
+          type: number
+          format: double
+        reviewCount:
+          type: integer
+          format: int64
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        number:
+          type: integer
+        size:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+
+    PageListingSearchResult:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingSearchResult'
         totalElements:
           type: integer
         totalPages:

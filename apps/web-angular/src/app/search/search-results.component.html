@@ -1,0 +1,109 @@
+<div class="search-results-page">
+  <div class="search-results-page__hero">
+    <div class="max-w-80rem mx-auto px-4 py-4">
+      <app-search-bar />
+    </div>
+  </div>
+
+  <div class="max-w-80rem mx-auto px-4 py-4">
+    <div class="grid">
+      <div class="col-12 lg:col-3">
+        <app-search-filters [filters]="filters" />
+      </div>
+
+      <div class="col-12 lg:col-9">
+        <div class="flex flex-column gap-3">
+          <div class="surface-0 border-round-2xl p-3 border-1 surface-border">
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
+              <div>
+                <p class="text-600 text-sm uppercase tracking-wide mb-1">Discovery</p>
+                <h1 class="text-2xl font-semibold m-0">{{ headerText }}</h1>
+              </div>
+              <div class="flex flex-wrap gap-2 align-items-center justify-content-end">
+                <div class="view-toggle">
+                  <button type="button" class="view-toggle__button" [class.view-toggle__button--active]="viewMode === 'list'" (click)="setViewMode('list')">
+                    List
+                  </button>
+                  <button type="button" class="view-toggle__button" [class.view-toggle__button--active]="viewMode === 'map'" (click)="setViewMode('map')">
+                    Map
+                  </button>
+                </div>
+
+                <button
+                  *ngFor="let chip of activeChips"
+                  type="button"
+                  class="chip-button"
+                  (click)="removeChip(chip)">
+                  {{ chip.label }} <i class="pi pi-times text-xs"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="loading" class="grid gap-3">
+            <div *ngFor="let skeleton of [1,2,3,4,5,6]" class="col-12 md:col-6">
+              <div class="surface-0 border-round-2xl p-3 border-1 surface-border">
+                <div class="search-skeleton__media"></div>
+                <div class="search-skeleton__line mt-3"></div>
+                <div class="search-skeleton__line search-skeleton__line--short mt-2"></div>
+                <div class="search-skeleton__line search-skeleton__line--price mt-4"></div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="error && !loading" class="surface-0 border-round-2xl p-4 border-1 surface-border text-center">
+            <i class="pi pi-exclamation-circle text-3xl text-red-400"></i>
+            <p class="text-700 mt-3 mb-0">{{ error }}</p>
+          </div>
+
+          <div *ngIf="!loading && !error && results.length === 0" class="surface-0 border-round-2xl p-5 border-1 surface-border text-center">
+            <div class="empty-state mx-auto mb-3">
+              <i class="pi pi-compass text-4xl text-primary"></i>
+            </div>
+            <h2 class="text-xl font-semibold m-0">No listings matched those filters</h2>
+            <p class="text-600 mt-2 mb-0">Try widening your dates, price band, or property type selection.</p>
+          </div>
+
+          <div *ngIf="!loading && !error && results.length > 0 && viewMode === 'list'" class="grid gap-3">
+            <div *ngFor="let listing of results" class="col-12 md:col-6">
+              <app-listing-card
+                [listing]="listing"
+                [showSaveToggle]="(auth.isAuthenticated$ | async) === true"
+                (saveToggled)="handleSaveToggle($event)" />
+            </div>
+          </div>
+
+          <div *ngIf="!loading && !error && results.length > 0 && viewMode === 'map'" class="search-map-layout">
+            <div class="search-map-layout__list">
+              <div class="grid gap-3">
+                <div *ngFor="let listing of results" class="col-12">
+                  <app-listing-card
+                    [listing]="listing"
+                    [showSaveToggle]="(auth.isAuthenticated$ | async) === true"
+                    (saveToggled)="handleSaveToggle($event)" />
+                </div>
+              </div>
+            </div>
+
+            <div class="search-map-layout__map">
+              <app-search-map
+                [results]="results"
+                [filters]="filters"
+                [loading]="loading"
+                (searchAreaRequested)="handleSearchAreaRequested($event)" />
+            </div>
+          </div>
+
+          <p-paginator
+            *ngIf="!loading && !error && totalElements > filters.size"
+            [first]="filters.page * filters.size"
+            [rows]="filters.size"
+            [totalRecords]="totalElements"
+            [rowsPerPageOptions]="[12, 24, 36]"
+            (onPageChange)="handlePageChange($event)">
+          </p-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

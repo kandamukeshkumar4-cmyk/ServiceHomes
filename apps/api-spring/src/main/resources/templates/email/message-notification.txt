@@ -1,0 +1,8 @@
+Hi {{recipientName}},
+
+You have a new message about {{listingTitle}}.
+
+{{senderName}} wrote:
+"{{messagePreview}}"
+
+Open ServiceHomes to reply and keep the reservation moving.

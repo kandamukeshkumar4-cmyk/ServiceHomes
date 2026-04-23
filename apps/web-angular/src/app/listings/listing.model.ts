@@ -103,6 +103,27 @@ export interface ListingCardDto {
   bathrooms: number;
 }
 
+export interface ListingCardViewModel extends ListingCardDto {
+  distanceKm?: number | null;
+  averageRating?: number | null;
+  reviewCount?: number;
+  isSaved?: boolean;
+}
+
+export interface ListingSearchResult extends ListingCardViewModel {
+  reviewCount: number;
+}
+
+export interface ListingSearchPage {
+  content: ListingSearchResult[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first?: boolean;
+  last?: boolean;
+}
+
 export type ListingAvailabilityRuleType = 'BLOCKED_DATE' | 'MIN_NIGHTS_OVERRIDE' | 'PRICE_OVERRIDE';
 
 export interface ListingAvailabilityRule {

@@ -64,6 +64,7 @@
 
   <div class="flex gap-2">
     <a [routerLink]="['/listings', booking.listingId]" class="p-button p-button-outlined no-underline flex-1 text-center">View listing</a>
+    <a *ngIf="canMessageHost()" [routerLink]="['/reservations', booking.id, 'messages']" class="p-button p-button-outlined no-underline flex-1 text-center">Message host</a>
     <button *ngIf="canCancel()" class="p-button p-button-danger flex-1" (click)="cancel()">Cancel booking</button>
   </div>
 </div>

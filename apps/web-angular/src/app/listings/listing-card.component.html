@@ -1,0 +1,49 @@
+<article class="listing-card border-round-2xl overflow-hidden shadow-1">
+  <div class="listing-card__media">
+    <a [routerLink]="['/listings', listing.id]" class="listing-card__media-link">
+      <img *ngIf="listing.coverUrl; else imageFallback" [src]="listing.coverUrl" [alt]="listing.title" class="listing-card__image" />
+    </a>
+    <ng-template #imageFallback>
+      <a [routerLink]="['/listings', listing.id]" class="listing-card__media-link listing-card__fallback">
+        <span>No image</span>
+      </a>
+    </ng-template>
+
+    <button
+      *ngIf="showSaveToggle"
+      type="button"
+      class="listing-card__save surface-0"
+      (click)="toggleSaved($event)"
+      [attr.aria-pressed]="listing.isSaved === true"
+      [attr.aria-label]="listing.isSaved ? 'Remove saved listing' : 'Save listing'">
+      <i class="pi" [ngClass]="listing.isSaved ? 'pi-heart-fill text-red-500' : 'pi-heart'"></i>
+    </button>
+  </div>
+
+  <div class="p-3">
+    <div class="flex justify-content-between align-items-start gap-2">
+      <div>
+        <a [routerLink]="['/listings', listing.id]" class="listing-card__title-link no-underline text-900">
+          <h3 class="text-base font-semibold m-0">{{ listing.city }}, {{ listing.country }}</h3>
+        </a>
+        <p class="text-600 text-sm m-0 mt-1">{{ listing.title }}</p>
+      </div>
+      <div class="text-right text-sm text-700" *ngIf="listing.averageRating || listing.reviewCount">
+        <div class="font-medium">★ {{ listing.averageRating ? (listing.averageRating | number:'1.1-1') : 'New' }}</div>
+        <div class="text-500" *ngIf="listing.reviewCount">{{ listing.reviewCount }} reviews</div>
+      </div>
+    </div>
+
+    <div class="text-600 text-sm mt-2">
+      {{ listing.bedrooms }} bed<span *ngIf="listing.bedrooms !== 1">rooms</span> · {{ listing.maxGuests }} guest<span *ngIf="listing.maxGuests !== 1">s</span>
+    </div>
+    <div class="text-600 text-sm" *ngIf="listing.distanceKm !== null && listing.distanceKm !== undefined">
+      {{ listing.distanceKm | number:'1.1-1' }} km away
+    </div>
+
+    <div class="flex justify-content-between align-items-end mt-3">
+      <p class="text-900 font-semibold m-0">${{ listing.nightlyPrice }} <span class="text-600 font-normal">night</span></p>
+      <span class="text-500 text-xs">{{ listing.categoryName }}</span>
+    </div>
+  </div>
+</article>

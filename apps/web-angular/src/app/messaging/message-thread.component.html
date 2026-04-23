@@ -1,0 +1,129 @@
+<div class="p-4 max-w-70rem mx-auto">
+  <div class="flex flex-column gap-3">
+    <a routerLink="/inbox" class="inline-flex align-items-center gap-2 text-primary no-underline font-medium">
+      <i class="pi pi-arrow-left"></i>
+      <span>Back to inbox</span>
+    </a>
+
+    <div *ngIf="thread" class="surface-0 shadow-1 border-round-lg p-3">
+      <div class="flex flex-column md:flex-row gap-3 md:align-items-center md:justify-content-between">
+        <div class="flex gap-3 align-items-center min-w-0">
+          <img
+            *ngIf="thread.listingCoverUrl; else threadCoverFallback"
+            [src]="thread.listingCoverUrl"
+            [alt]="thread.listingTitle"
+            class="border-round-lg object-cover flex-shrink-0"
+            style="width: 4.5rem; height: 4.5rem;"
+          />
+          <ng-template #threadCoverFallback>
+            <div class="surface-200 border-round-lg flex align-items-center justify-content-center text-700 font-semibold flex-shrink-0" style="width: 4.5rem; height: 4.5rem;">
+              Stay
+            </div>
+          </ng-template>
+
+          <div class="min-w-0">
+            <div class="text-sm text-600 mb-1">Conversation for</div>
+            <div class="font-semibold text-xl text-overflow-ellipsis overflow-hidden white-space-nowrap">{{ thread.listingTitle }}</div>
+            <div class="text-600 flex align-items-center gap-2 mt-2">
+              <div class="surface-100 border-circle flex align-items-center justify-content-center overflow-hidden" style="width: 2rem; height: 2rem;">
+                <img
+                  *ngIf="thread.counterpartAvatarUrl; else threadCounterpartFallback"
+                  [src]="thread.counterpartAvatarUrl"
+                  [alt]="thread.counterpartName"
+                  class="w-full h-full object-cover"
+                />
+                <ng-template #threadCounterpartFallback>
+                  <span class="text-xs font-semibold text-700">{{ initials(thread.counterpartName) }}</span>
+                </ng-template>
+              </div>
+              <span>{{ thread.counterpartName }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-column md:align-items-end gap-2">
+          <a [routerLink]="['/listings', thread.listingId]" class="p-button p-button-outlined no-underline text-center">View listing</a>
+          <div class="text-sm text-600" *ngIf="refreshing">Refreshing messages…</div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="loadError" class="surface-100 border-round-lg p-3 text-red-700">
+      <div class="font-semibold mb-1">Conversation unavailable</div>
+      <div>{{ loadError }}</div>
+      <div class="text-sm mt-2">The thread will retry automatically every 5 seconds while this page stays open.</div>
+    </div>
+
+    <div *ngIf="loading" class="surface-0 shadow-1 border-round-lg p-3">
+      <div class="flex flex-column gap-3">
+        <div *ngFor="let row of skeletonMessages" class="flex" [ngClass]="row % 2 === 0 ? 'justify-content-start' : 'justify-content-end'">
+          <div class="surface-200 border-round-2xl" style="height: 4rem; width: 16rem;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && thread" class="surface-0 shadow-1 border-round-lg overflow-hidden">
+      <div class="p-3 surface-50 border-bottom-1 surface-border text-sm text-600">
+        Reservation ID: <span class="font-medium text-900">{{ thread.reservationId }}</span>
+      </div>
+
+      <div class="p-3 flex flex-column gap-3 overflow-y-auto" style="max-height: 30rem;">
+        <div *ngIf="!displayedMessages.length" class="surface-50 border-round-lg p-4 text-center text-600">
+          No messages yet. Start the conversation with a quick introduction or a question about the stay.
+        </div>
+
+        <div *ngFor="let message of displayedMessages; trackBy: trackByMessage" class="flex" [ngClass]="message.mine ? 'justify-content-end' : 'justify-content-start'">
+          <div class="max-w-30rem flex gap-2" [ngClass]="message.mine ? 'flex-row-reverse' : 'flex-row'">
+            <div class="surface-100 border-circle flex align-items-center justify-content-center overflow-hidden flex-shrink-0 mt-1" style="width: 2rem; height: 2rem;">
+              <img
+                *ngIf="message.senderAvatarUrl; else senderFallback"
+                [src]="message.senderAvatarUrl"
+                [alt]="message.senderDisplayName"
+                class="w-full h-full object-cover"
+              />
+              <ng-template #senderFallback>
+                <span class="text-xs font-semibold text-700">{{ initials(message.senderDisplayName) }}</span>
+              </ng-template>
+            </div>
+
+            <div class="border-round-2xl px-3 py-2 line-height-3" [ngClass]="message.mine ? 'bg-primary text-primary-reverse-color' : 'surface-100 text-900'">
+              <div class="text-xs font-semibold mb-2 opacity-80">{{ message.mine ? 'You' : message.senderDisplayName }}</div>
+              <div class="white-space-pre-wrap">{{ message.content }}</div>
+              <div class="text-xs mt-2 opacity-80 flex align-items-center gap-2">
+                <span>{{ message.createdAt | date: 'MMM d, h:mm a' }}</span>
+                <span *ngIf="isPending(message)">Sending…</span>
+                <span *ngIf="message.mine && !isPending(message) && message.readAt">Read</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-top-1 surface-border p-3">
+        <div *ngIf="sendError" class="surface-100 border-round-lg p-2 text-red-700 mb-3">
+          {{ sendError }}
+        </div>
+
+        <label for="messageDraft" class="block text-sm font-semibold mb-2">Message</label>
+        <textarea
+          id="messageDraft"
+          class="p-inputtext w-full"
+          rows="4"
+          maxlength="5000"
+          [(ngModel)]="draft"
+          [disabled]="sending"
+          placeholder="Ask a question, share arrival details, or follow up about the reservation."
+        ></textarea>
+
+        <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3 mt-3">
+          <div class="text-sm" [ngClass]="remainingCharacters < 0 ? 'text-red-700' : 'text-600'">
+            {{ remainingCharacters }} characters remaining
+          </div>
+          <button type="button" class="p-button p-button-primary align-self-start md:align-self-auto" (click)="sendMessage()" [disabled]="!canSend">
+            {{ sending ? 'Sending…' : 'Send message' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

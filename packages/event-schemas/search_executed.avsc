@@ -12,6 +12,13 @@
     { "name": "checkOut", "type": ["null", "string"], "default": null },
     { "name": "minPrice", "type": ["null", "string"], "default": null },
     { "name": "maxPrice", "type": ["null", "string"], "default": null },
+    { "name": "bedrooms", "type": ["null", "int"], "default": null },
+    { "name": "propertyTypes", "type": ["null", { "type": "array", "items": "string" }], "default": null },
+    { "name": "instantBook", "type": ["null", "boolean"], "default": null },
+    { "name": "radiusKm", "type": ["null", "double"], "default": null },
+    { "name": "sort", "type": ["null", "string"], "default": null },
+    { "name": "page", "type": "int", "default": 0 },
+    { "name": "pageSize", "type": "int", "default": 20 },
     { "name": "resultCount", "type": "int" }
   ]
 }

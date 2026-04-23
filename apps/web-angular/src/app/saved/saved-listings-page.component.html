@@ -1,0 +1,32 @@
+<section class="p-4 max-w-80rem mx-auto">
+  <div class="surface-0 border-round-2xl p-4 border-1 surface-border mb-4">
+    <p class="text-600 text-sm uppercase tracking-wide mb-1">Saved stays</p>
+    <h1 class="text-2xl font-semibold m-0">Saved listings</h1>
+    <p class="text-600 mt-2 mb-0">Keep favorites handy while you compare reviews, maps, and host conversations.</p>
+  </div>
+
+  <div *ngIf="loading" class="surface-0 border-round-2xl p-4 border-1 surface-border text-center">
+    <i class="pi pi-spin pi-spinner text-2xl"></i>
+    <p class="text-600 mt-3 mb-0">Loading your saved listings...</p>
+  </div>
+
+  <div *ngIf="errorMessage && !loading" class="surface-0 border-round-2xl p-4 border-1 surface-border text-center">
+    <i class="pi pi-exclamation-circle text-3xl text-red-400"></i>
+    <p class="text-700 mt-3 mb-0">{{ errorMessage }}</p>
+  </div>
+
+  <div *ngIf="!loading && !errorMessage && listings.length === 0" class="surface-0 border-round-2xl p-5 border-1 surface-border text-center">
+    <i class="pi pi-heart text-4xl text-pink-400"></i>
+    <h2 class="text-xl font-semibold mt-3 mb-0">Nothing saved yet</h2>
+    <p class="text-600 mt-2 mb-0">Tap the heart on any search result to build your shortlist.</p>
+  </div>
+
+  <div *ngIf="!loading && !errorMessage && listings.length > 0" class="grid gap-3">
+    <div *ngFor="let listing of listings" class="col-12 sm:col-6 lg:col-4">
+      <app-listing-card
+        [listing]="listing"
+        [showSaveToggle]="true"
+        (saveToggled)="handleSaveToggle($event)" />
+    </div>
+  </div>
+</section>

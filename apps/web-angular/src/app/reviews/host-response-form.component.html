@@ -1,0 +1,31 @@
+<div class="response-box surface-50 border-round-lg p-3 mt-3">
+  <label class="block text-sm font-semibold mb-2">Respond as host</label>
+  <textarea
+    [(ngModel)]="response"
+    rows="4"
+    class="p-inputtext w-full"
+    maxlength="4000"
+    placeholder="Thank the guest and address their feedback.">
+  </textarea>
+
+  <div *ngIf="errorMessage" class="text-sm text-red-600 mt-2">
+    {{ errorMessage }}
+  </div>
+
+  <div class="flex gap-2 mt-3">
+    <button
+      type="button"
+      class="p-button p-button-sm p-button-primary"
+      (click)="submit()"
+      [disabled]="submitting || !response.trim()">
+      {{ submitting ? 'Saving...' : 'Publish response' }}
+    </button>
+    <button
+      type="button"
+      class="p-button p-button-sm p-button-text"
+      (click)="cancelled.emit()"
+      [disabled]="submitting">
+      Cancel
+    </button>
+  </div>
+</div>

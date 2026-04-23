@@ -1,23 +1,28 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { CategoryShellComponent } from '../shell/category-shell.component';
 import { SearchBarComponent } from '../search/search-bar.component';
-import { ListingCardDto } from '../listings/listing.model';
+import { ListingCardComponent } from '../listings/listing-card.component';
+import { ListingCardViewModel, ListingSearchPage } from '../listings/listing.model';
+import { SavedListingsService } from '../saved/saved-listings.service';
+import { AppAuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, CategoryShellComponent, SearchBarComponent],
+  imports: [CommonModule, CategoryShellComponent, SearchBarComponent, ListingCardComponent],
   templateUrl: './home.component.html',
   styles: []
 })
 export class HomeComponent implements OnInit {
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
+  private savedListingsService = inject(SavedListingsService);
+  auth = inject(AppAuthService);
 
-  listings: ListingCardDto[] = [];
+  listings: ListingCardViewModel[] = [];
   loading = false;
   error: string | null = null;
 
@@ -37,15 +42,41 @@ export class HomeComponent implements OnInit {
     if (params['checkOut']) httpParams = httpParams.set('checkOut', params['checkOut']);
     if (params['guests']) httpParams = httpParams.set('guests', params['guests']);
 
-    this.http.get<ListingCardDto[]>('/api/listings/search', { params: httpParams }).subscribe({
+    httpParams = httpParams.set('page', '0').set('size', '8').set('sort', 'NEWEST');
+
+    this.http.get<ListingSearchPage>('/api/listings/search', { params: httpParams }).subscribe({
       next: data => {
-        this.listings = data;
+        this.listings = data.content;
         this.loading = false;
       },
       error: (err) => {
         this.error = 'Failed to load listings. Please try again.';
         this.listings = [];
         this.loading = false;
+      }
+    });
+  }
+
+  handleSaveToggle(listingId: string): void {
+    const listing = this.listings.find((entry) => entry.id === listingId);
+    if (!listing) {
+      return;
+    }
+
+    const previous = listing.isSaved === true;
+    this.listings = this.listings.map((entry) =>
+      entry.id === listingId ? { ...entry, isSaved: !previous } : entry
+    );
+
+    const request = previous
+      ? this.savedListingsService.unsave(listingId)
+      : this.savedListingsService.save(listingId);
+
+    request.subscribe({
+      error: () => {
+        this.listings = this.listings.map((entry) =>
+          entry.id === listingId ? { ...entry, isSaved: previous } : entry
+        );
       }
     });
   }
