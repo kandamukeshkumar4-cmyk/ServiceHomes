@@ -16,4 +16,4 @@ COPY --from=build /app/dist/web-angular/browser/ /usr/share/nginx/html/
 
 EXPOSE 80
 
-HEALTHCHECK --interval=10s --timeout=5s --retries=12 CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+HEALTHCHECK --interval=10s --timeout=5s --retries=12 CMD wget --no-verbose --tries=1 --spider http://127.0.0.1/ || exit 1
