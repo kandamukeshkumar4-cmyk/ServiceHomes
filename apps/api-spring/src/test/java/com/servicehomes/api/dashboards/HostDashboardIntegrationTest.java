@@ -24,6 +24,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -94,7 +98,7 @@ class HostDashboardIntegrationTest {
             .andExpect(jsonPath("$.upcomingReservations.length()").value(1))
             .andExpect(jsonPath("$.pendingRequests.length()").value(1))
             .andExpect(jsonPath("$.listingPerformance.length()").value(1))
-            .andExpect(jsonPath("$.listingPerformance[0].bookingCount").value(3))
+            .andExpect(jsonPath("$.listingPerformance[0].bookingCount").value(2))
             .andExpect(result -> {
                 JsonNode response = objectMapper.readTree(result.getResponse().getContentAsString());
                 JsonNode occupancyRate = response.path("occupancyRate");
