@@ -100,12 +100,12 @@ class ListingSearchIntegrationTest {
     @Test
     void searchOrdersByDistanceWhenCoordinatesProvided() throws Exception {
         createListing("Closest stay", "At origin", "Origin", "Nowhere", 0.0, 0.0, "HOUSE", 1, 2, "100.00");
-        createListing("Farther stay", "One degree away", "Faraway", "Nowhere", 1.0, 1.0, "HOUSE", 1, 2, "100.00");
+        createListing("Farther stay", "Half a degree away", "Faraway", "Nowhere", 0.5, 0.5, "HOUSE", 1, 2, "100.00");
 
         mockMvc.perform(get("/listings/search")
                 .param("lat", "0")
                 .param("lng", "0")
-                .param("radiusKm", "200")
+                .param("radiusKm", "100")
                 .param("size", "10"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content[0].title").value("Closest stay"))

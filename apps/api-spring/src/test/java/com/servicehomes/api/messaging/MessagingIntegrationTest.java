@@ -23,7 +23,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -48,14 +47,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = ApiApplication.class)
+@SpringBootTest(
+    classes = ApiApplication.class,
+    properties = {
+        "messaging.email.enabled=true",
+        "messaging.email.from-address=test@servicehomes.example"
+    }
+)
 @AutoConfigureMockMvc
 @Testcontainers
 @ActiveProfiles("ci")
-@TestPropertySource(properties = {
-    "messaging.email.enabled=true",
-    "messaging.email.from-address=test@servicehomes.example"
-})
 class MessagingIntegrationTest {
 
     @Container

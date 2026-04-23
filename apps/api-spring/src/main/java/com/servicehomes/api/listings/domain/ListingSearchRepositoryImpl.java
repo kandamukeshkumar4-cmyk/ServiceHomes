@@ -35,7 +35,7 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
             FROM listings l
             JOIN listing_locations loc ON loc.listing_id = l.id
             JOIN listing_categories c ON c.id = l.category_id
-            JOIN listing_policies policy ON policy.listing_id = l.id
+            LEFT JOIN listing_policies policy ON policy.listing_id = l.id
             LEFT JOIN LATERAL (
                 SELECT p.url
                 FROM listing_photos p

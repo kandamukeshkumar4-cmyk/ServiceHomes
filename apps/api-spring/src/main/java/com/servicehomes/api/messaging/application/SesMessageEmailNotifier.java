@@ -3,11 +3,7 @@ package com.servicehomes.api.messaging.application;
 import com.servicehomes.api.messaging.domain.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.Body;
@@ -23,10 +19,7 @@ import java.time.Instant;
 import java.util.Map;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
-@ConditionalOnBean(SesClient.class)
-@ConditionalOnProperty(name = "messaging.email.enabled", havingValue = "true")
 public class SesMessageEmailNotifier implements MessageEmailNotifier {
 
     private static final String HTML_TEMPLATE = "templates/email/message-notification.html";
@@ -34,12 +27,8 @@ public class SesMessageEmailNotifier implements MessageEmailNotifier {
 
     private final MessageRepository messageRepository;
     private final SesClient sesClient;
-
-    @Value("${messaging.email.from-address}")
-    private String fromAddress;
-
-    @Value("${messaging.email.quiet-period-minutes:5}")
-    private long quietPeriodMinutes;
+    private final String fromAddress;
+    private final long quietPeriodMinutes;
 
     @Override
     public void notifyIfNeeded(NewMessageEmailCommand command) {

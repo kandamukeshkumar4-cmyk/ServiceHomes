@@ -34,8 +34,10 @@ public class ListingSearchService {
         var listingIds = page.getContent().stream()
             .map(row -> row.id())
             .toList();
-        Map<UUID, ListingReviewSummary> reviewSummaries = reviewRepository.findSummariesByListingIds(listingIds).stream()
-            .collect(Collectors.toMap(ListingReviewSummary::listingId, Function.identity()));
+        Map<UUID, ListingReviewSummary> reviewSummaries = listingIds.isEmpty()
+            ? Map.of()
+            : reviewRepository.findSummariesByListingIds(listingIds).stream()
+                .collect(Collectors.toMap(ListingReviewSummary::listingId, Function.identity()));
         Set<UUID> savedListingIds = currentUserId == null || listingIds.isEmpty()
             ? Set.of()
             : new HashSet<>(savedListingRepository.findListingIdsByGuestIdAndListingIdIn(currentUserId, listingIds));
