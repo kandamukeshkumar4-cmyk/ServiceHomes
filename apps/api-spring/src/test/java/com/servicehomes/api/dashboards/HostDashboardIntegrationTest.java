@@ -88,7 +88,7 @@ class HostDashboardIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.upcomingReservations.length()").value(1))
             .andExpect(jsonPath("$.pendingRequests.length()").value(1))
-            .andExpect(jsonPath("$.occupancyRate").value(org.hamcrest.Matchers.greaterThan(0)))
+            .andExpect(jsonPath("$.occupancyRate", org.hamcrest.Matchers.greaterThan(0.0), Double.class))
             .andExpect(jsonPath("$.mockEarnings").value(org.hamcrest.Matchers.greaterThan(0)))
             .andExpect(jsonPath("$.listingPerformance.length()").value(1))
             .andExpect(jsonPath("$.listingPerformance[0].bookingCount").value(3));
