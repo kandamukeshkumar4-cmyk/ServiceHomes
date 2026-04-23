@@ -50,6 +50,12 @@ export class ListingDetailComponent implements OnInit {
   reviews: ListingReview[] = [];
   averageRating = 0;
   reviewCount = 0;
+  cleanlinessRating: number | null = null;
+  accuracyRating: number | null = null;
+  communicationRating: number | null = null;
+  locationRating: number | null = null;
+  valueRating: number | null = null;
+  trustScore = 0;
   reviewsLoading = false;
   reviewsLoaded = false;
   reviewsError = '';
@@ -59,6 +65,8 @@ export class ListingDetailComponent implements OnInit {
   reviewSubmitting = false;
   hostResponseError = '';
   hostResponseSubmittingFor: string | null = null;
+  reviewReportError = '';
+  reportingReviewId: string | null = null;
 
   get coverPhoto(): ListingPhoto | undefined {
     return this.listing?.photos.find(p => p.isCover) || this.listing?.photos[0];
@@ -118,6 +126,14 @@ export class ListingDetailComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(l => {
         this.listing = l;
+        this.averageRating = l.averageRating ?? 0;
+        this.reviewCount = l.reviewCount ?? 0;
+        this.cleanlinessRating = l.cleanlinessRating ?? null;
+        this.accuracyRating = l.accuracyRating ?? null;
+        this.communicationRating = l.communicationRating ?? null;
+        this.locationRating = l.locationRating ?? null;
+        this.valueRating = l.valueRating ?? null;
+        this.trustScore = l.trustScore ?? 0;
         this.loadReviews();
       });
   }
@@ -186,7 +202,7 @@ export class ListingDetailComponent implements OnInit {
     this.reviewSubmitError = '';
     this.reviewSubmitting = true;
 
-    this.reviewsApi.createReview(submission.reservationId, submission.rating, submission.comment)
+    this.reviewsApi.createReview(submission.reservationId, submission.rating, submission.breakdown, submission.comment)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -221,6 +237,24 @@ export class ListingDetailComponent implements OnInit {
       });
   }
 
+  reportReview(event: { reviewId: string; reason: string; details: string }) {
+    this.reviewReportError = '';
+    this.reportingReviewId = event.reviewId;
+
+    this.reviewsApi.reportReview(event.reviewId, event.reason, event.details)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.reviewReportError = '';
+          this.reportingReviewId = null;
+        },
+        error: error => {
+          this.reviewReportError = error?.error?.message || 'Unable to submit this report.';
+          this.reportingReviewId = null;
+        }
+      });
+  }
+
   private loadReviews() {
     if (!this.listing) {
       return;
@@ -235,6 +269,12 @@ export class ListingDetailComponent implements OnInit {
         next: response => {
           this.averageRating = response.averageRating;
           this.reviewCount = response.reviewCount;
+          this.cleanlinessRating = response.cleanlinessRating;
+          this.accuracyRating = response.accuracyRating;
+          this.communicationRating = response.communicationRating;
+          this.locationRating = response.locationRating;
+          this.valueRating = response.valueRating;
+          this.trustScore = response.trustScore;
           this.reviews = response.content;
           this.reviewsLoading = false;
           this.reviewsLoaded = true;

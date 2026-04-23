@@ -74,6 +74,9 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
                 l.bedrooms,
                 l.beds,
                 l.bathrooms,
+                l.average_rating,
+                l.review_count,
+                l.trust_score,
             """;
         if (hasCoordinates) {
             selectClause += """
@@ -212,18 +215,19 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
         SearchSort sort = filters.sort();
         if (sort == null) {
             if (filters.latitude() != null && filters.longitude() != null) {
-                return " ORDER BY distance_km ASC NULLS LAST, l.created_at DESC";
+                return " ORDER BY distance_km ASC NULLS LAST, l.trust_score DESC, l.average_rating DESC NULLS LAST, l.review_count DESC, l.created_at DESC";
             }
             sort = hasText(filters.locationQuery()) ? SearchSort.RELEVANCE : SearchSort.NEWEST;
         }
 
         return switch (sort) {
             case RELEVANCE -> hasText(filters.locationQuery())
-                ? " ORDER BY ts_rank(l.search_vector, plainto_tsquery('english', :queryText)) DESC, l.created_at DESC"
-                : " ORDER BY l.created_at DESC";
+                ? " ORDER BY ts_rank(l.search_vector, plainto_tsquery('english', :queryText)) DESC, l.trust_score DESC, l.average_rating DESC NULLS LAST, l.review_count DESC, l.created_at DESC"
+                : " ORDER BY l.trust_score DESC, l.average_rating DESC NULLS LAST, l.review_count DESC, l.created_at DESC";
             case PRICE_ASC -> " ORDER BY l.nightly_price ASC, l.created_at DESC";
             case PRICE_DESC -> " ORDER BY l.nightly_price DESC, l.created_at DESC";
             case NEWEST -> " ORDER BY l.created_at DESC";
+            case RATING_DESC -> " ORDER BY l.trust_score DESC, l.average_rating DESC NULLS LAST, l.review_count DESC, l.created_at DESC";
         };
     }
 
@@ -249,7 +253,10 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
                 rs.getInt("bedrooms"),
                 rs.getInt("beds"),
                 rs.getInt("bathrooms"),
-                rs.getObject("distance_km", Double.class)
+                rs.getObject("distance_km", Double.class),
+                rs.getBigDecimal("average_rating"),
+                rs.getLong("review_count"),
+                rs.getBigDecimal("trust_score")
             );
         }
     }

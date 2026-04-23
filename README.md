@@ -177,6 +177,11 @@ cd apps/api-spring && ./mvnw spring-boot:run
 | `GET /api/reservations/my` | My bookings |
 | `POST /api/reservations/{id}/accept` | Accept a pending booking request (host) |
 | `POST /api/reservations/{id}/decline` | Decline a pending booking request (host) |
+| `POST /api/reservations/{id}/review` | Create a guest review for a completed stay |
+| `POST /api/reservations/{id}/host-review` | Create a host review for a completed stay |
+| `GET /api/listings/{id}/reviews` | List visible listing reviews and rating aggregates |
+| `POST /api/reviews/{id}/response` | Add one host response to a visible guest review |
+| `POST /api/reviews/{id}/report` | Report a visible review for moderation |
 
 See `packages/api-contracts/openapi.yml` for the full API specification.
 
@@ -196,6 +201,11 @@ Migrations run automatically on startup via Flyway:
 | `V7__align_local_seed_auth0_id.sql` | Align local JWT identity with the seeded local user |
 | `V8__listing_availability_indexes.sql` | Availability rule query indexes |
 | `V9__profile_fields.sql` | Host/profile enrichment fields and profile languages |
+| `V10__search_indexes.sql` | Listing search indexes |
+| `V11__reviews.sql` | Base reviews table |
+| `V12__saved_listings.sql` | Saved listings |
+| `V13__messaging.sql` | Guest-host messaging |
+| `V14__reviews_ratings_platform.sql` | Double-blind reviews, rating cache, reports, moderation |
 
 ## Analytics
 

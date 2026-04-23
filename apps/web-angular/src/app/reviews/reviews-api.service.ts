@@ -8,11 +8,22 @@ export interface ListingReview {
   reservationId: string;
   listingId: string;
   guestId: string;
+  hostId: string;
+  reviewerId: string;
+  reviewerRole: 'GUEST' | 'HOST';
   rating: number;
+  cleanlinessRating: number | null;
+  accuracyRating: number | null;
+  communicationRating: number | null;
+  locationRating: number | null;
+  valueRating: number | null;
   comment: string;
   guestDisplayName: string;
   guestAvatarUrl: string | null;
   hostResponse: string | null;
+  visibleAt: string;
+  moderationStatus: 'APPROVED' | 'HIDDEN';
+  reportCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -20,6 +31,12 @@ export interface ListingReview {
 export interface ListingReviewsResponse {
   averageRating: number;
   reviewCount: number;
+  cleanlinessRating: number | null;
+  accuracyRating: number | null;
+  communicationRating: number | null;
+  locationRating: number | null;
+  valueRating: number | null;
+  trustScore: number;
   content: ListingReview[];
   totalElements: number;
   totalPages: number;
@@ -37,6 +54,26 @@ export interface ReviewReservationOption {
   summary: string;
 }
 
+export interface ReviewRatingBreakdown {
+  cleanlinessRating: number;
+  accuracyRating: number;
+  communicationRating: number;
+  locationRating: number;
+  valueRating: number;
+}
+
+export interface ReviewReport {
+  id: string;
+  reviewId: string;
+  reporterId: string;
+  reason: string;
+  details: string | null;
+  status: string;
+  createdAt: string;
+  resolvedAt: string | null;
+  resolvedBy: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ReviewsApiService {
   private http = inject(HttpClient);
@@ -49,15 +86,28 @@ export class ReviewsApiService {
     return this.http.get<ListingReviewsResponse>(`/api/listings/${listingId}/reviews`, { params });
   }
 
-  createReview(reservationId: string, rating: number, comment: string): Observable<ListingReview> {
+  createReview(
+    reservationId: string,
+    rating: number,
+    breakdown: ReviewRatingBreakdown,
+    comment: string
+  ): Observable<ListingReview> {
     return this.http.post<ListingReview>(`/api/reservations/${reservationId}/review`, {
       rating,
+      ...breakdown,
       comment
     });
   }
 
   addHostResponse(reviewId: string, response: string): Observable<ListingReview> {
     return this.http.post<ListingReview>(`/api/reviews/${reviewId}/response`, { response });
+  }
+
+  reportReview(reviewId: string, reason: string, details: string): Observable<ReviewReport> {
+    return this.http.post<ReviewReport>(`/api/reviews/${reviewId}/report`, {
+      reason,
+      details: details.trim() || null
+    });
   }
 
   getEligibleReservations(listingId: string, reviewedReservationIds: string[]): Observable<ReviewReservationOption[]> {
@@ -69,7 +119,7 @@ export class ReviewsApiService {
       map(page => page.content
         .filter(reservation =>
           reservation.listingId === listingId
-          && ['CONFIRMED', 'COMPLETED'].includes(reservation.status)
+          && reservation.status === 'COMPLETED'
           && reservation.checkOut < today
           && !reviewedIds.has(reservation.id)
         )

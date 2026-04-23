@@ -38,12 +38,12 @@ Cleaned, deduped, validated views.
 - `fct_search` — search funnel facts from `search_executed`
 - `fct_listing_event` — listing lifecycle, view, save, and availability events
 - `fct_reservation_event` — reservation create, confirm, decline, and cancellation events
-- `fct_trust_event` — review, host response, profile update, and host conversion events
+- `fct_trust_event` — review creation, host reciprocal reviews, host responses, review moderation, profile update, and host conversion events
 - `fct_listing_daily` — daily listing metrics
 
 ### Gold OBT (`models/gold/obt/`)
 
-- `obt_listing_performance` — one big table for listing analytics with reservation value and event-derived engagement counts
+- `obt_listing_performance` — one big table for listing analytics with reservation value, review quality events, moderation counts, and engagement counts
 
 Dashboard view events are retained in `fct_event` for lineage, but dashboard-specific aggregate marts are intentionally not modeled here. Dashboard aggregates currently read from OLTP for freshness.
 

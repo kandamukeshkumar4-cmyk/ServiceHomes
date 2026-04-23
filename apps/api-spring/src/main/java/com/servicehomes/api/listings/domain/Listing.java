@@ -76,6 +76,32 @@ public class Listing {
     @Column(name = "published_at")
     private Instant publishedAt;
 
+    @Column(name = "average_rating", precision = 3, scale = 2)
+    private BigDecimal averageRating;
+
+    @Column(name = "review_count", nullable = false)
+    @Builder.Default
+    private long reviewCount = 0;
+
+    @Column(name = "cleanliness_rating", precision = 3, scale = 2)
+    private BigDecimal cleanlinessRating;
+
+    @Column(name = "accuracy_rating", precision = 3, scale = 2)
+    private BigDecimal accuracyRating;
+
+    @Column(name = "communication_rating", precision = 3, scale = 2)
+    private BigDecimal communicationRating;
+
+    @Column(name = "location_rating", precision = 3, scale = 2)
+    private BigDecimal locationRating;
+
+    @Column(name = "value_rating", precision = 3, scale = 2)
+    private BigDecimal valueRating;
+
+    @Column(name = "trust_score", nullable = false, precision = 5, scale = 2)
+    @Builder.Default
+    private BigDecimal trustScore = BigDecimal.ZERO;
+
     @OneToOne(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private ListingLocation location;
 

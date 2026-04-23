@@ -16,7 +16,10 @@ Avro/JSON schemas for analytics events.
 - `reservation_declined.avsc` — host declines a pending reservation request
 - `reservation_cancelled.avsc` — reservation is cancelled
 - `review_created.avsc` — guest leaves a review after an eligible stay
+- `host_review_created.avsc` — host leaves the reciprocal double-blind review
 - `host_response_added.avsc` — host posts a response to a listing review
+- `review_reported.avsc` — user reports a visible review for moderation
+- `review_moderated.avsc` — admin applies a review moderation decision
 - `listing_saved.avsc` — traveler saves a listing for later
 - `listing_unsaved.avsc` — traveler removes a saved listing
 - `profile_updated.avsc` — traveler or host updates their profile details

@@ -97,7 +97,8 @@ export class ListingService {
       relevance: 'RELEVANCE',
       priceAsc: 'PRICE_ASC',
       priceDesc: 'PRICE_DESC',
-      newest: 'NEWEST'
+      newest: 'NEWEST',
+      ratingDesc: 'RATING_DESC'
     };
     params.set('sort', sortMapping[filters.sort]);
     params.set('page', String(filters.page));

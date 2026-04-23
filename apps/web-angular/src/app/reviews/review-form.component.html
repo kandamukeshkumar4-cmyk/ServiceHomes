@@ -17,7 +17,7 @@
     </div>
 
     <div class="col-12 md:col-6">
-      <label class="block text-sm font-semibold mb-2">Rating</label>
+      <label class="block text-sm font-semibold mb-2">Overall rating</label>
       <div class="flex flex-wrap gap-2">
         <button
           *ngFor="let stars of [1, 2, 3, 4, 5]"
@@ -28,6 +28,25 @@
           [disabled]="submitting">
           {{ stars }}★
         </button>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="grid">
+        <div class="col-12 md:col-6" *ngFor="let category of ratingCategories">
+          <label class="block text-sm font-semibold mb-2">{{ category.label }}</label>
+          <div class="flex flex-wrap gap-2">
+            <button
+              *ngFor="let stars of [1, 2, 3, 4, 5]"
+              type="button"
+              class="p-button p-button-sm p-button-outlined rating-chip"
+              [class.active]="breakdown[category.key] === stars"
+              (click)="breakdown[category.key] = stars"
+              [disabled]="submitting">
+              {{ stars }}★
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 

@@ -17,5 +17,8 @@ public record ListingSearchRow(
     int bedrooms,
     int beds,
     int bathrooms,
-    Double distanceKm
+    Double distanceKm,
+    BigDecimal averageRating,
+    long reviewCount,
+    BigDecimal trustScore
 ) {}

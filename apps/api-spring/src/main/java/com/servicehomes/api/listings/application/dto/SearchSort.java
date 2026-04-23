@@ -4,5 +4,6 @@ public enum SearchSort {
     RELEVANCE,
     PRICE_ASC,
     PRICE_DESC,
-    NEWEST
+    NEWEST,
+    RATING_DESC
 }

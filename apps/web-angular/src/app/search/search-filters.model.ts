@@ -1,4 +1,4 @@
-export type SearchSort = 'relevance' | 'priceAsc' | 'priceDesc' | 'newest';
+export type SearchSort = 'relevance' | 'priceAsc' | 'priceDesc' | 'newest' | 'ratingDesc';
 
 export interface SearchFilters {
   listingId: string | null;

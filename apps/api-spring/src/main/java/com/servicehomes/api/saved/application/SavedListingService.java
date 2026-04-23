@@ -5,8 +5,6 @@ import com.servicehomes.api.listings.application.dto.ListingSearchResult;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingPhoto;
 import com.servicehomes.api.listings.domain.ListingRepository;
-import com.servicehomes.api.reviews.domain.ListingReviewSummary;
-import com.servicehomes.api.reviews.domain.ReviewRepository;
 import com.servicehomes.api.saved.domain.SavedListing;
 import com.servicehomes.api.saved.domain.SavedListingRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +21,6 @@ public class SavedListingService {
 
     private final SavedListingRepository savedListingRepository;
     private final ListingRepository listingRepository;
-    private final ReviewRepository reviewRepository;
     private final EventPublisher eventPublisher;
 
     public List<ListingSearchResult> listSavedListings(UUID guestId) {
@@ -34,10 +28,9 @@ public class SavedListingService {
         List<Listing> listings = savedListings.stream()
             .map(SavedListing::getListing)
             .toList();
-        Map<UUID, ListingReviewSummary> reviewSummaries = loadReviewSummaries(extractListingIds(listings));
 
         return listings.stream()
-            .map(listing -> toResult(listing, reviewSummaries.get(listing.getId())))
+            .map(this::toResult)
             .toList();
     }
 
@@ -91,22 +84,7 @@ public class SavedListingService {
         return new HashSet<>(savedListingRepository.findListingIdsByGuestIdAndListingIdIn(guestId, listingIds));
     }
 
-    private Map<UUID, ListingReviewSummary> loadReviewSummaries(List<UUID> listingIds) {
-        if (listingIds.isEmpty()) {
-            return Map.of();
-        }
-
-        return reviewRepository.findSummariesByListingIds(listingIds).stream()
-            .collect(Collectors.toMap(ListingReviewSummary::listingId, Function.identity()));
-    }
-
-    private List<UUID> extractListingIds(List<Listing> listings) {
-        return listings.stream()
-            .map(Listing::getId)
-            .toList();
-    }
-
-    private ListingSearchResult toResult(Listing listing, ListingReviewSummary reviewSummary) {
+    private ListingSearchResult toResult(Listing listing) {
         return new ListingSearchResult(
             listing.getId(),
             listing.getTitle(),
@@ -122,10 +100,9 @@ public class SavedListingService {
             listing.getBeds(),
             listing.getBathrooms(),
             null,
-            reviewSummary != null && reviewSummary.averageRating() != null
-                ? BigDecimal.valueOf(reviewSummary.averageRating())
-                : null,
-            reviewSummary != null ? reviewSummary.reviewCount() : 0L,
+            listing.getAverageRating(),
+            listing.getReviewCount(),
+            listing.getTrustScore(),
             true
         );
     }

@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "ReviewCreated",
+  "name": "HostReviewCreated",
   "namespace": "com.servicehomes.events",
   "fields": [
     { "name": "eventId", "type": "string" },
@@ -8,14 +8,9 @@
     { "name": "reviewId", "type": "string" },
     { "name": "reservationId", "type": "string" },
     { "name": "listingId", "type": "string" },
-    { "name": "guestId", "type": "string" },
     { "name": "hostId", "type": "string" },
+    { "name": "guestId", "type": "string" },
     { "name": "rating", "type": "int" },
-    { "name": "cleanlinessRating", "type": "int" },
-    { "name": "accuracyRating", "type": "int" },
-    { "name": "communicationRating", "type": "int" },
-    { "name": "locationRating", "type": "int" },
-    { "name": "valueRating", "type": "int" },
     { "name": "commentLength", "type": "int" },
     { "name": "visibleAt", "type": "string" }
   ]

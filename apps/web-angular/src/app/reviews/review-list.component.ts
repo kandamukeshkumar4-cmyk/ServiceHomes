@@ -1,12 +1,19 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { HostResponseFormComponent } from './host-response-form.component';
 import { ListingReview } from './reviews-api.service';
+
+export interface ReviewReportSubmission {
+  reviewId: string;
+  reason: string;
+  details: string;
+}
 
 @Component({
   selector: 'app-review-list',
   standalone: true,
-  imports: [CommonModule, HostResponseFormComponent],
+  imports: [CommonModule, FormsModule, HostResponseFormComponent],
   templateUrl: './review-list.component.html',
   styles: [`
     .breakdown-track {
@@ -32,15 +39,37 @@ export class ReviewListComponent {
   @Input() reviews: ListingReview[] = [];
   @Input() averageRating = 0;
   @Input() reviewCount = 0;
+  @Input() cleanlinessRating: number | null = null;
+  @Input() accuracyRating: number | null = null;
+  @Input() communicationRating: number | null = null;
+  @Input() locationRating: number | null = null;
+  @Input() valueRating: number | null = null;
+  @Input() trustScore = 0;
   @Input() loading = false;
   @Input() errorMessage = '';
   @Input() canRespondAsHost = false;
   @Input() responseSubmittingFor: string | null = null;
   @Input() responseError = '';
+  @Input() canReportReviews = false;
+  @Input() reportingReviewId: string | null = null;
+  @Input() reportError = '';
 
   @Output() hostResponseSubmitted = new EventEmitter<{ reviewId: string; response: string }>();
+  @Output() reviewReported = new EventEmitter<ReviewReportSubmission>();
 
   expandedResponseReviewId: string | null = null;
+  expandedReportReviewId: string | null = null;
+  reportReason = 'OTHER';
+  reportDetails = '';
+
+  readonly reportReasons = [
+    { value: 'SPAM', label: 'Spam' },
+    { value: 'HATE_OR_HARASSMENT', label: 'Harassment' },
+    { value: 'OFF_PLATFORM_PAYMENT', label: 'Off-platform payment' },
+    { value: 'PERSONAL_INFORMATION', label: 'Personal information' },
+    { value: 'IRRELEVANT', label: 'Irrelevant' },
+    { value: 'OTHER', label: 'Other' }
+  ];
 
   get breakdown() {
     const totalLoaded = this.reviews.length || 1;
@@ -67,6 +96,26 @@ export class ReviewListComponent {
     return Array.from({ length: rating }, () => '★');
   }
 
+  aggregateRatings() {
+    return [
+      { label: 'Cleanliness', value: this.cleanlinessRating },
+      { label: 'Accuracy', value: this.accuracyRating },
+      { label: 'Communication', value: this.communicationRating },
+      { label: 'Location', value: this.locationRating },
+      { label: 'Value', value: this.valueRating }
+    ].filter(item => item.value !== null && item.value !== undefined);
+  }
+
+  ratingDetailsFor(review: ListingReview) {
+    return [
+      { label: 'Cleanliness', value: review.cleanlinessRating },
+      { label: 'Accuracy', value: review.accuracyRating },
+      { label: 'Communication', value: review.communicationRating },
+      { label: 'Location', value: review.locationRating },
+      { label: 'Value', value: review.valueRating }
+    ].filter(item => item.value !== null && item.value !== undefined);
+  }
+
   openHostResponse(reviewId: string) {
     this.expandedResponseReviewId = reviewId;
   }
@@ -77,5 +126,28 @@ export class ReviewListComponent {
 
   submitHostResponse(reviewId: string, response: string) {
     this.hostResponseSubmitted.emit({ reviewId, response });
+  }
+
+  openReport(reviewId: string) {
+    this.expandedReportReviewId = reviewId;
+    this.reportReason = 'OTHER';
+    this.reportDetails = '';
+  }
+
+  cancelReport() {
+    this.expandedReportReviewId = null;
+    this.reportDetails = '';
+  }
+
+  submitReport(reviewId: string) {
+    if (this.reportingReviewId === reviewId) {
+      return;
+    }
+
+    this.reviewReported.emit({
+      reviewId,
+      reason: this.reportReason,
+      details: this.reportDetails.trim()
+    });
   }
 }
