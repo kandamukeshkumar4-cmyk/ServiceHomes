@@ -31,6 +31,7 @@ public class LocalSecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .addFilterBefore(localJwtFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/host/dashboard", "/guest/dashboard").authenticated()
                 .requestMatchers("/api/**").permitAll()
                 .anyRequest().permitAll()
             );

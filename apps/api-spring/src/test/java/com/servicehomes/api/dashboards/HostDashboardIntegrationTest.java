@@ -81,7 +81,7 @@ class HostDashboardIntegrationTest {
         // Confirmed but past
         createReservation(listing, GUEST_ID, today.minusDays(10), today.minusDays(5), Reservation.Status.CONFIRMED);
 
-        mockMvc.perform(get("/api/host/dashboard")
+        mockMvc.perform(get("/host/dashboard")
                 .header("X-Test-User-Id", HOST_ID.toString()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.upcomingReservations.length()").value(1))
@@ -94,7 +94,7 @@ class HostDashboardIntegrationTest {
 
     @Test
     void hostDashboardRequiresAuth() throws Exception {
-        mockMvc.perform(get("/api/host/dashboard"))
+        mockMvc.perform(get("/host/dashboard"))
             .andExpect(status().isUnauthorized());
     }
 

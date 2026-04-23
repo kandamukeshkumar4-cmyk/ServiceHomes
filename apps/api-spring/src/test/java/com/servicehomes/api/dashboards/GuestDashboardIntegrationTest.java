@@ -88,7 +88,7 @@ class GuestDashboardIntegrationTest {
 
         savedListingRepository.save(SavedListing.builder().guestId(GUEST_ID).listing(listing).build());
 
-        mockMvc.perform(get("/api/guest/dashboard")
+        mockMvc.perform(get("/guest/dashboard")
                 .header("X-Test-User-Id", GUEST_ID.toString()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.upcomingTrips.length()").value(1))
@@ -99,7 +99,7 @@ class GuestDashboardIntegrationTest {
 
     @Test
     void guestDashboardRequiresAuth() throws Exception {
-        mockMvc.perform(get("/api/guest/dashboard"))
+        mockMvc.perform(get("/guest/dashboard"))
             .andExpect(status().isUnauthorized());
     }
 
