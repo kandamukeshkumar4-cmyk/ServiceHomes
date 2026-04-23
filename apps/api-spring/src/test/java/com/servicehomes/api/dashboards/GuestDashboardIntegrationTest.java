@@ -1,6 +1,5 @@
 package com.servicehomes.api.dashboards;
 
-import com.servicehomes.api.config.TestJwtFilter;
 import com.servicehomes.api.listings.domain.*;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
@@ -90,7 +89,7 @@ class GuestDashboardIntegrationTest {
         savedListingRepository.save(SavedListing.builder().guestId(GUEST_ID).listing(listing).build());
 
         mockMvc.perform(get("/api/guest/dashboard")
-                .header(TestJwtFilter.HEADER_NAME, GUEST_ID.toString()))
+                .header("X-Test-User-Id", GUEST_ID.toString()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.upcomingTrips.length()").value(1))
             .andExpect(jsonPath("$.pastTrips.length()").value(2))
