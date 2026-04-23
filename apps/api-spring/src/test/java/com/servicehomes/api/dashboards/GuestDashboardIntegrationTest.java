@@ -35,6 +35,8 @@ class GuestDashboardIntegrationTest {
 
     private static final UUID HOST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
     private static final UUID GUEST_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12");
+    private static final String HOST_AUTH0_ID = "auth0|seed-host-1";
+    private static final String GUEST_AUTH0_ID = "auth0|seed-guest-1";
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgis/postgis:15-3.4").asCompatibleSubstituteFor("postgres"))
@@ -89,7 +91,7 @@ class GuestDashboardIntegrationTest {
         savedListingRepository.save(SavedListing.builder().guestId(GUEST_ID).listing(listing).build());
 
         mockMvc.perform(get("/guest/dashboard")
-                .header("X-Test-User-Id", GUEST_ID.toString()))
+                .header("X-Test-User-Id", GUEST_AUTH0_ID))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.upcomingTrips.length()").value(1))
             .andExpect(jsonPath("$.pastTrips.length()").value(2))
