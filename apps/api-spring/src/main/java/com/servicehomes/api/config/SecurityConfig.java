@@ -36,6 +36,17 @@ public class SecurityConfig {
             .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/health", "/actuator/health").permitAll()
+                .requestMatchers(HttpMethod.GET, "/listings/my").authenticated()
+                .requestMatchers(HttpMethod.GET,
+                    "/hosts/*",
+                    "/listings/*",
+                    "/listings/*/availability",
+                    "/listings/*/photos",
+                    "/listings/*/reviews",
+                    "/listings/amenities",
+                    "/listings/categories",
+                    "/listings/search"
+                ).permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .anyRequest().authenticated()
             )

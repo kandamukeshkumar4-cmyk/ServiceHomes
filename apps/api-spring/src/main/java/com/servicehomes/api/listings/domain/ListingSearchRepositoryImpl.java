@@ -31,6 +31,7 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
     @Override
     public Page<ListingSearchRow> search(SearchListingsRequest filters, Pageable pageable) {
         MapSqlParameterSource params = new MapSqlParameterSource();
+        boolean hasCoordinates = hasCoordinates(filters);
         StringBuilder fromClause = new StringBuilder("""
             FROM listings l
             JOIN listing_locations loc ON loc.listing_id = l.id
@@ -48,7 +49,7 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
 
         appendWhere(filters, params, fromClause);
 
-        String selectClause = """
+        String selectClause = hasCoordinates ? """
             SELECT
                 l.id,
                 l.title,
@@ -71,6 +72,22 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
                     ) / 1000.0
                     ELSE NULL
                 END AS distance_km
+            """ : """
+            SELECT
+                l.id,
+                l.title,
+                cover.url AS cover_url,
+                loc.city,
+                loc.country,
+                l.nightly_price,
+                c.name AS category_name,
+                loc.latitude,
+                loc.longitude,
+                l.max_guests,
+                l.bedrooms,
+                l.beds,
+                l.bathrooms,
+                NULL::double precision AS distance_km
             """;
 
         StringBuilder query = new StringBuilder(selectClause).append(fromClause);
@@ -89,8 +106,10 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
     }
 
     private void appendWhere(SearchListingsRequest filters, MapSqlParameterSource params, StringBuilder sql) {
-        params.addValue("latitude", filters.latitude());
-        params.addValue("longitude", filters.longitude());
+        if (hasCoordinates(filters)) {
+            params.addValue("latitude", filters.latitude());
+            params.addValue("longitude", filters.longitude());
+        }
 
         if (filters.listingId() != null) {
             sql.append(" AND l.id = :listingId");
@@ -196,7 +215,7 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
     private String buildOrderBy(SearchListingsRequest filters) {
         SearchSort sort = filters.sort();
         if (sort == null) {
-            if (filters.latitude() != null && filters.longitude() != null) {
+            if (hasCoordinates(filters)) {
                 return " ORDER BY distance_km ASC NULLS LAST, l.created_at DESC";
             }
             sort = hasText(filters.locationQuery()) ? SearchSort.RELEVANCE : SearchSort.NEWEST;
@@ -214,6 +233,10 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
 
     private static boolean hasText(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private static boolean hasCoordinates(SearchListingsRequest filters) {
+        return filters.latitude() != null && filters.longitude() != null;
     }
 
     private static final class ListingSearchRowMapper implements RowMapper<ListingSearchRow> {
