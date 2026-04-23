@@ -93,14 +93,17 @@ class HostDashboardIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.upcomingReservations.length()").value(1))
             .andExpect(jsonPath("$.pendingRequests.length()").value(1))
-            .andExpect(jsonPath("$.mockEarnings").value(org.hamcrest.Matchers.greaterThan(0)))
             .andExpect(jsonPath("$.listingPerformance.length()").value(1))
             .andExpect(jsonPath("$.listingPerformance[0].bookingCount").value(3))
             .andExpect(result -> {
-                JsonNode occupancyRate = objectMapper.readTree(result.getResponse().getContentAsString())
-                    .path("occupancyRate");
+                JsonNode response = objectMapper.readTree(result.getResponse().getContentAsString());
+                JsonNode occupancyRate = response.path("occupancyRate");
+                JsonNode mockEarnings = response.path("mockEarnings");
                 org.junit.jupiter.api.Assertions.assertTrue(occupancyRate.isNumber(), "occupancyRate must be numeric");
                 org.junit.jupiter.api.Assertions.assertTrue(occupancyRate.asDouble() > 0.0, "occupancyRate must be positive");
+                org.junit.jupiter.api.Assertions.assertTrue(mockEarnings.isNumber(), "mockEarnings must be numeric");
+                org.junit.jupiter.api.Assertions.assertTrue(mockEarnings.decimalValue().compareTo(BigDecimal.ZERO) > 0,
+                    "mockEarnings must be positive");
             });
     }
 
