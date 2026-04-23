@@ -87,7 +87,9 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
             selectClause += "NULL AS distance_km";
         }
 
-        StringBuilder query = new StringBuilder(selectClause).append(fromClause);
+        StringBuilder query = new StringBuilder(selectClause)
+            .append('\n')
+            .append(fromClause);
         query.append(buildOrderBy(filters));
         query.append(" LIMIT :limit OFFSET :offset");
         params.addValue("limit", pageable.getPageSize());
