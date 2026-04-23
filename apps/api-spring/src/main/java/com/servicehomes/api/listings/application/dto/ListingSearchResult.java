@@ -20,5 +20,6 @@ public record ListingSearchResult(
     Double distanceKm,
     BigDecimal averageRating,
     long reviewCount,
+    BigDecimal trustScore,
     boolean isSaved
 ) {}

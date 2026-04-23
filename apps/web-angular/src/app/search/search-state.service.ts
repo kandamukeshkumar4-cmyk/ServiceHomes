@@ -247,7 +247,9 @@ function readBoolean(value: unknown): boolean {
 
 function readSort(value: unknown): SearchSort {
   const raw = readString(value);
-  return raw === 'priceAsc' || raw === 'priceDesc' || raw === 'newest' ? raw : DEFAULT_SEARCH_FILTERS.sort;
+  return raw === 'priceAsc' || raw === 'priceDesc' || raw === 'newest' || raw === 'ratingDesc'
+    ? raw
+    : DEFAULT_SEARCH_FILTERS.sort;
 }
 
 function readNumber(value: unknown): number | null {

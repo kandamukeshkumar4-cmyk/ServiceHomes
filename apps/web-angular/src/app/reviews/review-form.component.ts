@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReviewReservationOption } from './reviews-api.service';
+import { ReviewRatingBreakdown, ReviewReservationOption } from './reviews-api.service';
 
 export interface ReviewSubmission {
   reservationId: string;
   rating: number;
+  breakdown: ReviewRatingBreakdown;
   comment: string;
 }
 
@@ -34,7 +35,22 @@ export class ReviewFormComponent implements OnChanges {
 
   selectedReservationId = '';
   rating = 5;
+  breakdown: ReviewRatingBreakdown = {
+    cleanlinessRating: 5,
+    accuracyRating: 5,
+    communicationRating: 5,
+    locationRating: 5,
+    valueRating: 5
+  };
   comment = '';
+
+  readonly ratingCategories: { key: keyof ReviewRatingBreakdown; label: string }[] = [
+    { key: 'cleanlinessRating', label: 'Cleanliness' },
+    { key: 'accuracyRating', label: 'Accuracy' },
+    { key: 'communicationRating', label: 'Communication' },
+    { key: 'locationRating', label: 'Location' },
+    { key: 'valueRating', label: 'Value' }
+  ];
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['reservations']) {
@@ -50,6 +66,13 @@ export class ReviewFormComponent implements OnChanges {
   reset() {
     this.selectedReservationId = this.reservations[0]?.id ?? '';
     this.rating = 5;
+    this.breakdown = {
+      cleanlinessRating: 5,
+      accuracyRating: 5,
+      communicationRating: 5,
+      locationRating: 5,
+      valueRating: 5
+    };
     this.comment = '';
   }
 
@@ -62,6 +85,7 @@ export class ReviewFormComponent implements OnChanges {
     this.submitted.emit({
       reservationId: this.selectedReservationId,
       rating: this.rating,
+      breakdown: { ...this.breakdown },
       comment: normalizedComment
     });
   }

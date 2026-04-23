@@ -28,7 +28,10 @@ models:
                   - reservation_declined
                   - reservation_cancelled
                   - review_created
+                  - host_review_created
                   - host_response_added
+                  - review_reported
+                  - review_moderated
                   - profile_updated
                   - became_host
                   - host_dashboard_viewed
@@ -100,7 +103,10 @@ models:
                   - reservation_declined
                   - reservation_cancelled
                   - review_created
+                  - host_review_created
                   - host_response_added
+                  - review_reported
+                  - review_moderated
                   - profile_updated
                   - became_host
                   - host_dashboard_viewed
@@ -176,7 +182,10 @@ models:
               arguments:
                 values:
                   - review_created
+                  - host_review_created
                   - host_response_added
+                  - review_reported
+                  - review_moderated
                   - profile_updated
                   - became_host
       - name: aggregate_id

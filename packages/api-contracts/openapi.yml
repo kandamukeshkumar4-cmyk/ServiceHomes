@@ -269,7 +269,7 @@ paths:
           in: query
           schema:
             type: string
-            enum: [RELEVANCE, PRICE_ASC, PRICE_DESC, NEWEST]
+            enum: [RELEVANCE, PRICE_ASC, PRICE_DESC, NEWEST, RATING_DESC]
         - name: page
           in: query
           schema:
@@ -661,6 +661,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/Review'
 
+  /reservations/{id}/host-review:
+    post:
+      summary: Create a host review for an eligible completed reservation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHostReviewRequest'
+      responses:
+        '200':
+          description: Created host review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+
   /host/dashboard:
     get:
       summary: Get host dashboard summary
@@ -708,6 +734,71 @@ paths:
       responses:
         '200':
           description: Review with host response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+
+  /reviews/{id}/report:
+    post:
+      summary: Report a visible review for moderation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportReviewRequest'
+      responses:
+        '200':
+          description: Created review report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewReport'
+
+  /admin/reviews/moderation:
+    get:
+      summary: List open review moderation reports
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Paginated moderation queue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageModerationReview'
+
+  /admin/reviews/{id}/moderation:
+    patch:
+      summary: Apply moderation status to a review
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerateReviewRequest'
+      responses:
+        '200':
+          description: Moderated review
           content:
             application/json:
               schema:
@@ -877,6 +968,29 @@ components:
         status:
           type: string
           enum: [DRAFT, PUBLISHED, UNPUBLISHED]
+        averageRating:
+          type: number
+          nullable: true
+        reviewCount:
+          type: integer
+          format: int64
+        cleanlinessRating:
+          type: number
+          nullable: true
+        accuracyRating:
+          type: number
+          nullable: true
+        communicationRating:
+          type: number
+          nullable: true
+        locationRating:
+          type: number
+          nullable: true
+        valueRating:
+          type: number
+          nullable: true
+        trustScore:
+          type: number
         location:
           $ref: '#/components/schemas/ListingLocation'
         policy:
@@ -1008,16 +1122,12 @@ components:
           nullable: true
         reviewCount:
           type: integer
+          format: int64
         isSaved:
           type: boolean
-        distanceKm:
+        trustScore:
           type: number
           nullable: true
-        averageRating:
-          type: number
-          nullable: true
-        reviewCount:
-          type: integer
 
     PageListing:
       type: object
@@ -1302,6 +1412,38 @@ components:
 
     CreateReviewRequest:
       type: object
+      required: [rating, cleanlinessRating, accuracyRating, communicationRating, locationRating, valueRating, comment]
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        cleanlinessRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        accuracyRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        communicationRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        locationRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        valueRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          maxLength: 4000
+
+    CreateHostReviewRequest:
+      type: object
       required: [rating, comment]
       properties:
         rating:
@@ -1320,6 +1462,30 @@ components:
           type: string
           maxLength: 4000
 
+    ReportReviewRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          enum: [SPAM, HATE_OR_HARASSMENT, OFF_PLATFORM_PAYMENT, PERSONAL_INFORMATION, IRRELEVANT, OTHER]
+        details:
+          type: string
+          nullable: true
+          maxLength: 2000
+
+    ModerateReviewRequest:
+      type: object
+      required: [moderationStatus]
+      properties:
+        moderationStatus:
+          type: string
+          enum: [APPROVED, HIDDEN]
+        notes:
+          type: string
+          nullable: true
+          maxLength: 2000
+
     Review:
       type: object
       properties:
@@ -1335,8 +1501,32 @@ components:
         guestId:
           type: string
           format: uuid
+        hostId:
+          type: string
+          format: uuid
+        reviewerId:
+          type: string
+          format: uuid
+        reviewerRole:
+          type: string
+          enum: [GUEST, HOST]
         rating:
           type: integer
+        cleanlinessRating:
+          type: integer
+          nullable: true
+        accuracyRating:
+          type: integer
+          nullable: true
+        communicationRating:
+          type: integer
+          nullable: true
+        locationRating:
+          type: integer
+          nullable: true
+        valueRating:
+          type: integer
+          nullable: true
         comment:
           type: string
         guestDisplayName:
@@ -1347,6 +1537,14 @@ components:
         hostResponse:
           type: string
           nullable: true
+        visibleAt:
+          type: string
+          format: date-time
+        moderationStatus:
+          type: string
+          enum: [APPROVED, HIDDEN]
+        reportCount:
+          type: integer
         createdAt:
           type: string
           format: date-time
@@ -1363,6 +1561,29 @@ components:
         reviewCount:
           type: integer
           format: int64
+        cleanlinessRating:
+          type: number
+          format: double
+          nullable: true
+        accuracyRating:
+          type: number
+          format: double
+          nullable: true
+        communicationRating:
+          type: number
+          format: double
+          nullable: true
+        locationRating:
+          type: number
+          format: double
+          nullable: true
+        valueRating:
+          type: number
+          format: double
+          nullable: true
+        trustScore:
+          type: number
+          format: double
         content:
           type: array
           items:
@@ -1370,6 +1591,68 @@ components:
         totalElements:
           type: integer
           format: int64
+        totalPages:
+          type: integer
+        number:
+          type: integer
+        size:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+
+    ReviewReport:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reviewId:
+          type: string
+          format: uuid
+        reporterId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+        details:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [OPEN, RESOLVED, DISMISSED]
+        createdAt:
+          type: string
+          format: date-time
+        resolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+        resolvedBy:
+          type: string
+          format: uuid
+          nullable: true
+
+    ModerationReview:
+      type: object
+      properties:
+        review:
+          $ref: '#/components/schemas/Review'
+        reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewReport'
+
+    PageModerationReview:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModerationReview'
+        totalElements:
+          type: integer
         totalPages:
           type: integer
         number:

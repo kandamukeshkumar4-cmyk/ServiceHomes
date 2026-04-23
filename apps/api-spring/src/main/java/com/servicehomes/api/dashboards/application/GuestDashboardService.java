@@ -8,6 +8,7 @@ import com.servicehomes.api.messaging.domain.MessageThread;
 import com.servicehomes.api.messaging.domain.MessageThreadRepository;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
+import com.servicehomes.api.reviews.domain.Review;
 import com.servicehomes.api.reviews.domain.ReviewRepository;
 import com.servicehomes.api.saved.domain.SavedListingRepository;
 import lombok.RequiredArgsConstructor;
@@ -54,10 +55,10 @@ public class GuestDashboardService {
     }
 
     private boolean canReview(Reservation r) {
-        if (r.getStatus() != Reservation.Status.CONFIRMED && r.getStatus() != Reservation.Status.COMPLETED) {
+        if (r.getStatus() != Reservation.Status.COMPLETED) {
             return false;
         }
-        return !reviewRepository.existsByReservation_Id(r.getId());
+        return !reviewRepository.existsByReservation_IdAndReviewerRole(r.getId(), Review.ReviewerRole.GUEST);
     }
 
     private long countUnreadThreads(UUID guestId) {

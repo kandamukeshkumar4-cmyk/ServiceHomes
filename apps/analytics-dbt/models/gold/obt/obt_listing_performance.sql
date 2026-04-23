@@ -31,7 +31,10 @@ trust_event_metrics AS (
   SELECT
     listing_id,
     COUNT_IF(event_type = 'review_created') as review_created_count,
-    COUNT_IF(event_type = 'host_response_added') as host_response_count
+    COUNT_IF(event_type = 'host_review_created') as host_review_created_count,
+    COUNT_IF(event_type = 'host_response_added') as host_response_count,
+    COUNT_IF(event_type = 'review_reported') as review_report_count,
+    COUNT_IF(event_type = 'review_moderated') as review_moderation_count
   FROM {{ ref('fct_trust_event') }}
   WHERE listing_id IS NOT NULL
   GROUP BY 1
@@ -64,7 +67,10 @@ SELECT
   COALESCE(lem.listing_unpublish_count, 0) as listing_unpublish_count,
   COALESCE(lem.availability_update_count, 0) as availability_update_count,
   COALESCE(tem.review_created_count, 0) as review_created_count,
-  COALESCE(tem.host_response_count, 0) as host_response_count
+  COALESCE(tem.host_review_created_count, 0) as host_review_created_count,
+  COALESCE(tem.host_response_count, 0) as host_response_count,
+  COALESCE(tem.review_report_count, 0) as review_report_count,
+  COALESCE(tem.review_moderation_count, 0) as review_moderation_count
 FROM {{ ref('sr_listings') }} l
 LEFT JOIN {{ ref('dim_location') }} loc ON l.id = loc.listing_id
 LEFT JOIN {{ ref('dim_host') }} h ON l.host_id = h.user_id

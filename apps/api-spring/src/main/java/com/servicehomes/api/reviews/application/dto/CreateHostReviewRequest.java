@@ -6,12 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record CreateReviewRequest(
+public record CreateHostReviewRequest(
     @NotNull @Min(1) @Max(5) Integer rating,
-    @NotNull @Min(1) @Max(5) Integer cleanlinessRating,
-    @NotNull @Min(1) @Max(5) Integer accuracyRating,
-    @NotNull @Min(1) @Max(5) Integer communicationRating,
-    @NotNull @Min(1) @Max(5) Integer locationRating,
-    @NotNull @Min(1) @Max(5) Integer valueRating,
     @NotBlank @Size(max = 4000) String comment
 ) {}

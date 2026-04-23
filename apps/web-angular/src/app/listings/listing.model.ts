@@ -16,6 +16,14 @@ export interface Listing {
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
+  averageRating?: number | null;
+  reviewCount?: number;
+  cleanlinessRating?: number | null;
+  accuracyRating?: number | null;
+  communicationRating?: number | null;
+  locationRating?: number | null;
+  valueRating?: number | null;
+  trustScore?: number;
   location: ListingLocation;
   policy: ListingPolicy;
   photos: ListingPhoto[];
@@ -107,6 +115,7 @@ export interface ListingCardViewModel extends ListingCardDto {
   distanceKm?: number | null;
   averageRating?: number | null;
   reviewCount?: number;
+  trustScore?: number | null;
   isSaved?: boolean;
 }
 

@@ -76,19 +76,29 @@
         </app-review-form>
 
         <div *ngIf="!canLeaveReview && !eligibleReservationsLoading && currentUserId && !isHostViewer" class="surface-50 border-round-lg p-3 text-sm text-600 mb-3">
-          Leave a review after a confirmed stay has finished.
+          Leave a review after a completed stay has finished.
         </div>
 
         <app-review-list
           [reviews]="reviews"
           [averageRating]="averageRating"
           [reviewCount]="reviewCount"
+          [cleanlinessRating]="cleanlinessRating"
+          [accuracyRating]="accuracyRating"
+          [communicationRating]="communicationRating"
+          [locationRating]="locationRating"
+          [valueRating]="valueRating"
+          [trustScore]="trustScore"
           [loading]="reviewsLoading"
           [errorMessage]="reviewsError"
           [canRespondAsHost]="isHostViewer"
           [responseSubmittingFor]="hostResponseSubmittingFor"
           [responseError]="hostResponseError"
-          (hostResponseSubmitted)="submitHostResponse($event)">
+          [canReportReviews]="!!currentUserId"
+          [reportingReviewId]="reportingReviewId"
+          [reportError]="reviewReportError"
+          (hostResponseSubmitted)="submitHostResponse($event)"
+          (reviewReported)="reportReview($event)">
         </app-review-list>
       </div>
 

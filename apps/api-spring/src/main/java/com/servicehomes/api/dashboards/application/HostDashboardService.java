@@ -11,7 +11,6 @@ import com.servicehomes.api.messaging.domain.MessageThread;
 import com.servicehomes.api.messaging.domain.MessageThreadRepository;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
-import com.servicehomes.api.reviews.domain.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,6 @@ public class HostDashboardService {
     private final ListingRepository listingRepository;
     private final MessageThreadRepository messageThreadRepository;
     private final MessageRepository messageRepository;
-    private final ReviewRepository reviewRepository;
 
     public HostDashboardResponse getDashboard(UUID hostId) {
         LocalDate today = LocalDate.now();
@@ -98,15 +96,13 @@ public class HostDashboardService {
                     listing.getId(),
                     List.of(Reservation.Status.CONFIRMED, Reservation.Status.COMPLETED)
                 );
-                Double avgRating = reviewRepository.calculateAverageRatingByListingId(listing.getId());
-                long reviewCount = reviewRepository.countReviewsByListingId(listing.getId());
                 return new ListingPerformanceDto(
                     listing.getId(),
                     listing.getTitle(),
                     coverUrl(listing),
                     bookingCount,
-                    avgRating,
-                    reviewCount
+                    listing.getAverageRating() != null ? listing.getAverageRating().doubleValue() : null,
+                    listing.getReviewCount()
                 );
             })
             .toList();
