@@ -36,7 +36,8 @@ public class SesMessageEmailNotifier implements MessageEmailNotifier {
             return;
         }
 
-        Instant cutoff = command.sentAt().minus(Duration.ofMinutes(quietPeriodMinutes));
+        Instant sentAt = command.sentAt() != null ? command.sentAt() : Instant.now();
+        Instant cutoff = sentAt.minus(Duration.ofMinutes(quietPeriodMinutes));
         if (wasRecipientRecentlyActive(command, cutoff) || hasRecentUnreadAlready(command, cutoff)) {
             return;
         }

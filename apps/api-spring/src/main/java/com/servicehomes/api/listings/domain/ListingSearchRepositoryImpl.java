@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -21,6 +20,17 @@ import java.util.UUID;
 public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCustom {
 
     private static final RowMapper<ListingSearchRow> ROW_MAPPER = new ListingSearchRowMapper();
+    private static final String DISTANCE_EXPRESSION = """
+        (
+            6371.0 * acos(
+                LEAST(1.0, GREATEST(-1.0,
+                    cos(radians(CAST(:latitude AS double precision))) * cos(radians(loc.latitude))
+                    * cos(radians(loc.longitude) - radians(CAST(:longitude AS double precision)))
+                    + sin(radians(CAST(:latitude AS double precision))) * sin(radians(loc.latitude))
+                ))
+            )
+        )
+        """;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -31,6 +41,7 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
     @Override
     public Page<ListingSearchRow> search(SearchListingsRequest filters, Pageable pageable) {
         MapSqlParameterSource params = new MapSqlParameterSource();
+        boolean hasCoordinates = filters.latitude() != null && filters.longitude() != null;
         StringBuilder fromClause = new StringBuilder("""
             FROM listings l
             JOIN listing_locations loc ON loc.listing_id = l.id
@@ -63,15 +74,18 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
                 l.bedrooms,
                 l.beds,
                 l.bathrooms,
+            """;
+        if (hasCoordinates) {
+            selectClause += """
                 CASE
-                    WHEN :latitude IS NOT NULL AND :longitude IS NOT NULL AND loc.latitude IS NOT NULL AND loc.longitude IS NOT NULL
-                    THEN earth_distance(
-                        ll_to_earth(loc.latitude, loc.longitude),
-                        ll_to_earth(:latitude, :longitude)
-                    ) / 1000.0
+                    WHEN loc.latitude IS NOT NULL AND loc.longitude IS NOT NULL
+                    THEN %s
                     ELSE NULL
                 END AS distance_km
-            """;
+                """.formatted(DISTANCE_EXPRESSION);
+        } else {
+            selectClause += "NULL AS distance_km";
+        }
 
         StringBuilder query = new StringBuilder(selectClause).append(fromClause);
         query.append(buildOrderBy(filters));
@@ -89,8 +103,10 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
     }
 
     private void appendWhere(SearchListingsRequest filters, MapSqlParameterSource params, StringBuilder sql) {
-        params.addValue("latitude", filters.latitude());
-        params.addValue("longitude", filters.longitude());
+        if (filters.latitude() != null && filters.longitude() != null) {
+            params.addValue("latitude", filters.latitude());
+            params.addValue("longitude", filters.longitude());
+        }
 
         if (filters.listingId() != null) {
             sql.append(" AND l.id = :listingId");
@@ -173,12 +189,9 @@ public class ListingSearchRepositoryImpl implements ListingSearchRepositoryCusto
             sql.append("""
                  AND loc.latitude IS NOT NULL
                  AND loc.longitude IS NOT NULL
-                 AND earth_distance(
-                     ll_to_earth(loc.latitude, loc.longitude),
-                     ll_to_earth(:latitude, :longitude)
-                 ) < :radiusMeters
-                """);
-            params.addValue("radiusMeters", BigDecimal.valueOf(filters.radiusKm() * 1000.0d));
+                 AND %s < :radiusKm
+                """.formatted(DISTANCE_EXPRESSION));
+            params.addValue("radiusKm", filters.radiusKm());
         }
 
         if (filters.swLat() != null && filters.swLng() != null && filters.neLat() != null && filters.neLng() != null) {

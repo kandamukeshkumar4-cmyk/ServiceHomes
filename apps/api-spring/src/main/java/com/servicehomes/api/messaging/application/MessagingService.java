@@ -58,7 +58,7 @@ public class MessagingService {
         MessageThread thread = messageThreadRepository.findByReservationId(reservationId)
             .orElseGet(() -> createThread(reservation));
 
-        Message savedMessage = messageRepository.save(Message.builder()
+        Message savedMessage = messageRepository.saveAndFlush(Message.builder()
             .thread(thread)
             .senderId(senderId)
             .content(request.content().trim())
