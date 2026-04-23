@@ -3,9 +3,9 @@ export const environment = {
   apiBaseUrl: '/api',
   auth: {
     enabled: true,
-    domain: 'YOUR_AUTH0_DOMAIN',
-    clientId: 'YOUR_AUTH0_CLIENT_ID',
-    audience: 'YOUR_AUTH0_AUDIENCE',
+    domain: 'dev-whp2gausi3kglqlv.us.auth0.com',
+    clientId: 'ycU9hs7LpN3wek1UCDEbQkEaUgU64Tqz',
+    audience: 'https://api.servicehomes',
     useRefreshTokens: true,
     cacheLocation: 'localstorage' as const
   }

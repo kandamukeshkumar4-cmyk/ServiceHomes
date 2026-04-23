@@ -25,3 +25,8 @@ variable "domain_name" {
   type        = string
   default     = ""
 }
+
+variable "api_origin_domain_name" {
+  description = "DNS name for the backend API origin"
+  type        = string
+}

@@ -64,11 +64,12 @@ module "ses" {
 module "frontend" {
   source = "./modules/frontend"
 
-  project_name        = var.project_name
-  environment         = var.environment
-  acm_certificate_arn = var.acm_certificate_arn
-  hosted_zone_id      = var.hosted_zone_id
-  domain_name         = var.email_domain
+  project_name           = var.project_name
+  environment            = var.environment
+  acm_certificate_arn    = var.acm_certificate_arn
+  hosted_zone_id         = var.hosted_zone_id
+  domain_name            = var.email_domain
+  api_origin_domain_name = module.alb.alb_dns_name
 }
 
 module "alb" {
