@@ -15,10 +15,6 @@ resource "aws_ses_configuration_set" "main" {
     tls_policy = "Require"
   }
 
-  reputation_options {
-    reputation_metrics_enabled = true
-  }
-
   tracking_options {
     custom_redirect_domain = var.email_domain != "" ? var.email_domain : null
   }
@@ -43,7 +39,7 @@ resource "aws_ses_event_destination" "cloudwatch" {
 
   cloudwatch_destination {
     default_value  = "email-event"
-    dimension_name = "EventType"
-    value_source   = "eventType"
+    dimension_name = "MessageTag"
+    value_source   = "messageTag"
   }
 }
