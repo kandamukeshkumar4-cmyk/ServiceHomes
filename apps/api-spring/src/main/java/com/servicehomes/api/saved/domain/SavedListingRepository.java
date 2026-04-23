@@ -39,4 +39,6 @@ public interface SavedListingRepository extends JpaRepository<SavedListing, UUID
         @Param("guestId") UUID guestId,
         @Param("listingIds") Collection<UUID> listingIds
     );
+
+    long countByGuestId(UUID guestId);
 }

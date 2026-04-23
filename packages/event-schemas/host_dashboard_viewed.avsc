@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "HostDashboardViewed",
+  "namespace": "com.servicehomes.events",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "timestamp", "type": "string" },
+    { "name": "hostId", "type": "string" },
+    { "name": "listingCount", "type": "int", "default": 0 }
+  ]
+}

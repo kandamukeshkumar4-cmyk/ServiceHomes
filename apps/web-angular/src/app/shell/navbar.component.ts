@@ -25,8 +25,8 @@ import { NotificationService } from '../core/notification.service';
                 {{ unreadCount }}
               </span>
             </a>
-            <a routerLink="/bookings" routerLinkActive="text-primary font-bold" class="text-700 no-underline">My Bookings</a>
-            <a routerLink="/host/accommodations" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Host</a>
+            <a routerLink="/trips" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Trips</a>
+            <a routerLink="/host" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Host</a>
             <a routerLink="/account" routerLinkActive="text-primary font-bold" class="text-700 no-underline">Account</a>
             <span *ngIf="auth.isLocalMode" class="px-2 py-1 surface-100 border-round text-600 text-sm">Local Auth</span>
             <button *ngIf="auth.usesAuth0" pButton class="p-button-text p-button-sm" (click)="auth.logout()">Log out</button>
