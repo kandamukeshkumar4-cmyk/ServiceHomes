@@ -70,7 +70,7 @@ class ReviewIntegrationTest {
     private static final UUID LOCAL_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private static final String SEED_HOST_AUTH0_ID = "auth0|seed-host-1";
     private static final String SEED_GUEST_AUTH0_ID = "auth0|seed-guest-1";
-    private static final String LOCAL_USER_AUTH0_ID = "local-user";
+    private static final String LOCAL_USER_AUTH0_ID = LOCAL_USER_ID.toString();
 
     @Autowired
     private MockMvc mockMvc;

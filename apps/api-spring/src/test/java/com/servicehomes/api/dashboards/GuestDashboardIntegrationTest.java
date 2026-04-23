@@ -84,7 +84,7 @@ class GuestDashboardIntegrationTest {
         // Upcoming trip
         createReservation(listing, GUEST_ID, today.plusDays(3), today.plusDays(6), Reservation.Status.CONFIRMED);
         // Past trip (reviewable)
-        createReservation(listing, GUEST_ID, today.minusDays(10), today.minusDays(5), Reservation.Status.CONFIRMED);
+        createReservation(listing, GUEST_ID, today.minusDays(10), today.minusDays(5), Reservation.Status.COMPLETED);
         // Past cancelled trip
         createReservation(listing, GUEST_ID, today.minusDays(20), today.minusDays(15), Reservation.Status.CANCELLED_BY_GUEST);
 
