@@ -136,6 +136,13 @@ resource "aws_ecs_service" "api" {
   desired_count   = var.desired_count
 
   health_check_grace_period_seconds = var.environment == "production" ? 180 : 240
+  propagate_tags                    = "NONE"
+
+  capacity_provider_strategy {
+    base              = 1
+    weight            = 100
+    capacity_provider = "FARGATE"
+  }
 
   network_configuration {
     subnets          = var.private_subnet_ids
