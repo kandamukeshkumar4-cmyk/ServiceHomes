@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "SearchResultClicked",
+  "namespace": "com.servicehomes.events",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "timestamp", "type": "string" },
+    { "name": "userId", "type": ["null", "string"], "default": null },
+    { "name": "searchQueryId", "type": "string" },
+    { "name": "queryHash", "type": "string" },
+    { "name": "listingId", "type": "string" },
+    { "name": "resultPosition", "type": "int" },
+    { "name": "deviceType", "type": ["null", "string"], "default": null }
+  ]
+}
