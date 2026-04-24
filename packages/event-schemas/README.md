@@ -5,6 +5,7 @@ Avro/JSON schemas for analytics events.
 ## Events
 
 - `listing_viewed.avsc` — traveler views a listing
+- `recently_viewed_recorded.avsc` — authenticated guest records a listing in recently viewed history
 - `listing_created.avsc` — host creates a listing
 - `listing_updated.avsc` — host updates a listing
 - `listing_availability_updated.avsc` — host replaces calendar availability rules
@@ -24,6 +25,11 @@ Avro/JSON schemas for analytics events.
 - `listing_unsaved.avsc` — traveler removes a saved listing
 - `profile_updated.avsc` — traveler or host updates their profile details
 - `became_host.avsc` — traveler account is promoted to include host capabilities
+- `wishlist_item_added.avsc` — guest adds a listing to a wishlist
+- `wishlist_item_removed.avsc` — guest removes a listing from a wishlist
+- `wishlist_item_reordered.avsc` — guest reorders wishlist items
+- `wishlist_shared.avsc` — owner shares a wishlist publicly or with collaborators
+- `saved_search_created.avsc` — guest saves a search filter snapshot
 
 ## Outbox Table
 

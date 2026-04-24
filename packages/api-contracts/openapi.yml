@@ -832,6 +832,478 @@ paths:
               schema:
                 $ref: '#/components/schemas/ListingReviewsResponse'
 
+  /wishlists:
+    get:
+      summary: List current user's accessible wishlists (owned or collaborative)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Wishlist summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WishlistSummary'
+    post:
+      summary: Create a wishlist
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWishlistRequest'
+      responses:
+        '200':
+          description: Created wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistSummary'
+
+  /wishlists/contains:
+    get:
+      summary: List accessible wishlist IDs containing a listing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Wishlist IDs containing the listing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wishlistIds:
+                    type: array
+                    items:
+                      type: string
+                      format: uuid
+
+  /wishlists/{wishlistId}:
+    get:
+      summary: Get wishlist detail
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Wishlist detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistDetail'
+    delete:
+      summary: Delete an owned wishlist
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+
+  /wishlists/{wishlistId}/items:
+    post:
+      summary: Add a listing to a wishlist
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddWishlistItemRequest'
+      responses:
+        '200':
+          description: Wishlist item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistItem'
+
+  /wishlists/{wishlistId}/items/{itemId}:
+    patch:
+      summary: Update wishlist item note
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWishlistItemRequest'
+      responses:
+        '200':
+          description: Wishlist item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistItem'
+    delete:
+      summary: Remove a wishlist item
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Removed
+
+  /wishlists/{wishlistId}/items/by-listing/{listingId}:
+    delete:
+      summary: Remove a listing from a wishlist
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Removed
+
+  /wishlists/{wishlistId}/items/reorder:
+    put:
+      summary: Persist wishlist item sort order
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderWishlistItemsRequest'
+      responses:
+        '204':
+          description: Reordered
+
+  /wishlists/{wishlistId}/collaborators:
+    put:
+      summary: Replace wishlist collaborators
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCollaboratorsRequest'
+      responses:
+        '200':
+          description: Wishlist detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistDetail'
+
+  /wishlists/{wishlistId}/share-link:
+    post:
+      summary: Generate a public wishlist share token
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Share link
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+
+  /wishlists/{wishlistId}/privacy:
+    put:
+      summary: Make an owned wishlist public or private
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: isPublic
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Wishlist detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistDetail'
+
+  /wishlists/{wishlistId}/cover-upload:
+    post:
+      summary: Create a presigned S3 PUT URL for a wishlist cover and persist the public URL
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WishlistCoverUploadRequest'
+      responses:
+        '200':
+          description: Presigned upload details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistCoverUploadResponse'
+
+  /wishlists/{wishlistId}/cover-photo:
+    put:
+      summary: Finalize a successfully uploaded wishlist cover by S3 key
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: wishlistId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinalizeWishlistCoverRequest'
+      responses:
+        '200':
+          description: Wishlist detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistDetail'
+
+  /public/wishlists/share/{token}:
+    get:
+      summary: Read a public shared wishlist through the unauthenticated route
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Public wishlist detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistDetail'
+
+  /saved-searches:
+    get:
+      summary: List current user's saved searches
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Saved searches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SavedSearch'
+    post:
+      summary: Save the current search filters
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveSearchRequest'
+      responses:
+        '200':
+          description: Saved search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedSearch'
+
+  /saved-searches/{savedSearchId}:
+    delete:
+      summary: Delete a saved search owned by the current user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: savedSearchId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+  /saved-searches/{savedSearchId}/result-count:
+    put:
+      summary: Record the latest result count snapshot for a saved search
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: savedSearchId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordResultCountRequest'
+      responses:
+        '200':
+          description: Saved search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedSearch'
+
+  /recently-viewed:
+    get:
+      summary: List current user's recently viewed listings
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Recent listing summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListingSummary'
+    post:
+      summary: Record a listing view
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordListingViewRequest'
+      responses:
+        '204':
+          description: Recorded
+    delete:
+      summary: Clear current user's recent viewing history
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Cleared
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1961,3 +2433,228 @@ components:
           type: string
         canReview:
           type: boolean
+
+    WishlistSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ownerId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        coverPhotoUrl:
+          type: string
+        isPublic:
+          type: boolean
+        owner:
+          type: boolean
+        collaboratorCount:
+          type: integer
+        itemCount:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+
+    WishlistDetail:
+      allOf:
+        - $ref: '#/components/schemas/WishlistSummary'
+        - type: object
+          properties:
+            shareToken:
+              type: string
+            collaboratorIds:
+              type: array
+              items:
+                type: string
+                format: uuid
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/WishlistItem'
+            totalItems:
+              type: integer
+            editable:
+              type: boolean
+
+    WishlistItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        listing:
+          $ref: '#/components/schemas/ListingSummary'
+        note:
+          type: string
+        sortOrder:
+          type: integer
+        addedAt:
+          type: string
+          format: date-time
+
+    ListingSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        thumbnail:
+          type: string
+        price:
+          type: number
+        rating:
+          type: number
+
+    CreateWishlistRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          maxLength: 160
+        description:
+          type: string
+        isPublic:
+          type: boolean
+
+    AddWishlistItemRequest:
+      type: object
+      required: [listingId]
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        note:
+          type: string
+        sourcePage:
+          type: string
+
+    UpdateWishlistItemRequest:
+      type: object
+      properties:
+        note:
+          type: string
+
+    ReorderWishlistItemsRequest:
+      type: object
+      required: [itemIds]
+      properties:
+        itemIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    UpdateCollaboratorsRequest:
+      type: object
+      properties:
+        collaboratorIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    ShareLink:
+      type: object
+      properties:
+        token:
+          type: string
+        url:
+          type: string
+
+    WishlistCoverUploadRequest:
+      type: object
+      required: [contentType, contentLength]
+      properties:
+        contentType:
+          type: string
+        contentLength:
+          type: integer
+
+    WishlistCoverUploadResponse:
+      type: object
+      properties:
+        uploadUrl:
+          type: string
+        s3Key:
+          type: string
+        publicUrl:
+          type: string
+
+    FinalizeWishlistCoverRequest:
+      type: object
+      required: [s3Key]
+      properties:
+        s3Key:
+          type: string
+
+    SavedSearch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        filters:
+          type: object
+        locationQuery:
+          type: string
+        geoCenterLat:
+          type: number
+        geoCenterLng:
+          type: number
+        radiusKm:
+          type: number
+        notifyNewResults:
+          type: boolean
+        resultCountSnapshot:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    SaveSearchRequest:
+      type: object
+      required: [name, filters]
+      properties:
+        name:
+          type: string
+        filters:
+          type: object
+        locationQuery:
+          type: string
+        geoCenterLat:
+          type: number
+        geoCenterLng:
+          type: number
+        radiusKm:
+          type: number
+        notifyNewResults:
+          type: boolean
+
+    RecordResultCountRequest:
+      type: object
+      required: [resultCount]
+      properties:
+        resultCount:
+          type: integer
+
+    RecordListingViewRequest:
+      type: object
+      required: [listingId, sourcePage]
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        sourcePage:
+          type: string
+          enum: [search, wishlist, home]

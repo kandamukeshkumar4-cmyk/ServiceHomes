@@ -1,6 +1,6 @@
 import { Component, DestroyRef, ViewChild, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,12 +12,14 @@ import { ReservationQuote, ReservationRecord } from '../bookings/reservation.mod
 import { ReviewFormComponent, ReviewSubmission } from '../reviews/review-form.component';
 import { ReviewListComponent } from '../reviews/review-list.component';
 import { ListingReview, ReviewReservationOption, ReviewsApiService } from '../reviews/reviews-api.service';
+import { SaveToWishlistComponent } from '../wishlists/save-to-wishlist.component';
+import { WishlistService } from '../wishlists/wishlist.service';
 
 
 @Component({
   selector: 'app-listing-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, ListingMapComponent, RouterLink, ReviewFormComponent, ReviewListComponent],
+  imports: [CommonModule, FormsModule, ListingMapComponent, RouterLink, ReviewFormComponent, ReviewListComponent, SaveToWishlistComponent],
   templateUrl: './listing-detail.component.html',
   styles: []
 })
@@ -26,9 +28,11 @@ export class ListingDetailComponent implements OnInit {
 
   private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private listingService = inject(ListingService);
   private http = inject(HttpClient);
   private reviewsApi = inject(ReviewsApiService);
+  private wishlistService = inject(WishlistService);
   auth = inject(AppAuthService);
 
   listing: Listing | null = null;
@@ -67,6 +71,7 @@ export class ListingDetailComponent implements OnInit {
   hostResponseSubmittingFor: string | null = null;
   reviewReportError = '';
   reportingReviewId: string | null = null;
+  private recentlyViewedListingId: string | null = null;
 
   get coverPhoto(): ListingPhoto | undefined {
     return this.listing?.photos.find(p => p.isCover) || this.listing?.photos[0];
@@ -119,6 +124,7 @@ export class ListingDetailComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(me => {
         this.currentUserId = me?.id ?? null;
+        this.recordRecentlyViewed();
         this.loadEligibleReservations();
       });
 
@@ -134,6 +140,7 @@ export class ListingDetailComponent implements OnInit {
         this.locationRating = l.locationRating ?? null;
         this.valueRating = l.valueRating ?? null;
         this.trustScore = l.trustScore ?? 0;
+        this.recordRecentlyViewed();
         this.loadReviews();
       });
   }
@@ -315,5 +322,35 @@ export class ListingDetailComponent implements OnInit {
           this.eligibleReservationsLoading = false;
         }
       });
+  }
+
+  private recordRecentlyViewed(): void {
+    if (!this.currentUserId || !this.listing || this.recentlyViewedListingId === this.listing.id) {
+      return;
+    }
+    this.recentlyViewedListingId = this.listing.id;
+    this.wishlistService.recordListingView(this.listing.id, this.viewSourcePage())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: () => {
+          this.recentlyViewedListingId = null;
+        }
+      });
+  }
+
+  private viewSourcePage(): 'search' | 'wishlist' | 'home' {
+    const sourcePage = this.route.snapshot.queryParamMap.get('sourcePage');
+    if (sourcePage === 'search' || sourcePage === 'wishlist') {
+      return sourcePage;
+    }
+    const nav = this.router.getCurrentNavigation();
+    const previousUrl = nav?.previousUrl ?? '';
+    if (previousUrl.includes('/search')) {
+      return 'search';
+    }
+    if (previousUrl.includes('/wishlists')) {
+      return 'wishlist';
+    }
+    return 'home';
   }
 }

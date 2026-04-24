@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, finalize, of, switchMap, tap } from 'rxjs';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
@@ -21,13 +23,16 @@ import { SearchStateService } from './search-state.service';
   templateUrl: './search-results.component.html',
   styleUrl: './search-results.component.scss'
 })
-export class SearchResultsComponent {
+export class SearchResultsComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly searchApiService = inject(SearchApiService);
   private readonly searchState = inject(SearchStateService);
   private readonly savedListingsService = inject(SavedListingsService);
+  private readonly http = inject(HttpClient);
+  private readonly route = inject(ActivatedRoute);
   readonly auth = inject(AppAuthService);
   private currentSearchQueryId: string | null = null;
+  private savedSearchId: string | null = null;
 
   filters: SearchFilters = DEFAULT_SEARCH_FILTERS;
   results: ListingSearchResult[] = [];
@@ -37,6 +42,12 @@ export class SearchResultsComponent {
   viewMode: 'list' | 'map' = 'list';
 
   readonly chips = this.searchState.filters$;
+
+  ngOnInit(): void {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      this.savedSearchId = params.get('savedSearchId');
+    });
+  }
 
   constructor() {
     this.searchState.filters$
@@ -68,6 +79,10 @@ export class SearchResultsComponent {
         this.results = page.content;
         this.totalElements = page.totalElements;
         this.currentSearchQueryId = page.searchQueryId;
+
+        if (this.savedSearchId) {
+          this.http.post(`/api/saved-searches/${this.savedSearchId}/result-count`, { resultCount: this.totalElements }).subscribe();
+        }
       });
   }
 
