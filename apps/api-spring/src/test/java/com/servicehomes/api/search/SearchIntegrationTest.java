@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -69,6 +70,9 @@ class SearchIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private ListingCategory category;
 
@@ -320,6 +324,8 @@ class SearchIntegrationTest {
             .longitude(longitude)
             .build());
 
-        return listingRepository.save(listing);
+        Listing saved = listingRepository.save(listing);
+        jdbcTemplate.execute("REFRESH MATERIALIZED VIEW search_listings_materialized");
+        return saved;
     }
 }
