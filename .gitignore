@@ -71,3 +71,8 @@ backend-logs.zip
 backend-logs2.zip
 /cl[0-9]*/
 /bl[0-9]*.zip
+
+# Local build tools
+.tools/
+maven.zip
+scripts/_*.ps1

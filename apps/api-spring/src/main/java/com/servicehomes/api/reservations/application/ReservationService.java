@@ -12,6 +12,7 @@ import com.servicehomes.api.reservations.application.dto.*;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationDto create(UUID guestId, CreateReservationRequest request) {
-        Listing listing = listingRepository.findById(request.listingId())
+        Listing listing = listingRepository.findByIdWithLock(request.listingId())
             .orElseThrow(() -> new IllegalArgumentException("Listing not found"));
 
         if (listing.getStatus() != Listing.Status.PUBLISHED) {
@@ -101,7 +102,12 @@ public class ReservationService {
             .status(status)
             .build();
 
-        Reservation saved = reservationRepository.save(reservation);
+        Reservation saved;
+        try {
+            saved = reservationRepository.saveAndFlush(reservation);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalArgumentException("Dates are not available for this listing");
+        }
         String eventName = status == Reservation.Status.CONFIRMED ? "reservation_confirmed" : "reservation_created";
         eventPublisher.publish(eventName, "reservation", saved.getId().toString(),
             java.util.Map.of(
