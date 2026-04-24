@@ -198,3 +198,58 @@ models:
         tests:
           - unique
           - not_null
+  - name: sr_searches
+    description: Normalized search query events from PostgreSQL search_queries table.
+    columns:
+      - name: search_query_id
+        tests:
+          - unique
+          - not_null
+      - name: query_hash
+        tests:
+          - not_null
+      - name: searched_at
+        tests:
+          - not_null
+  - name: fct_search_session
+    description: One row per search query with click engagement metrics and response time bucketing.
+    columns:
+      - name: search_query_id
+        tests:
+          - unique
+          - not_null
+      - name: result_count
+        tests:
+          - not_null
+      - name: had_results
+        tests:
+          - not_null
+      - name: was_clicked
+        tests:
+          - not_null
+  - name: fct_search_conversion
+    description: Search-to-click-to-booking funnel metrics per search query.
+    columns:
+      - name: search_query_id
+        tests:
+          - unique
+          - not_null
+      - name: total_clicks
+        tests:
+          - not_null
+      - name: click_through_rate
+        tests:
+          - not_null
+  - name: dim_search_listing_performance
+    description: Listing-level CTR, booking rate, and revenue attribution from search traffic.
+    columns:
+      - name: listing_id
+        tests:
+          - unique
+          - not_null
+      - name: total_impressions
+        tests:
+          - not_null
+      - name: total_clicks
+        tests:
+          - not_null
