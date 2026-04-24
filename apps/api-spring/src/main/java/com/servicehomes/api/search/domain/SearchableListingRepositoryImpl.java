@@ -89,26 +89,31 @@ public class SearchableListingRepositoryImpl implements SearchableListingReposit
     }
 
     @Override
-    public List<String> getSuggestions(String query, int limit) {
+    public List<SearchSuggestionProjection> getSuggestions(String query, int limit) {
         String sql = """
-            SELECT DISTINCT ON (suggestion) suggestion
+            SELECT suggestion, source_type
             FROM (
-                SELECT city AS suggestion, 1 AS priority
-                FROM search_listings_materialized
-                WHERE city % :query AND status = 'PUBLISHED'
+                SELECT suggestion, source_type, priority,
+                       ROW_NUMBER() OVER (PARTITION BY suggestion ORDER BY priority) AS rn
+                FROM (
+                    SELECT city AS suggestion, 'location' AS source_type, 1 AS priority
+                    FROM search_listings_materialized
+                    WHERE city % :query AND status = 'PUBLISHED'
 
-                UNION ALL
+                    UNION ALL
 
-                SELECT title AS suggestion, 2 AS priority
-                FROM search_listings_materialized
-                WHERE title % :query AND status = 'PUBLISHED'
+                    SELECT title AS suggestion, 'listing' AS source_type, 2 AS priority
+                    FROM search_listings_materialized
+                    WHERE title % :query AND status = 'PUBLISHED'
 
-                UNION ALL
+                    UNION ALL
 
-                SELECT country AS suggestion, 3 AS priority
-                FROM search_listings_materialized
-                WHERE country % :query AND status = 'PUBLISHED'
-            ) suggestions
+                    SELECT country AS suggestion, 'location' AS source_type, 3 AS priority
+                    FROM search_listings_materialized
+                    WHERE country % :query AND status = 'PUBLISHED'
+                ) raw
+            ) deduped
+            WHERE rn = 1
             ORDER BY priority, suggestion
             LIMIT :limit
             """;
@@ -117,7 +122,9 @@ public class SearchableListingRepositoryImpl implements SearchableListingReposit
         params.addValue("query", query.trim());
         params.addValue("limit", limit);
 
-        return jdbcTemplate.queryForList(sql, params, String.class);
+        return jdbcTemplate.query(sql, params, (rs, rowNum) ->
+            new SearchSuggestionProjection(rs.getString("suggestion"), rs.getString("source_type"))
+        );
     }
 
     private void appendWhere(SearchRequest request, MapSqlParameterSource params, StringBuilder sql) {
@@ -193,12 +200,14 @@ public class SearchableListingRepositoryImpl implements SearchableListingReposit
             params.addValue("checkOut", request.checkOut());
         }
 
-        if (request.hasGeoCoords() && request.radiusKm() != null) {
-            sql.append(" AND sl.geog IS NOT NULL");
-            sql.append(" AND ST_DWithin(sl.geog, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography, :radiusMeters)");
+        if (request.hasGeoCoords()) {
             params.addValue("latitude", request.lat());
             params.addValue("longitude", request.lng());
-            params.addValue("radiusMeters", request.radiusKm() * 1000);
+            if (request.radiusKm() != null) {
+                sql.append(" AND sl.geog IS NOT NULL");
+                sql.append(" AND ST_DWithin(sl.geog, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography, :radiusMeters)");
+                params.addValue("radiusMeters", request.radiusKm() * 1000);
+            }
         }
 
         if (request.hasBoundingBox()) {

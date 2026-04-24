@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/listings/search")
+@RequestMapping("/listings/search")
 @RequiredArgsConstructor
 public class SearchController {
 

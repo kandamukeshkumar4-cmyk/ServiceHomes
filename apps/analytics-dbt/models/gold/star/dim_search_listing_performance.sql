@@ -38,7 +38,6 @@ listing_search_appearances AS (
 
 listing_search_impressions AS (
     SELECT
-        sq.result_count AS total_results_in_searches,
         COUNT(DISTINCT sq.search_query_id) AS total_searches_with_results
     FROM search_queries sq
     WHERE sq.result_count > 0

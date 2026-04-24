@@ -19,6 +19,7 @@ export interface SearchApiResponse {
   hasNext: boolean;
   hasPrevious: boolean;
   cursor: string | null;
+  searchQueryId: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

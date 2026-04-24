@@ -138,34 +138,7 @@ CREATE INDEX IF NOT EXISTS idx_search_mv_city
 CREATE INDEX IF NOT EXISTS idx_search_mv_title_trgm
     ON search_listings_materialized USING gin (title gin_trgm_ops);
 
-CREATE OR REPLACE FUNCTION refresh_search_listings_materialized()
-RETURNS TRIGGER AS $$
-BEGIN
-    REFRESH MATERIALIZED VIEW CONCURRENTLY search_listings_materialized;
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS trigger_refresh_search_mv ON listings;
-CREATE TRIGGER trigger_refresh_search_mv
-    AFTER INSERT OR UPDATE OR DELETE ON listings
-    FOR EACH STATEMENT
-    EXECUTE FUNCTION refresh_search_listings_materialized();
-
-DROP TRIGGER IF EXISTS trigger_refresh_search_mv_location ON listing_locations;
-CREATE TRIGGER trigger_refresh_search_mv_location
-    AFTER INSERT OR UPDATE OR DELETE ON listing_locations
-    FOR EACH STATEMENT
-    EXECUTE FUNCTION refresh_search_listings_materialized();
-
-DROP TRIGGER IF EXISTS trigger_refresh_search_mv_policy ON listing_policies;
-CREATE TRIGGER trigger_refresh_search_mv_policy
-    AFTER INSERT OR UPDATE OR DELETE ON listing_policies
-    FOR EACH STATEMENT
-    EXECUTE FUNCTION refresh_search_listings_materialized();
-
-DROP TRIGGER IF EXISTS trigger_refresh_search_mv_amenity ON listing_amenity_links;
-CREATE TRIGGER trigger_refresh_search_mv_amenity
-    AFTER INSERT OR UPDATE OR DELETE ON listing_amenity_links
-    FOR EACH STATEMENT
-    EXECUTE FUNCTION refresh_search_listings_materialized();
+-- Materialized view refresh strategy:
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY cannot execute inside a trigger/function transaction.
+-- Refresh is scheduled externally (pg_cron every 60s, or application-level on listing mutations).
+-- Example: SELECT cron.schedule('refresh-search-mv', '0 * * * * *', 'REFRESH MATERIALIZED VIEW CONCURRENTLY search_listings_materialized');

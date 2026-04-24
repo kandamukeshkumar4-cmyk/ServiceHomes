@@ -44,8 +44,11 @@ click_to_booking AS (
         COUNT(DISTINCT CASE WHEN r.status = 'CONFIRMED' THEN r.reservation_id END) AS confirmed_bookings_from_search,
         SUM(COALESCE(r.total_amount, 0)) AS total_booking_value
     FROM search_to_click stc
+    LEFT JOIN {{ source('app', 'search_clicks') }} sc
+        ON stc.search_query_id = sc.search_query_id
     LEFT JOIN reservations r
         ON stc.user_id = r.guest_id
+        AND sc.listing_id = r.listing_id
         AND r.reserved_at >= stc.searched_at
         AND r.reserved_at < stc.searched_at + INTERVAL '24 hours'
     GROUP BY

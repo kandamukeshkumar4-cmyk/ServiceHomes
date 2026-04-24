@@ -10,5 +10,5 @@ public interface SearchableListingRepositoryCustom {
 
     Page<SearchableListing> search(SearchRequest request, Pageable pageable);
 
-    List<String> getSuggestions(String query, int limit);
+    List<SearchSuggestionProjection> getSuggestions(String query, int limit);
 }

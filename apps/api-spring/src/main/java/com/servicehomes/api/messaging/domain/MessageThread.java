@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "message_threads")
+@Table(name = "threads")
 @Getter
 @Setter
 @NoArgsConstructor

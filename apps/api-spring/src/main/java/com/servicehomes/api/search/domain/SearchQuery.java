@@ -30,6 +30,7 @@ public class SearchQuery {
     private String queryText;
 
     @Column(name = "filters_used", columnDefinition = "jsonb")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     private String filtersUsed;
 
     @Column(name = "result_count", nullable = false)

@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -47,6 +48,9 @@ class SearchServiceTest {
     @Mock
     private CurrentUserService currentUserService;
 
+    @Mock
+    private CacheManager cacheManager;
+
     @InjectMocks
     private SearchService searchService;
 
@@ -55,7 +59,7 @@ class SearchServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        searchService = new SearchService(searchRepository, savedListingRepository, searchQueryRepository, searchClickRepository, currentUserService, objectMapper);
+        searchService = new SearchService(searchRepository, savedListingRepository, searchQueryRepository, searchClickRepository, currentUserService, objectMapper, cacheManager);
     }
 
     @Test
@@ -65,6 +69,11 @@ class SearchServiceTest {
 
         when(searchRepository.search(any(), any())).thenReturn(page);
         when(savedListingRepository.findListingIdsByGuestIdAndListingIdIn(any(), any())).thenReturn(List.of());
+        when(searchQueryRepository.save(any())).thenAnswer(inv -> {
+            SearchQuery q = inv.getArgument(0);
+            q.setId(UUID.randomUUID());
+            return q;
+        });
 
         SearchRequest request = new SearchRequest("beach", null, 2, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0, 10);
         SearchResponse response = searchService.search(request, PageRequest.of(0, 10), UUID.randomUUID());
@@ -72,6 +81,7 @@ class SearchServiceTest {
         assertThat(response.content()).hasSize(1);
         assertThat(response.content().get(0).title()).isEqualTo("Test listing");
         assertThat(response.totalElements()).isEqualTo(1);
+        assertThat(response.searchQueryId()).isNotNull();
     }
 
     @Test
@@ -83,6 +93,11 @@ class SearchServiceTest {
 
         when(searchRepository.search(any(), any())).thenReturn(page);
         when(savedListingRepository.findListingIdsByGuestIdAndListingIdIn(eq(userId), any())).thenReturn(List.of(listingId));
+        when(searchQueryRepository.save(any())).thenAnswer(inv -> {
+            SearchQuery q = inv.getArgument(0);
+            q.setId(UUID.randomUUID());
+            return q;
+        });
 
         SearchRequest request = new SearchRequest(null, null, 1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0, 10);
         SearchResponse response = searchService.search(request, PageRequest.of(0, 10), userId);
@@ -98,6 +113,11 @@ class SearchServiceTest {
 
         when(searchRepository.search(any(), any())).thenReturn(page);
         when(savedListingRepository.findListingIdsByGuestIdAndListingIdIn(any(), any())).thenReturn(List.of());
+        when(searchQueryRepository.save(any())).thenAnswer(inv -> {
+            SearchQuery q = inv.getArgument(0);
+            q.setId(UUID.randomUUID());
+            return q;
+        });
 
         SearchRequest request = new SearchRequest(null, null, 1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0, 10);
         SearchResponse response = searchService.search(request, PageRequest.of(0, 10), userId);

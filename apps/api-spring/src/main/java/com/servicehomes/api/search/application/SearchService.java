@@ -9,12 +9,14 @@ import com.servicehomes.api.search.domain.SearchClick;
 import com.servicehomes.api.search.domain.SearchClickRepository;
 import com.servicehomes.api.search.domain.SearchQuery;
 import com.servicehomes.api.search.domain.SearchQueryRepository;
+import com.servicehomes.api.search.domain.SearchSuggestionProjection;
 import com.servicehomes.api.search.domain.SearchableListing;
 import com.servicehomes.api.search.domain.SearchableListingRepositoryCustom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,21 +41,37 @@ public class SearchService {
     private final SearchClickRepository searchClickRepository;
     private final CurrentUserService currentUserService;
     private final ObjectMapper objectMapper;
+    private final CacheManager cacheManager;
 
-    @Cacheable(value = "searchResults", key = "#request.hashCode() + '_' + #pageable.hashCode()")
     @Transactional(readOnly = true)
     public SearchResponse search(SearchRequest request, Pageable pageable, UUID currentUserId) {
         long startTime = System.currentTimeMillis();
 
-        Page<SearchableListing> page = searchRepository.search(request, pageable);
+        String cacheKey = buildCacheKey(request, pageable, currentUserId);
+        Cache cache = cacheManager.getCache("searchResults");
+        CachedSearchResult cached = cache != null ? cache.get(cacheKey, CachedSearchResult.class) : null;
 
-        List<UUID> listingIds = page.getContent().stream()
-            .map(SearchableListing::getId)
-            .toList();
+        Page<SearchableListing> page;
+        Set<UUID> savedIds;
 
-        Set<UUID> savedIds = currentUserId == null || listingIds.isEmpty()
-            ? Set.of()
-            : new HashSet<>(savedListingRepository.findListingIdsByGuestIdAndListingIdIn(currentUserId, listingIds));
+        if (cached != null) {
+            page = cached.page();
+            savedIds = cached.savedIds();
+        } else {
+            page = searchRepository.search(request, pageable);
+
+            List<UUID> listingIds = page.getContent().stream()
+                .map(SearchableListing::getId)
+                .toList();
+
+            savedIds = currentUserId == null || listingIds.isEmpty()
+                ? Set.of()
+                : new HashSet<>(savedListingRepository.findListingIdsByGuestIdAndListingIdIn(currentUserId, listingIds));
+
+            if (cache != null) {
+                cache.put(cacheKey, new CachedSearchResult(page, savedIds));
+            }
+        }
 
         List<SearchResultItem> items = page.getContent().stream()
             .map(listing -> mapToListingItem(listing, savedIds.contains(listing.getId())))
@@ -61,9 +79,9 @@ public class SearchService {
 
         long responseTime = System.currentTimeMillis() - startTime;
 
-        recordSearchQueryAsync(request, currentUserId, (int) page.getTotalElements(), (int) responseTime);
+        SearchQuery recorded = recordSearchQuery(request, currentUserId, (int) page.getTotalElements(), (int) responseTime);
 
-        return SearchResponse.of(items, page.getTotalElements(), pageable.getPageNumber(), pageable.getPageSize());
+        return SearchResponse.of(items, page.getTotalElements(), pageable.getPageNumber(), pageable.getPageSize(), recorded != null ? recorded.getId() : null);
     }
 
     @CacheEvict(value = "searchResults", allEntries = true)
@@ -77,15 +95,17 @@ public class SearchService {
             return List.of();
         }
 
-        List<String> suggestions = searchRepository.getSuggestions(query.trim(), 10);
+        List<SearchSuggestionProjection> suggestions = searchRepository.getSuggestions(query.trim(), 10);
 
         return suggestions.stream()
             .map(s -> {
-                String[] parts = s.split(",");
-                if (parts.length >= 2) {
-                    return SearchSuggestionResponse.ofLocation(parts[0].trim(), parts[1].trim());
+                if ("location".equals(s.sourceType())) {
+                    String[] parts = s.text().split(",");
+                    if (parts.length >= 2) {
+                        return SearchSuggestionResponse.ofLocation(parts[0].trim(), parts[1].trim());
+                    }
                 }
-                return SearchSuggestionResponse.ofTitle(s, "");
+                return SearchSuggestionResponse.ofTitle(s.text(), "");
             })
             .toList();
     }
@@ -106,8 +126,8 @@ public class SearchService {
         searchClickRepository.save(click);
     }
 
-    @Async
-    public void recordSearchQueryAsync(SearchRequest request, UUID currentUserId, int resultCount, int responseTimeMs) {
+    @Transactional
+    public SearchQuery recordSearchQuery(SearchRequest request, UUID currentUserId, int resultCount, int responseTimeMs) {
         try {
             String queryHash = computeQueryHash(request);
             String filtersJson = serializeFilters(request);
@@ -124,9 +144,10 @@ public class SearchService {
                 .radiusKm(request.radiusKm())
                 .build();
 
-            searchQueryRepository.save(searchQuery);
+            return searchQueryRepository.save(searchQuery);
         } catch (Exception e) {
             log.error("Failed to record search query analytics", e);
+            return null;
         }
     }
 
@@ -225,6 +246,12 @@ public class SearchService {
             return "{}";
         }
     }
+
+    private String buildCacheKey(SearchRequest request, Pageable pageable, UUID currentUserId) {
+        return request.hashCode() + "_" + pageable.hashCode() + "_" + (currentUserId != null ? currentUserId.toString() : "anon");
+    }
+
+    private record CachedSearchResult(Page<SearchableListing> page, Set<UUID> savedIds) {}
 
     private String nullToEmpty(String value) {
         return value != null ? value : "";

@@ -12,13 +12,15 @@ public record SearchResponse(
     int pageSize,
     boolean hasNext,
     boolean hasPrevious,
-    String cursor
+    String cursor,
+    java.util.UUID searchQueryId
 ) {
     public static SearchResponse of(
         List<SearchResultItem> content,
         long totalElements,
         int currentPage,
-        int pageSize
+        int pageSize,
+        java.util.UUID searchQueryId
     ) {
         int totalPages = (int) Math.ceil((double) totalElements / pageSize);
         return new SearchResponse(
@@ -29,7 +31,8 @@ public record SearchResponse(
             pageSize,
             currentPage < totalPages - 1,
             currentPage > 0,
-            currentPage < totalPages - 1 ? encodeCursor(currentPage + 1, pageSize) : null
+            currentPage < totalPages - 1 ? encodeCursor(currentPage + 1, pageSize) : null,
+            searchQueryId
         );
     }
 
