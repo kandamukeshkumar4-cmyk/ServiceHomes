@@ -96,7 +96,7 @@ public class SearchableListingRepositoryImpl implements SearchableListingReposit
                 SELECT suggestion, source_type, priority,
                        ROW_NUMBER() OVER (PARTITION BY suggestion ORDER BY priority) AS rn
                 FROM (
-                    SELECT city AS suggestion, 'location' AS source_type, 1 AS priority
+                    SELECT city || ', ' || country AS suggestion, 'location' AS source_type, 1 AS priority
                     FROM search_listings_materialized
                     WHERE city % :query AND status = 'PUBLISHED'
 

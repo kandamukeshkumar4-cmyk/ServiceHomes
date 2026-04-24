@@ -93,15 +93,14 @@ export class ListingService {
       filters.propertyTypes.forEach((propertyType) => params.append('propertyTypes', propertyType.toUpperCase()));
     }
 
-    const sortMapping: Record<SearchFilters['sort'], string> = {
+    const sortMapping: Record<string, string> = {
       relevance: 'RELEVANCE',
       priceAsc: 'PRICE_ASC',
       priceDesc: 'PRICE_DESC',
       newest: 'NEWEST',
-      ratingDesc: 'RATING_DESC',
-      distance: 'DISTANCE'
+      ratingDesc: 'RATING_DESC'
     };
-    params.set('sort', sortMapping[filters.sort]);
+    params.set('sort', sortMapping[filters.sort] ?? 'RELEVANCE');
     params.set('page', String(filters.page));
     params.set('size', String(filters.size));
 

@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/health", "/actuator/health").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/listings/search").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/listings/search/suggestions").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/listings/search/click").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .anyRequest().authenticated()
             )

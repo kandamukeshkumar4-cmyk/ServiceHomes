@@ -247,9 +247,6 @@ models:
         tests:
           - unique
           - not_null
-      - name: total_impressions
-        tests:
-          - not_null
-      - name: total_clicks
+      - name: times_clicked
         tests:
           - not_null
