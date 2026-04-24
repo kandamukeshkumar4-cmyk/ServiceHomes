@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "SearchPerformed",
+  "namespace": "com.servicehomes.events",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "timestamp", "type": "string" },
+    { "name": "userId", "type": ["null", "string"], "default": null },
+    { "name": "queryHash", "type": "string" },
+    { "name": "queryText", "type": ["null", "string"], "default": null },
+    { "name": "filtersUsed", "type": ["null", "string"], "default": null },
+    { "name": "resultCount", "type": "int" },
+    { "name": "responseTimeMs", "type": ["null", "int"], "default": null },
+    { "name": "geoCenterLat", "type": ["null", "double"], "default": null },
+    { "name": "geoCenterLng", "type": ["null", "double"], "default": null },
+    { "name": "radiusKm", "type": ["null", "double"], "default": null },
+    { "name": "page", "type": "int", "default": 0 },
+    { "name": "pageSize", "type": "int", "default": 20 }
+  ]
+}

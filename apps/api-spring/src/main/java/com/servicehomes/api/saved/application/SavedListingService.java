@@ -65,6 +65,7 @@ public class SavedListingService {
         }
 
         savedListingRepository.deleteByGuestIdAndListing_Id(guestId, listingId);
+
         eventPublisher.publish(
             "listing_unsaved",
             "listing",
