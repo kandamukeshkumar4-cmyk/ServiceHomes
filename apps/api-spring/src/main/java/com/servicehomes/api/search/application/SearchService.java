@@ -133,8 +133,8 @@ public class SearchService {
     @Transactional
     public SearchQuery recordSearchQuery(SearchRequest request, UUID currentUserId, int resultCount, int responseTimeMs, List<UUID> resultListingIds) {
         try {
-            String queryHash = computeQueryHash(request);
             String filtersJson = serializeFilters(request);
+            String queryHash = computeQueryHash(filtersJson);
 
             SearchQuery searchQuery = SearchQuery.builder()
                 .userId(currentUserId)
@@ -212,21 +212,9 @@ public class SearchService {
         }
     }
 
-    private String computeQueryHash(SearchRequest request) {
+    private String computeQueryHash(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            String input = String.join("|",
-                nullToEmpty(request.query()),
-                nullToEmpty(request.categoryId() != null ? request.categoryId().toString() : null),
-                nullToEmpty(request.guests() != null ? request.guests().toString() : null),
-                nullToEmpty(request.minPrice() != null ? request.minPrice().toString() : null),
-                nullToEmpty(request.maxPrice() != null ? request.maxPrice().toString() : null),
-                nullToEmpty(request.bedrooms() != null ? request.bedrooms().toString() : null),
-                nullToEmpty(request.propertyTypes() != null ? String.join(",", request.propertyTypes()) : null),
-                nullToEmpty(request.lat() != null ? request.lat().toString() : null),
-                nullToEmpty(request.lng() != null ? request.lng().toString() : null),
-                nullToEmpty(request.radiusKm() != null ? request.radiusKm().toString() : null)
-            );
             byte[] hash = md.digest(input.getBytes(StandardCharsets.UTF_8));
             return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
         } catch (NoSuchAlgorithmException e) {
@@ -294,8 +282,4 @@ public class SearchService {
     }
 
     private record CachedSearchResult(Page<SearchableListing> page) {}
-
-    private String nullToEmpty(String value) {
-        return value != null ? value : "";
-    }
 }

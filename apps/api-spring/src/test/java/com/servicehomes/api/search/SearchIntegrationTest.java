@@ -266,6 +266,7 @@ class SearchIntegrationTest {
             .queryHash("test-hash")
             .resultCount(1)
             .resultListingIds(List.of(listing.getId()))
+            .filtersUsed("{\"page\":0,\"size\":10}")
             .build());
 
         String clickBody = """

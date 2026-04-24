@@ -3,9 +3,15 @@ package com.servicehomes.api.search.application;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 @Component
 @RequiredArgsConstructor
@@ -20,27 +26,34 @@ public class SearchIndexRefresher {
 
     @Scheduled(fixedDelayString = "${search.index.refresh-delay-ms:60000}")
     public void refreshSearchIndex() {
-        if (!tryAcquireRefreshLock()) {
-            log.debug("Skipping search materialized view refresh; another instance holds the refresh lock");
-            return;
-        }
-
         try {
-            refreshMaterializedView();
-            searchService.invalidateSearchCache();
-        } finally {
-            releaseRefreshLock();
+            jdbcTemplate.execute((ConnectionCallback<Void>) connection -> {
+                if (!tryAcquireRefreshLock(connection)) {
+                    log.debug("Skipping search materialized view refresh; another instance holds the refresh lock");
+                    return null;
+                }
+
+                try {
+                    refreshMaterializedView(connection);
+                    searchService.invalidateSearchCache();
+                } finally {
+                    releaseRefreshLock(connection);
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            log.error("Failed to run search materialized view refresh", e);
         }
     }
 
-    private void refreshMaterializedView() {
+    private void refreshMaterializedView(Connection connection) {
         try {
-            jdbcTemplate.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY search_listings_materialized");
+            execute(connection, "REFRESH MATERIALIZED VIEW CONCURRENTLY search_listings_materialized");
             log.debug("Search materialized view refreshed concurrently");
         } catch (Exception concurrentFailure) {
             log.warn("Failed to refresh search materialized view concurrently, falling back to non-concurrent refresh", concurrentFailure);
             try {
-                jdbcTemplate.execute("REFRESH MATERIALIZED VIEW search_listings_materialized");
+                execute(connection, "REFRESH MATERIALIZED VIEW search_listings_materialized");
                 log.info("Search materialized view refreshed without concurrency");
             } catch (Exception fallbackFailure) {
                 log.error("Failed to refresh search materialized view", fallbackFailure);
@@ -48,24 +61,29 @@ public class SearchIndexRefresher {
         }
     }
 
-    private boolean tryAcquireRefreshLock() {
-        Boolean acquired = jdbcTemplate.queryForObject(
-            "SELECT pg_try_advisory_lock(?)",
-            Boolean.class,
-            SEARCH_INDEX_REFRESH_LOCK_ID
-        );
-        return Boolean.TRUE.equals(acquired);
+    private boolean tryAcquireRefreshLock(Connection connection) throws Exception {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT pg_try_advisory_lock(?)")) {
+            statement.setLong(1, SEARCH_INDEX_REFRESH_LOCK_ID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() && resultSet.getBoolean(1);
+            }
+        }
     }
 
-    private void releaseRefreshLock() {
+    private void releaseRefreshLock(Connection connection) {
         try {
-            jdbcTemplate.queryForObject(
-                "SELECT pg_advisory_unlock(?)",
-                Boolean.class,
-                SEARCH_INDEX_REFRESH_LOCK_ID
-            );
+            try (PreparedStatement statement = connection.prepareStatement("SELECT pg_advisory_unlock(?)")) {
+                statement.setLong(1, SEARCH_INDEX_REFRESH_LOCK_ID);
+                statement.executeQuery();
+            }
         } catch (Exception e) {
             log.warn("Failed to release search materialized view refresh lock", e);
+        }
+    }
+
+    private void execute(Connection connection, String sql) throws Exception {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(sql);
         }
     }
 }
