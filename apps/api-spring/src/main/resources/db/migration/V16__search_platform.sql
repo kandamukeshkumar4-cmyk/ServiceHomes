@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS search_clicks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     search_query_id UUID NOT NULL REFERENCES search_queries(id) ON DELETE CASCADE,
     user_id UUID REFERENCES users(id),
-    listing_id UUID NOT NULL REFERENCES listings(id),
+    listing_id UUID NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
     result_position INT NOT NULL,
     device_type VARCHAR(32),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

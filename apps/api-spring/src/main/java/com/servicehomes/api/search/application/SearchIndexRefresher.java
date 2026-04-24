@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 @Component
@@ -84,7 +85,7 @@ public class SearchIndexRefresher {
         }
     }
 
-    private void execute(Connection connection, String sql) throws Exception {
+    private void execute(Connection connection, String sql) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             statement.execute(sql);
         }
