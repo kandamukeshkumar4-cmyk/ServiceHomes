@@ -5,9 +5,9 @@ import { catchError, finalize, of, switchMap, tap } from 'rxjs';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { ListingCardComponent } from '../listings/listing-card.component';
 import { ListingSearchResult } from '../listings/listing.model';
-import { ListingService } from '../listings/listing.service';
 import { SavedListingsService } from '../saved/saved-listings.service';
 import { AppAuthService } from '../core/auth.service';
+import { SearchApiService, SearchApiResponse } from './search-api.service';
 import { SearchBarComponent } from './search-bar.component';
 import { DEFAULT_SEARCH_FILTERS, SearchFilters } from './search-filters.model';
 import { SearchFiltersComponent } from './search-filters.component';
@@ -23,10 +23,11 @@ import { SearchStateService } from './search-state.service';
 })
 export class SearchResultsComponent {
   private readonly destroyRef = inject(DestroyRef);
-  private readonly listingService = inject(ListingService);
+  private readonly searchApiService = inject(SearchApiService);
   private readonly searchState = inject(SearchStateService);
   private readonly savedListingsService = inject(SavedListingsService);
   readonly auth = inject(AppAuthService);
+  private currentSearchQueryId: string | null = null;
 
   filters: SearchFilters = DEFAULT_SEARCH_FILTERS;
   results: ListingSearchResult[] = [];
@@ -45,26 +46,28 @@ export class SearchResultsComponent {
           this.loading = true;
           this.error = null;
         }),
-        switchMap((filters) => this.listingService.search(filters).pipe(
+        switchMap((filters) => this.searchApiService.search(filters).pipe(
           finalize(() => {
             this.loading = false;
           }),
           catchError(() => {
             this.results = [];
             this.totalElements = 0;
+            this.currentSearchQueryId = null;
             this.error = 'Search is unavailable right now. Please retry in a moment.';
             return of(null);
           })
         )),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe((page) => {
+      .subscribe((page: SearchApiResponse | null) => {
         if (!page) {
           return;
         }
 
         this.results = page.content;
         this.totalElements = page.totalElements;
+        this.currentSearchQueryId = page.searchQueryId;
       });
   }
 
@@ -128,6 +131,15 @@ export class SearchResultsComponent {
 
   setViewMode(viewMode: 'list' | 'map'): void {
     this.viewMode = viewMode;
+  }
+
+  handleListingClick(listingId: string, position: number): void {
+    if (!this.currentSearchQueryId) {
+      return;
+    }
+    this.searchApiService.recordClick(this.currentSearchQueryId, listingId, position + 1).subscribe({
+      error: () => { /* silently fail; analytics are best-effort */ }
+    });
   }
 
   handleSaveToggle(listingId: string): void {

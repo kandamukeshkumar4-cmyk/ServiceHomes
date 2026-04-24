@@ -74,7 +74,7 @@ public class SearchService {
         }
 
         List<SearchResultItem> items = page.getContent().stream()
-            .map(listing -> mapToListingItem(listing, savedIds.contains(listing.getId())))
+            .map(listing -> mapToListingItem(listing, savedIds.contains(listing.getId()), request))
             .toList();
 
         long responseTime = System.currentTimeMillis() - startTime;
@@ -115,6 +115,10 @@ public class SearchService {
         SearchQuery searchQuery = searchQueryRepository.findById(clickRequest.searchQueryId())
             .orElseThrow(() -> new IllegalArgumentException("Search query not found: " + clickRequest.searchQueryId()));
 
+        if (!searchRepository.existsById(clickRequest.listingId())) {
+            throw new IllegalArgumentException("Listing not found in search results: " + clickRequest.listingId());
+        }
+
         SearchClick click = SearchClick.builder()
             .searchQuery(searchQuery)
             .userId(currentUserId)
@@ -151,9 +155,9 @@ public class SearchService {
         }
     }
 
-    private SearchResultItem mapToListingItem(SearchableListing listing, boolean isSaved) {
+    private SearchResultItem mapToListingItem(SearchableListing listing, boolean isSaved, SearchRequest request) {
         List<String> amenityIds = parseAmenityIds(listing.getAmenityIds());
-        Double distanceKm = null;
+        Double distanceKm = computeDistanceKm(listing.getLatitude(), listing.getLongitude(), request.lat(), request.lng());
 
         return new SearchResultItem(
             listing.getId(),
@@ -179,6 +183,20 @@ public class SearchService {
             amenityIds,
             isSaved
         );
+    }
+
+    private Double computeDistanceKm(Double lat1, Double lng1, Double lat2, Double lng2) {
+        if (lat1 == null || lng1 == null || lat2 == null || lng2 == null) {
+            return null;
+        }
+        final int R = 6371;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLng = Math.toRadians(lng2 - lng1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+            * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 
     private List<String> parseAmenityIds(String amenityIdsJson) {

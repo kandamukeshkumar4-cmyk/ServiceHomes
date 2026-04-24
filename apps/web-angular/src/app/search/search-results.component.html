@@ -65,7 +65,7 @@
           </div>
 
           <div *ngIf="!loading && !error && results.length > 0 && viewMode === 'list'" class="grid gap-3">
-            <div *ngFor="let listing of results" class="col-12 md:col-6">
+            <div *ngFor="let listing of results; let i = index" class="col-12 md:col-6" (click)="handleListingClick(listing.id, i)">
               <app-listing-card
                 [listing]="listing"
                 [showSaveToggle]="(auth.isAuthenticated$ | async) === true"
@@ -76,7 +76,7 @@
           <div *ngIf="!loading && !error && results.length > 0 && viewMode === 'map'" class="search-map-layout">
             <div class="search-map-layout__list">
               <div class="grid gap-3">
-                <div *ngFor="let listing of results" class="col-12">
+                <div *ngFor="let listing of results; let i = index" class="col-12" (click)="handleListingClick(listing.id, i)">
                   <app-listing-card
                     [listing]="listing"
                     [showSaveToggle]="(auth.isAuthenticated$ | async) === true"

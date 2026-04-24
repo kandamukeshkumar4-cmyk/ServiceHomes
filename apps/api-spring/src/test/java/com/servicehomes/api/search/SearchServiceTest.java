@@ -141,6 +141,7 @@ class SearchServiceTest {
         SearchQuery searchQuery = SearchQuery.builder().id(searchQueryId).build();
 
         when(searchQueryRepository.findById(searchQueryId)).thenReturn(Optional.of(searchQuery));
+        when(searchRepository.existsById(listingId)).thenReturn(true);
 
         RecordSearchClickRequest clickRequest = new RecordSearchClickRequest(searchQueryId, listingId, 1, "desktop");
         searchService.recordSearchClick(UUID.randomUUID(), clickRequest);

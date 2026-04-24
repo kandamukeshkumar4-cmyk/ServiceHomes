@@ -133,8 +133,10 @@ export class SearchApiService {
       lat: filters.lat,
       lng: filters.lng,
       rad: filters.radiusKm,
-      sw: filters.swLat,
-      ne: filters.neLat,
+      swLat: filters.swLat,
+      swLng: filters.swLng,
+      neLat: filters.neLat,
+      neLng: filters.neLng,
       sort: filters.sort,
       page: filters.page,
       size: filters.size

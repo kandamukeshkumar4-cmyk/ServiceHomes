@@ -89,6 +89,15 @@ public class SearchableListingRepositoryImpl implements SearchableListingReposit
     }
 
     @Override
+    public boolean existsById(UUID id) {
+        String sql = "SELECT 1 FROM search_listings_materialized WHERE id = :id AND status = 'PUBLISHED' LIMIT 1";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", id);
+        List<Integer> results = jdbcTemplate.queryForList(sql, params, Integer.class);
+        return !results.isEmpty();
+    }
+
+    @Override
     public List<SearchSuggestionProjection> getSuggestions(String query, int limit) {
         String sql = """
             SELECT suggestion, source_type

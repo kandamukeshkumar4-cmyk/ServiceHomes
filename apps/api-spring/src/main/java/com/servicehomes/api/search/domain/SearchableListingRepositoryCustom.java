@@ -5,10 +5,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface SearchableListingRepositoryCustom {
 
     Page<SearchableListing> search(SearchRequest request, Pageable pageable);
 
     List<SearchSuggestionProjection> getSuggestions(String query, int limit);
+
+    boolean existsById(UUID id);
 }
