@@ -1,5 +1,6 @@
 package com.servicehomes.api.messaging.domain;
 
+import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.reservations.domain.Reservation;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,6 +27,10 @@ public class MessageThread {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id", nullable = false, unique = true)
     private Reservation reservation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "listing_id", nullable = false)
+    private Listing listing;
 
     @Column(name = "guest_id", nullable = false)
     private UUID guestId;

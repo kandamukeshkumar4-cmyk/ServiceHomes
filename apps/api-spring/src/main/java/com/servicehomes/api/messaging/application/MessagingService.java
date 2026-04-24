@@ -95,6 +95,7 @@ public class MessagingService {
     private MessageThread createThread(Reservation reservation) {
         return messageThreadRepository.save(MessageThread.builder()
             .reservation(reservation)
+            .listing(reservation.getListing())
             .guestId(reservation.getGuestId())
             .hostId(reservation.getListing().getHostId())
             .build());
