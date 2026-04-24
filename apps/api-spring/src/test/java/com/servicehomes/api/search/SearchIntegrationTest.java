@@ -8,6 +8,8 @@ import com.servicehomes.api.listings.domain.ListingLocation;
 import com.servicehomes.api.listings.domain.ListingRepository;
 import com.servicehomes.api.reservations.domain.Reservation;
 import com.servicehomes.api.reservations.domain.ReservationRepository;
+import com.servicehomes.api.search.domain.SearchQuery;
+import com.servicehomes.api.search.domain.SearchQueryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +75,9 @@ class SearchIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private SearchQueryRepository searchQueryRepository;
 
     private ListingCategory category;
 
@@ -255,25 +260,13 @@ class SearchIntegrationTest {
 
     @Test
     void recordClickSavesClick() throws Exception {
-        createListing("Click target", "Description here", "Nashville", "USA", 36.16, -86.78, "HOUSE", 2, 4, "160.00");
+        var listing = createListing("Nashville gem", "Music city stay", "Nashville", "USA", 36.16, -86.78, "HOUSE", 2, 4, "160.00");
 
-        String searchBody = """
-            {
-              "query": "nashville",
-              "page": 0,
-              "size": 10
-            }
-            """;
-
-        String searchResponse = mockMvc.perform(post("/api/listings/search")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(searchBody))
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-        var listing = listingRepository.findAll().get(0);
-        String searchQueryId = objectMapper.readTree(searchResponse).get("searchQueryId").asText();
+        SearchQuery searchQuery = searchQueryRepository.save(SearchQuery.builder()
+            .queryHash("test-hash")
+            .resultCount(1)
+            .resultListingIds(List.of(listing.getId()))
+            .build());
 
         String clickBody = """
             {
@@ -281,7 +274,7 @@ class SearchIntegrationTest {
               "listingId": "%s",
               "resultPosition": 1
             }
-            """.formatted(searchQueryId, listing.getId());
+            """.formatted(searchQuery.getId(), listing.getId());
 
         mockMvc.perform(post("/api/listings/search/click")
                 .contentType(MediaType.APPLICATION_JSON)
