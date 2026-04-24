@@ -18,9 +18,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,26 +49,24 @@ public class SearchService {
         CachedSearchResult cached = cache != null ? cache.get(cacheKey, CachedSearchResult.class) : null;
 
         Page<SearchableListing> page;
-        Set<UUID> savedIds;
 
         if (cached != null) {
             page = cached.page();
-            savedIds = cached.savedIds();
         } else {
             page = searchRepository.search(request, pageable);
 
-            List<UUID> listingIds = page.getContent().stream()
-                .map(SearchableListing::getId)
-                .toList();
-
-            savedIds = currentUserId == null || listingIds.isEmpty()
-                ? Set.of()
-                : new HashSet<>(savedListingRepository.findListingIdsByGuestIdAndListingIdIn(currentUserId, listingIds));
-
             if (cache != null) {
-                cache.put(cacheKey, new CachedSearchResult(page, savedIds));
+                cache.put(cacheKey, new CachedSearchResult(page));
             }
         }
+
+        List<UUID> listingIds = page.getContent().stream()
+            .map(SearchableListing::getId)
+            .toList();
+
+        Set<UUID> savedIds = currentUserId == null || listingIds.isEmpty()
+            ? Set.of()
+            : new HashSet<>(savedListingRepository.findListingIdsByGuestIdAndListingIdIn(currentUserId, listingIds));
 
         List<SearchResultItem> items = page.getContent().stream()
             .map(listing -> mapToListingItem(listing, savedIds.contains(listing.getId()), request))
@@ -79,7 +74,11 @@ public class SearchService {
 
         long responseTime = System.currentTimeMillis() - startTime;
 
-        SearchQuery recorded = recordSearchQuery(request, currentUserId, (int) page.getTotalElements(), (int) responseTime);
+        List<UUID> resultListingIds = page.getContent().stream()
+            .map(SearchableListing::getId)
+            .toList();
+
+        SearchQuery recorded = recordSearchQuery(request, currentUserId, (int) page.getTotalElements(), (int) responseTime, resultListingIds);
 
         return SearchResponse.of(items, page.getTotalElements(), pageable.getPageNumber(), pageable.getPageSize(), recorded != null ? recorded.getId() : null);
     }
@@ -115,7 +114,8 @@ public class SearchService {
         SearchQuery searchQuery = searchQueryRepository.findById(clickRequest.searchQueryId())
             .orElseThrow(() -> new IllegalArgumentException("Search query not found: " + clickRequest.searchQueryId()));
 
-        if (!searchRepository.existsById(clickRequest.listingId())) {
+        int resultPosition = findRecordedResultPosition(searchQuery, clickRequest.listingId());
+        if (resultPosition < 1) {
             throw new IllegalArgumentException("Listing not found in search results: " + clickRequest.listingId());
         }
 
@@ -123,7 +123,7 @@ public class SearchService {
             .searchQuery(searchQuery)
             .userId(currentUserId)
             .listingId(clickRequest.listingId())
-            .resultPosition(clickRequest.resultPosition())
+            .resultPosition(resultPosition)
             .deviceType(clickRequest.deviceType())
             .build();
 
@@ -131,7 +131,7 @@ public class SearchService {
     }
 
     @Transactional
-    public SearchQuery recordSearchQuery(SearchRequest request, UUID currentUserId, int resultCount, int responseTimeMs) {
+    public SearchQuery recordSearchQuery(SearchRequest request, UUID currentUserId, int resultCount, int responseTimeMs, List<UUID> resultListingIds) {
         try {
             String queryHash = computeQueryHash(request);
             String filtersJson = serializeFilters(request);
@@ -146,6 +146,7 @@ public class SearchService {
                 .geoCenterLat(request.lat())
                 .geoCenterLng(request.lng())
                 .radiusKm(request.radiusKm())
+                .resultListingIds(resultListingIds)
                 .build();
 
             return searchQueryRepository.save(searchQuery);
@@ -269,7 +270,30 @@ public class SearchService {
         return request.hashCode() + "_" + pageable.hashCode() + "_" + (currentUserId != null ? currentUserId.toString() : "anon");
     }
 
-    private record CachedSearchResult(Page<SearchableListing> page, Set<UUID> savedIds) {}
+    private int findRecordedResultPosition(SearchQuery searchQuery, UUID listingId) {
+        List<UUID> resultListingIds = searchQuery.getResultListingIds();
+        if (resultListingIds == null || resultListingIds.isEmpty()) {
+            return -1;
+        }
+
+        int pageIndex = resultListingIds.indexOf(listingId);
+        if (pageIndex < 0) {
+            return -1;
+        }
+
+        SearchRequest storedRequest = parseStoredSearchRequest(searchQuery);
+        return storedRequest.page() * storedRequest.size() + pageIndex + 1;
+    }
+
+    private SearchRequest parseStoredSearchRequest(SearchQuery searchQuery) {
+        try {
+            return objectMapper.readValue(searchQuery.getFiltersUsed(), SearchRequest.class);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Search query filters are invalid: " + searchQuery.getId(), e);
+        }
+    }
+
+    private record CachedSearchResult(Page<SearchableListing> page) {}
 
     private String nullToEmpty(String value) {
         return value != null ? value : "";

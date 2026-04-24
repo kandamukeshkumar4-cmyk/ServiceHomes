@@ -137,7 +137,8 @@ export class SearchResultsComponent {
     if (!this.currentSearchQueryId) {
       return;
     }
-    this.searchApiService.recordClick(this.currentSearchQueryId, listingId, position + 1).subscribe({
+    const globalPosition = this.filters.page * this.filters.size + position + 1;
+    this.searchApiService.recordClick(this.currentSearchQueryId, listingId, globalPosition).subscribe({
       error: () => { /* silently fail; analytics are best-effort */ }
     });
   }

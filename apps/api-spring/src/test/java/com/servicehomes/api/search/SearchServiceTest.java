@@ -135,15 +135,20 @@ class SearchServiceTest {
     }
 
     @Test
-    void recordSearchClickSavesClick() {
+    void recordSearchClickSavesClickWithRecordedResultPosition() throws Exception {
         UUID searchQueryId = UUID.randomUUID();
+        UUID firstListingId = UUID.randomUUID();
         UUID listingId = UUID.randomUUID();
-        SearchQuery searchQuery = SearchQuery.builder().id(searchQueryId).build();
+        SearchRequest request = new SearchRequest(null, null, 1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 2, 10);
+        SearchQuery searchQuery = SearchQuery.builder()
+            .id(searchQueryId)
+            .filtersUsed(objectMapper.writeValueAsString(request))
+            .resultListingIds(List.of(firstListingId, listingId))
+            .build();
 
         when(searchQueryRepository.findById(searchQueryId)).thenReturn(Optional.of(searchQuery));
-        when(searchRepository.existsById(listingId)).thenReturn(true);
 
-        RecordSearchClickRequest clickRequest = new RecordSearchClickRequest(searchQueryId, listingId, 1, "desktop");
+        RecordSearchClickRequest clickRequest = new RecordSearchClickRequest(searchQueryId, listingId, 999, "desktop");
         searchService.recordSearchClick(UUID.randomUUID(), clickRequest);
 
         ArgumentCaptor<SearchClick> captor = ArgumentCaptor.forClass(SearchClick.class);
@@ -151,8 +156,30 @@ class SearchServiceTest {
 
         SearchClick saved = captor.getValue();
         assertThat(saved.getListingId()).isEqualTo(listingId);
-        assertThat(saved.getResultPosition()).isEqualTo(1);
+        assertThat(saved.getResultPosition()).isEqualTo(22);
         assertThat(saved.getDeviceType()).isEqualTo("desktop");
+    }
+
+    @Test
+    void recordSearchClickThrowsForListingOutsideRecordedResults() throws Exception {
+        UUID searchQueryId = UUID.randomUUID();
+        UUID clickedListingId = UUID.randomUUID();
+        SearchRequest request = new SearchRequest(null, null, 1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0, 10);
+        SearchQuery searchQuery = SearchQuery.builder()
+            .id(searchQueryId)
+            .filtersUsed(objectMapper.writeValueAsString(request))
+            .resultListingIds(List.of(UUID.randomUUID()))
+            .build();
+
+        when(searchQueryRepository.findById(searchQueryId)).thenReturn(Optional.of(searchQuery));
+
+        RecordSearchClickRequest clickRequest = new RecordSearchClickRequest(searchQueryId, clickedListingId, 1, null);
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> searchService.recordSearchClick(null, clickRequest)
+        );
+        verify(searchClickRepository, never()).save(any());
     }
 
     @Test

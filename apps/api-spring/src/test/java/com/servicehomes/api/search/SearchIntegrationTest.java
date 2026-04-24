@@ -1,5 +1,6 @@
 package com.servicehomes.api.search;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingCategory;
 import com.servicehomes.api.listings.domain.ListingCategoryRepository;
@@ -65,6 +66,9 @@ class SearchIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private ListingCategory category;
 
@@ -265,14 +269,15 @@ class SearchIntegrationTest {
             .getContentAsString();
 
         var listing = listingRepository.findAll().get(0);
+        String searchQueryId = objectMapper.readTree(searchResponse).get("searchQueryId").asText();
 
         String clickBody = """
             {
-              "searchQueryId": "00000000-0000-0000-0000-000000000000",
+              "searchQueryId": "%s",
               "listingId": "%s",
               "resultPosition": 1
             }
-            """.formatted(listing.getId());
+            """.formatted(searchQueryId, listing.getId());
 
         mockMvc.perform(post("/api/listings/search/click")
                 .contentType(MediaType.APPLICATION_JSON)

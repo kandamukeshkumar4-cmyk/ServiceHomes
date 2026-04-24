@@ -48,6 +48,10 @@ public class SearchQuery {
     @Column(name = "radius_km")
     private Double radiusKm;
 
+    @Column(name = "result_listing_ids", columnDefinition = "jsonb")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    private java.util.List<UUID> resultListingIds;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

@@ -22,6 +22,7 @@ public class SavedListingService {
     private final SavedListingRepository savedListingRepository;
     private final ListingRepository listingRepository;
     private final EventPublisher eventPublisher;
+    private final com.servicehomes.api.search.application.SearchService searchService;
 
     public List<ListingSearchResult> listSavedListings(UUID guestId) {
         List<SavedListing> savedListings = savedListingRepository.findSavedListingsByGuestId(guestId);
@@ -47,6 +48,8 @@ public class SavedListingService {
             .listing(listing)
             .build());
 
+        searchService.invalidateSearchCache();
+
         eventPublisher.publish(
             "listing_saved",
             "listing",
@@ -65,6 +68,9 @@ public class SavedListingService {
         }
 
         savedListingRepository.deleteByGuestIdAndListing_Id(guestId, listingId);
+
+        searchService.invalidateSearchCache();
+
         eventPublisher.publish(
             "listing_unsaved",
             "listing",

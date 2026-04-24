@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, shareReplay } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { SearchFilters } from '../search/search-filters.model';
 import { ListingSearchResult } from '../listings/listing.model';
 
@@ -25,27 +25,10 @@ export interface SearchApiResponse {
 @Injectable({ providedIn: 'root' })
 export class SearchApiService {
   private http = inject(HttpClient);
-  private resultCache = new Map<string, Observable<SearchApiResponse>>();
 
   search(filters: SearchFilters): Observable<SearchApiResponse> {
-    const cacheKey = this.buildCacheKey(filters);
-    if (this.resultCache.has(cacheKey)) {
-      return this.resultCache.get(cacheKey)!;
-    }
-
     const body = this.buildSearchBody(filters);
-    const observable = this.http.post<SearchApiResponse>('/api/listings/search', body).pipe(
-      shareReplay({ bufferSize: 1, refCount: false })
-    );
-
-    this.resultCache.set(cacheKey, observable);
-
-    if (this.resultCache.size > 50) {
-      const firstKey = this.resultCache.keys().next().value;
-      this.resultCache.delete(firstKey);
-    }
-
-    return observable;
+    return this.http.post<SearchApiResponse>('/api/listings/search', body);
   }
 
   getSuggestions(query: string): Observable<SearchSuggestion[]> {
@@ -63,10 +46,6 @@ export class SearchApiService {
       listingId,
       resultPosition
     });
-  }
-
-  clearCache(): void {
-    this.resultCache.clear();
   }
 
   private buildSearchBody(filters: SearchFilters): Record<string, unknown> {
@@ -114,32 +93,5 @@ export class SearchApiService {
       distance: 'DISTANCE'
     };
     return mapping[sort];
-  }
-
-  private buildCacheKey(filters: SearchFilters): string {
-    return JSON.stringify({
-      q: filters.locationQuery,
-      ci: filters.checkIn,
-      co: filters.checkOut,
-      g: filters.guests,
-      min: filters.minPrice,
-      max: filters.maxPrice,
-      br: filters.bedrooms,
-      bd: filters.beds,
-      ba: filters.bathrooms,
-      pt: filters.propertyTypes.join(','),
-      am: filters.amenityIds.join(','),
-      ib: filters.instantBook,
-      lat: filters.lat,
-      lng: filters.lng,
-      rad: filters.radiusKm,
-      swLat: filters.swLat,
-      swLng: filters.swLng,
-      neLat: filters.neLat,
-      neLng: filters.neLng,
-      sort: filters.sort,
-      page: filters.page,
-      size: filters.size
-    });
   }
 }
