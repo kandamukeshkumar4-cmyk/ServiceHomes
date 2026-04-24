@@ -65,6 +65,11 @@ export class ListingCardComponent {
   @Input({ required: true }) listing!: ListingCardViewModel;
   @Input() showSaveToggle = false;
   @Output() readonly saveToggled = new EventEmitter<string>();
+  @Output() readonly listingOpened = new EventEmitter<string>();
+
+  openListing(): void {
+    this.listingOpened.emit(this.listing.id);
+  }
 
   toggleSaved(event: Event): void {
     event.preventDefault();

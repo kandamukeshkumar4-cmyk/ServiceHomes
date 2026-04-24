@@ -37,20 +37,31 @@ search_to_click AS (
     FROM search_sessions ss
 ),
 
-click_to_booking AS (
-    SELECT
-        stc.*,
-        COUNT(DISTINCT r.reservation_id) AS bookings_from_search,
-        COUNT(DISTINCT CASE WHEN r.status = 'CONFIRMED' THEN r.reservation_id END) AS confirmed_bookings_from_search,
-        SUM(COALESCE(r.total_amount, 0)) AS total_booking_value
+matched_reservations AS (
+    SELECT DISTINCT
+        stc.search_query_id,
+        r.reservation_id,
+        r.status,
+        r.total_amount
     FROM search_to_click stc
-    LEFT JOIN {{ source('app', 'search_clicks') }} sc
+    INNER JOIN {{ source('app', 'search_clicks') }} sc
         ON stc.search_query_id = sc.search_query_id
-    LEFT JOIN reservations r
+    INNER JOIN reservations r
         ON stc.user_id = r.guest_id
         AND sc.listing_id = r.listing_id
         AND r.reserved_at >= stc.searched_at
         AND r.reserved_at < stc.searched_at + INTERVAL '24 hours'
+),
+
+click_to_booking AS (
+    SELECT
+        stc.*,
+        COUNT(mr.reservation_id) AS bookings_from_search,
+        COUNT(CASE WHEN mr.status = 'CONFIRMED' THEN mr.reservation_id END) AS confirmed_bookings_from_search,
+        SUM(COALESCE(mr.total_amount, 0)) AS total_booking_value
+    FROM search_to_click stc
+    LEFT JOIN matched_reservations mr
+        ON stc.search_query_id = mr.search_query_id
     GROUP BY
         stc.search_query_id,
         stc.user_id,

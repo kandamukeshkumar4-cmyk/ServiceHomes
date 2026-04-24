@@ -61,12 +61,15 @@ public class SearchIndexRefresher {
         }
     }
 
-    private boolean tryAcquireRefreshLock(Connection connection) throws Exception {
+    private boolean tryAcquireRefreshLock(Connection connection) {
         try (PreparedStatement statement = connection.prepareStatement("SELECT pg_try_advisory_lock(?)")) {
             statement.setLong(1, SEARCH_INDEX_REFRESH_LOCK_ID);
             try (ResultSet resultSet = statement.executeQuery()) {
                 return resultSet.next() && resultSet.getBoolean(1);
             }
+        } catch (Exception e) {
+            log.warn("Failed to acquire search materialized view refresh lock", e);
+            return false;
         }
     }
 
