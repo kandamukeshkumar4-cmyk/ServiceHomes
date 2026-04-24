@@ -96,7 +96,7 @@ export class SearchStateService {
 
       const urlTree = this.router.parseUrl(this.router.url);
       urlTree.queryParams = queryParams;
-      void this.router.navigateByUrl(urlTree, { replaceUrl: true });
+      void this.router.navigateByUrl(urlTree);
     });
   }
 
