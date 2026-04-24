@@ -11,6 +11,8 @@ sources:
       - name: listing_categories
       - name: listing_locations
       - name: reservations
+      - name: search_queries
+      - name: search_clicks
       - name: outbox_events
 
   - name: raw

@@ -1,4 +1,4 @@
-export type SearchSort = 'relevance' | 'priceAsc' | 'priceDesc' | 'newest' | 'ratingDesc';
+export type SearchSort = 'relevance' | 'priceAsc' | 'priceDesc' | 'newest' | 'ratingDesc' | 'distance';
 
 export interface SearchFilters {
   listingId: string | null;
@@ -12,7 +12,10 @@ export interface SearchFilters {
   lng: number | null;
   radiusKm: number | null;
   bedrooms: number | null;
+  beds: number | null;
+  bathrooms: number | null;
   propertyTypes: string[];
+  amenityIds: string[];
   instantBook: boolean;
   swLat: number | null;
   swLng: number | null;
@@ -35,7 +38,10 @@ export const DEFAULT_SEARCH_FILTERS: SearchFilters = {
   lng: null,
   radiusKm: null,
   bedrooms: null,
+  beds: null,
+  bathrooms: null,
   propertyTypes: [],
+  amenityIds: [],
   instantBook: false,
   swLat: null,
   swLng: null,

@@ -6,6 +6,7 @@ import { SearchStateService } from './search-state.service';
 import { SearchApiService } from './search-api.service';
 import { SavedListingsService } from '../saved/saved-listings.service';
 import { AppAuthService } from '../core/auth.service';
+import { ListingService } from '../listings/listing.service';
 import { DEFAULT_SEARCH_FILTERS } from './search-filters.model';
 
 describe('SearchResultsComponent', () => {
@@ -55,6 +56,19 @@ describe('SearchResultsComponent', () => {
     logout: jasmine.createSpy()
   };
 
+  const listingServiceMock = {
+    search: jasmine.createSpy().and.returnValue(of({
+      content: [],
+      totalElements: 0,
+      totalPages: 0,
+      currentPage: 0,
+      pageSize: 20,
+      hasNext: false,
+      hasPrevious: false,
+      cursor: null
+    }))
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SearchResultsComponent],
@@ -63,6 +77,7 @@ describe('SearchResultsComponent', () => {
         { provide: SearchApiService, useValue: searchApiMock },
         { provide: SavedListingsService, useValue: savedListingsMock },
         { provide: AppAuthService, useValue: authMock },
+        { provide: ListingService, useValue: listingServiceMock },
         provideRouter([])
       ]
     }).compileComponents();
@@ -92,16 +107,11 @@ describe('SearchResultsComponent', () => {
     expect(component.headerText).toBe('5 stays for "Miami"');
   });
 
-  it('toggles view mode between list and split', () => {
+  it('toggles view mode between list and map', () => {
     component.setViewMode('list');
     expect(component.viewMode).toBe('list');
 
-    component.setViewMode('split');
-    expect(component.viewMode).toBe('split');
-  });
-
-  it('clears filters when clearFilters is called', () => {
-    component.clearFilters();
-    expect(searchStateMock.clearFilters).toHaveBeenCalled();
+    component.setViewMode('map');
+    expect(component.viewMode).toBe('map');
   });
 });

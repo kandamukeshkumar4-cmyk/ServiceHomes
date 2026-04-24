@@ -112,7 +112,7 @@ export class SearchStateService {
 }
 
 function cloneFilters(filters: SearchFilters): SearchFilters {
-  return { ...filters, propertyTypes: [...filters.propertyTypes] };
+  return { ...filters, propertyTypes: [...filters.propertyTypes], amenityIds: [...filters.amenityIds] };
 }
 
 function normalizeFilters(filters: Partial<SearchFilters>): SearchFilters {
@@ -131,7 +131,10 @@ function normalizeFilters(filters: Partial<SearchFilters>): SearchFilters {
     lng: readLongitude(filters.lng),
     radiusKm: readPositiveNumber(filters.radiusKm),
     bedrooms: readPositiveInteger(filters.bedrooms),
+    beds: readPositiveInteger(filters.beds),
+    bathrooms: readPositiveInteger(filters.bathrooms),
     propertyTypes: readStringArray(filters.propertyTypes),
+    amenityIds: readStringArray(filters.amenityIds),
     instantBook: Boolean(filters.instantBook),
     swLat: readLatitude(filters.swLat),
     swLng: readLongitude(filters.swLng),
@@ -157,7 +160,10 @@ function serializeFilters(filters: SearchFilters): Params {
   assignIfPresent(params, 'lng', filters.lng);
   assignIfPresent(params, 'radiusKm', filters.radiusKm);
   assignIfPresent(params, 'bedrooms', filters.bedrooms);
+  assignIfPresent(params, 'beds', filters.beds);
+  assignIfPresent(params, 'bathrooms', filters.bathrooms);
   assignIfPresent(params, 'propertyTypes', filters.propertyTypes.length ? filters.propertyTypes.join(',') : null);
+  assignIfPresent(params, 'amenityIds', filters.amenityIds.length ? filters.amenityIds.join(',') : null);
   assignIfTrue(params, 'instantBook', filters.instantBook);
   assignIfPresent(params, 'swLat', filters.swLat);
   assignIfPresent(params, 'swLng', filters.swLng);
@@ -247,7 +253,7 @@ function readBoolean(value: unknown): boolean {
 
 function readSort(value: unknown): SearchSort {
   const raw = readString(value);
-  return raw === 'priceAsc' || raw === 'priceDesc' || raw === 'newest' || raw === 'ratingDesc'
+  return raw === 'priceAsc' || raw === 'priceDesc' || raw === 'newest' || raw === 'ratingDesc' || raw === 'distance'
     ? raw
     : DEFAULT_SEARCH_FILTERS.sort;
 }

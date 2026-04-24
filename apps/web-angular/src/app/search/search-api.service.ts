@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, shareReplay } from 'rxjs';
 import { SearchFilters } from '../search/search-filters.model';
-import { ListingSearchPage, SearchResultItem } from '../listings/listing.model';
+import { ListingSearchResult } from '../listings/listing.model';
 
 export interface SearchSuggestion {
   text: string;
@@ -11,7 +11,7 @@ export interface SearchSuggestion {
 }
 
 export interface SearchApiResponse {
-  content: SearchResultItem[];
+  content: ListingSearchResult[];
   totalElements: number;
   totalPages: number;
   currentPage: number;
