@@ -36,6 +36,7 @@
               <a [routerLink]="['/listings', listing.id, 'edit']" class="p-button p-button-sm p-button-outlined no-underline flex-1 text-center">Edit</a>
               <a [routerLink]="['/listings', listing.id, 'availability']" class="p-button p-button-sm p-button-outlined no-underline flex-1 text-center">Availability</a>
             </div>
+            <a [routerLink]="['/host', 'listings', listing.id, 'calendar']" class="p-button p-button-sm p-button-outlined no-underline text-center">Calendar & Pricing</a>
             <button *ngIf="listing.status !== 'PUBLISHED'" class="p-button p-button-sm p-button-success flex-1" (click)="publish(listing.id)">Publish</button>
             <button *ngIf="listing.status === 'PUBLISHED'" class="p-button p-button-sm p-button-secondary flex-1" (click)="unpublish(listing.id)">Unpublish</button>
           </div>

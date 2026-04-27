@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "LengthOfStayDiscountCreated",
+  "namespace": "com.servicehomes.events",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "timestamp", "type": "string" },
+    { "name": "listingId", "type": "string" },
+    { "name": "hostId", "type": "string" },
+    { "name": "discountId", "type": "string" },
+    { "name": "minNights", "type": "string" },
+    { "name": "discountPercent", "type": "string" }
+  ]
+}
