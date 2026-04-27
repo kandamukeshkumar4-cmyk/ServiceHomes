@@ -5,6 +5,7 @@ import com.servicehomes.api.listings.application.dto.AvailabilityRuleDto;
 import com.servicehomes.api.listings.application.dto.ListingAvailabilityResponse;
 import com.servicehomes.api.listings.application.dto.ListingCalendarResponse;
 import com.servicehomes.api.listings.application.dto.UpdateListingAvailabilityRequest;
+import com.servicehomes.api.listings.domain.LengthOfStayDiscount;
 import com.servicehomes.api.listings.domain.Listing;
 import com.servicehomes.api.listings.domain.ListingAvailabilityRule;
 import com.servicehomes.api.listings.domain.ListingAvailabilityRuleRepository;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,7 @@ public class AvailabilityService {
 
     private final ListingRepository listingRepository;
     private final ListingAvailabilityRuleRepository availabilityRuleRepository;
+    private final HostCalendarService hostCalendarService;
     private final EventPublisher eventPublisher;
 
     public ListingAvailabilityResponse getAvailability(UUID hostId, UUID listingId) {
@@ -139,6 +142,15 @@ public class AvailabilityService {
 
         if (nights < effectiveMinNights) {
             throw new IllegalArgumentException("Minimum nights requirement not met for selected dates");
+        }
+
+        Optional<LengthOfStayDiscount> losDiscount = hostCalendarService.findApplicableLengthOfStayDiscount(listing.getId(), nights);
+        if (losDiscount.isPresent()) {
+            BigDecimal discountPercent = losDiscount.get().getDiscountPercent();
+            BigDecimal discountFactor = BigDecimal.ONE.subtract(
+                discountPercent.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
+            );
+            subtotal = subtotal.multiply(discountFactor).setScale(2, RoundingMode.HALF_UP);
         }
 
         BigDecimal averageNightlyPrice = subtotal.divide(BigDecimal.valueOf(nights), 2, RoundingMode.HALF_UP);

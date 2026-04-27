@@ -1,0 +1,118 @@
+<div class="p-4 max-w-80rem mx-auto" *ngIf="listing">
+  <div class="flex justify-content-between align-items-center mb-4">
+    <h1 class="text-2xl font-bold m-0">Calendar & Pricing: {{ listing.title }}</h1>
+    <a [routerLink]="['/host', 'accommodations']" class="p-button p-button-outlined no-underline">Back to accommodations</a>
+  </div>
+
+  <p class="text-600 mb-4">Manage seasonal pricing, length-of-stay discounts, weekend premiums, and turnover days.</p>
+
+  <div *ngIf="error" class="p-3 mb-3 border-round-lg bg-red-100 text-red-700">{{ error }}</div>
+
+  <div class="grid">
+    <div class="col-12 lg:col-8">
+      <div class="pricing-section">
+        <h2 class="text-xl font-bold mb-3">Calendar View</h2>
+        <div class="flex gap-2 mb-3 align-items-end">
+          <div>
+            <label class="block text-sm text-600 mb-1">Start date</label>
+            <input type="date" [(ngModel)]="calendarStart" class="p-inputtext" />
+          </div>
+          <div>
+            <label class="block text-sm text-600 mb-1">End date</label>
+            <input type="date" [(ngModel)]="calendarEnd" class="p-inputtext" />
+          </div>
+          <button class="p-button p-button-sm" (click)="refreshCalendar()">Refresh</button>
+        </div>
+        <div *ngIf="calendarError" class="p-2 mb-2 border-round bg-red-100 text-red-700 text-sm">{{ calendarError }}</div>
+        <div class="calendar-grid">
+          <div *ngFor="let day of calendarDays" [ngClass]="dayCardClasses(day)">
+            <div class="flex justify-content-between mb-1">
+              <span class="text-xs text-500">{{ formatCalendarWeekday(day.date) }}</span>
+              <span class="text-sm font-semibold">{{ formatCalendarDay(day.date) }}</span>
+            </div>
+            <div *ngIf="day.blocked" class="text-xs text-red-600 font-semibold">Blocked</div>
+            <div *ngIf="day.turnover && !day.blocked" class="text-xs text-amber-600 font-semibold">Turnover</div>
+            <div *ngIf="!day.blocked" class="text-sm font-bold mt-1">{{ formatCurrency(day.finalNightlyPrice) }}</div>
+            <div *ngIf="day.hasPriceOverride && !day.blocked" class="text-xs text-purple-600">Price override</div>
+            <div *ngIf="day.hasSeasonalTemplate && !day.hasPriceOverride && !day.blocked" class="text-xs text-blue-600">
+              Seasonal {{ day.seasonalMultiplier }}x
+            </div>
+            <div *ngIf="day.hasWeekendMultiplier && !day.hasPriceOverride && !day.blocked" class="text-xs text-green-600">
+              Weekend {{ day.weekendMultiplier }}x
+            </div>
+            <div class="text-xs text-500 mt-1">Min {{ day.minNights }} nights</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 lg:col-4">
+      <div class="pricing-section">
+        <h2 class="text-lg font-bold mb-2">Seasonal Pricing Templates</h2>
+        <div *ngIf="seasonalTemplates.length === 0" class="text-sm text-600 mb-2">No templates yet.</div>
+        <div *ngFor="let t of seasonalTemplates" class="flex justify-content-between align-items-center p-2 surface-100 border-round mb-1">
+          <div>
+            <div class="text-sm font-semibold">{{ t.name }}</div>
+            <div class="text-xs text-600">{{ t.startDate }} to {{ t.endDate }} &middot; {{ t.multiplier }}x</div>
+          </div>
+          <button class="p-button p-button-sm p-button-danger p-button-text" (click)="deleteSeasonalTemplate(t.id)">Delete</button>
+        </div>
+        <div class="flex flex-column gap-2 mt-2">
+          <input type="text" [(ngModel)]="newTemplateName" placeholder="Template name" class="p-inputtext p-inputtext-sm" />
+          <div class="flex gap-2">
+            <input type="date" [(ngModel)]="newTemplateStart" class="p-inputtext p-inputtext-sm flex-1" />
+            <input type="date" [(ngModel)]="newTemplateEnd" class="p-inputtext p-inputtext-sm flex-1" />
+          </div>
+          <input type="number" [(ngModel)]="newTemplateMultiplier" placeholder="Multiplier (e.g. 1.25)" step="0.01" min="0.01" class="p-inputtext p-inputtext-sm" />
+          <button class="p-button p-button-sm" [disabled]="saving" (click)="addSeasonalTemplate()">Add Template</button>
+        </div>
+      </div>
+
+      <div class="pricing-section">
+        <h2 class="text-lg font-bold mb-2">Length-of-Stay Discounts</h2>
+        <div *ngIf="lengthOfStayDiscounts.length === 0" class="text-sm text-600 mb-2">No discounts yet.</div>
+        <div *ngFor="let d of lengthOfStayDiscounts" class="flex justify-content-between align-items-center p-2 surface-100 border-round mb-1">
+          <div class="text-sm">{{ d.minNights }}+ nights &middot; {{ d.discountPercent }}% off</div>
+          <button class="p-button p-button-sm p-button-danger p-button-text" (click)="deleteLengthOfStayDiscount(d.id)">Delete</button>
+        </div>
+        <div class="flex flex-column gap-2 mt-2">
+          <div class="flex gap-2">
+            <input type="number" [(ngModel)]="newDiscountMinNights" placeholder="Min nights" min="1" class="p-inputtext p-inputtext-sm flex-1" />
+            <input type="number" [(ngModel)]="newDiscountPercent" placeholder="Discount %" min="0" max="100" step="0.01" class="p-inputtext p-inputtext-sm flex-1" />
+          </div>
+          <button class="p-button p-button-sm" [disabled]="saving" (click)="addLengthOfStayDiscount()">Add Discount</button>
+        </div>
+      </div>
+
+      <div class="pricing-section">
+        <h2 class="text-lg font-bold mb-2">Weekend Multipliers</h2>
+        <div class="flex flex-column gap-2">
+          <div class="flex gap-2 align-items-center">
+            <label class="text-sm flex-1">Friday</label>
+            <input type="number" [(ngModel)]="weekendFridayMultiplier" step="0.01" min="0.01" class="p-inputtext p-inputtext-sm" style="width: 5rem" />
+          </div>
+          <div class="flex gap-2 align-items-center">
+            <label class="text-sm flex-1">Saturday</label>
+            <input type="number" [(ngModel)]="weekendSaturdayMultiplier" step="0.01" min="0.01" class="p-inputtext p-inputtext-sm" style="width: 5rem" />
+          </div>
+          <div class="flex gap-2 align-items-center">
+            <label class="text-sm flex-1">Sunday</label>
+            <input type="number" [(ngModel)]="weekendSundayMultiplier" step="0.01" min="0.01" class="p-inputtext p-inputtext-sm" style="width: 5rem" />
+          </div>
+          <button class="p-button p-button-sm" [disabled]="saving" (click)="saveWeekendMultiplier()">Save Weekend Multipliers</button>
+        </div>
+      </div>
+
+      <div class="pricing-section">
+        <h2 class="text-lg font-bold mb-2">Turnover Days</h2>
+        <div class="flex flex-column gap-2">
+          <div class="flex gap-2 align-items-center">
+            <label class="text-sm flex-1">Buffer days after checkout</label>
+            <input type="number" [(ngModel)]="turnoverBufferDays" min="0" class="p-inputtext p-inputtext-sm" style="width: 5rem" />
+          </div>
+          <button class="p-button p-button-sm" [disabled]="saving" (click)="saveTurnoverDay()">Save Turnover Settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

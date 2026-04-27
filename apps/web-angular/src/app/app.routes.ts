@@ -23,5 +23,6 @@ export const routes: Routes = [
   { path: 'host/reservations', canActivate: [authGuard], loadComponent: () => import('./host/host-reservations.component').then(m => m.HostReservationsComponent) },
   { path: 'listings/new', canActivate: [authGuard], loadComponent: () => import('./listings/listing-create.component').then(m => m.ListingCreateComponent) },
   { path: 'listings/:id/edit', canActivate: [authGuard], loadComponent: () => import('./listings/listing-edit.component').then(m => m.ListingEditComponent) },
-  { path: 'listings/:id/availability', canActivate: [authGuard], loadComponent: () => import('./listings/listing-availability.component').then(m => m.ListingAvailabilityComponent) }
+  { path: 'listings/:id/availability', canActivate: [authGuard], loadComponent: () => import('./listings/listing-availability.component').then(m => m.ListingAvailabilityComponent) },
+  { path: 'host/listings/:id/calendar', canActivate: [authGuard], loadComponent: () => import('./host/host-calendar.component').then(m => m.HostCalendarComponent) }
 ];

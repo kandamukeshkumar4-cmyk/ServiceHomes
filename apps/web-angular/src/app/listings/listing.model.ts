@@ -165,3 +165,73 @@ export interface ListingCalendarResponse {
   endDate: string;
   days: ListingCalendarDay[];
 }
+
+export interface HostCalendarDay {
+  date: string;
+  blocked: boolean;
+  turnover: boolean;
+  minNights: number;
+  baseNightlyPrice: number;
+  seasonalMultiplier: number;
+  weekendMultiplier: number;
+  priceOverride: number | null;
+  finalNightlyPrice: number;
+  hasPriceOverride: boolean;
+  hasSeasonalTemplate: boolean;
+  hasWeekendMultiplier: boolean;
+}
+
+export interface HostCalendarResponse {
+  listingId: string;
+  startDate: string;
+  endDate: string;
+  days: HostCalendarDay[];
+}
+
+export interface SeasonalPricingTemplate {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  multiplier: number;
+}
+
+export interface LengthOfStayDiscount {
+  id: string;
+  minNights: number;
+  discountPercent: number;
+}
+
+export interface WeekendMultiplier {
+  id: string;
+  fridayMultiplier: number;
+  saturdayMultiplier: number;
+  sundayMultiplier: number;
+}
+
+export interface TurnoverDay {
+  id: string;
+  bufferDays: number;
+}
+
+export interface CreateSeasonalPricingTemplateRequest {
+  name: string;
+  startDate: string;
+  endDate: string;
+  multiplier: number;
+}
+
+export interface CreateLengthOfStayDiscountRequest {
+  minNights: number;
+  discountPercent: number;
+}
+
+export interface UpdateWeekendMultiplierRequest {
+  fridayMultiplier: number;
+  saturdayMultiplier: number;
+  sundayMultiplier: number;
+}
+
+export interface UpdateTurnoverDayRequest {
+  bufferDays: number;
+}

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,4 +59,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     long countRequestsRespondedWithin24Hours(@Param("hostId") UUID hostId);
 
     long countByListing_IdAndStatusIn(UUID listingId, List<Reservation.Status> statuses);
+
+    @Query("""
+        SELECT r FROM Reservation r
+        WHERE r.listing.id = :listingId
+          AND r.status = 'CONFIRMED'
+          AND r.checkOut >= :startDate
+          AND r.checkIn <= :endDate
+        ORDER BY r.checkIn ASC
+        """)
+    List<Reservation> findConfirmedByListingIdAndDateRange(
+        @Param("listingId") UUID listingId,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate
+    );
 }

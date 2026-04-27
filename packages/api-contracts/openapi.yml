@@ -199,6 +199,324 @@ paths:
               schema:
                 $ref: '#/components/schemas/ListingCalendar'
 
+  /host/listings/{listingId}/calendar:
+    get:
+      summary: Get enriched host calendar with pricing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Host calendar day view
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostCalendar'
+
+  /host/listings/{listingId}/calendar/seasonal-templates:
+    get:
+      summary: List seasonal pricing templates
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of seasonal pricing templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SeasonalPricingTemplate'
+    post:
+      summary: Create seasonal pricing template
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSeasonalPricingTemplateRequest'
+      responses:
+        '200':
+          description: Created template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonalPricingTemplate'
+
+  /host/listings/{listingId}/calendar/seasonal-templates/{templateId}:
+    put:
+      summary: Update seasonal pricing template
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSeasonalPricingTemplateRequest'
+      responses:
+        '200':
+          description: Updated template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonalPricingTemplate'
+    delete:
+      summary: Delete seasonal pricing template
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+
+  /host/listings/{listingId}/calendar/length-of-stay-discounts:
+    get:
+      summary: List length-of-stay discounts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of length-of-stay discounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LengthOfStayDiscount'
+    post:
+      summary: Create length-of-stay discount
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLengthOfStayDiscountRequest'
+      responses:
+        '200':
+          description: Created discount
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LengthOfStayDiscount'
+
+  /host/listings/{listingId}/calendar/length-of-stay-discounts/{discountId}:
+    put:
+      summary: Update length-of-stay discount
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: discountId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLengthOfStayDiscountRequest'
+      responses:
+        '200':
+          description: Updated discount
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LengthOfStayDiscount'
+    delete:
+      summary: Delete length-of-stay discount
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: discountId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+
+  /host/listings/{listingId}/calendar/weekend-multiplier:
+    get:
+      summary: Get weekend multiplier
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Weekend multiplier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeekendMultiplier'
+        '404':
+          description: Not set
+    put:
+      summary: Update weekend multiplier
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWeekendMultiplierRequest'
+      responses:
+        '200':
+          description: Updated weekend multiplier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeekendMultiplier'
+
+  /host/listings/{listingId}/calendar/turnover-day:
+    get:
+      summary: Get turnover day settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Turnover day settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TurnoverDay'
+        '404':
+          description: Not set
+    put:
+      summary: Update turnover day settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTurnoverDayRequest'
+      responses:
+        '200':
+          description: Updated turnover day settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TurnoverDay'
+
   /listings/search:
     get:
       summary: Search published listings
@@ -2468,19 +2786,10 @@ components:
           properties:
             shareToken:
               type: string
-            collaboratorIds:
-              type: array
-              items:
-                type: string
-                format: uuid
             items:
               type: array
               items:
                 $ref: '#/components/schemas/WishlistItem'
-            totalItems:
-              type: integer
-            editable:
-              type: boolean
 
     WishlistItem:
       type: object
@@ -2488,17 +2797,20 @@ components:
         id:
           type: string
           format: uuid
-        listing:
-          $ref: '#/components/schemas/ListingSummary'
-        note:
+        listingId:
           type: string
-        sortOrder:
+          format: uuid
+        listing:
+          $ref: '#/components/schemas/WishlistListingSnapshot'
+        notes:
+          type: string
+        orderIndex:
           type: integer
         addedAt:
           type: string
           format: date-time
 
-    ListingSummary:
+    WishlistListingSnapshot:
       type: object
       properties:
         id:
@@ -2506,11 +2818,15 @@ components:
           format: uuid
         title:
           type: string
-        thumbnail:
+        coverUrl:
           type: string
-        price:
+        city:
+          type: string
+        country:
+          type: string
+        nightlyPrice:
           type: number
-        rating:
+        averageRating:
           type: number
 
     CreateWishlistRequest:
@@ -2519,7 +2835,16 @@ components:
       properties:
         title:
           type: string
-          maxLength: 160
+        description:
+          type: string
+        isPublic:
+          type: boolean
+
+    UpdateWishlistRequest:
+      type: object
+      properties:
+        title:
+          type: string
         description:
           type: string
         isPublic:
@@ -2532,15 +2857,7 @@ components:
         listingId:
           type: string
           format: uuid
-        note:
-          type: string
-        sourcePage:
-          type: string
-
-    UpdateWishlistItemRequest:
-      type: object
-      properties:
-        note:
+        notes:
           type: string
 
     ReorderWishlistItemsRequest:
@@ -2553,40 +2870,32 @@ components:
             type: string
             format: uuid
 
-    UpdateCollaboratorsRequest:
+    WishlistCollaborator:
       type: object
       properties:
-        collaboratorIds:
-          type: array
-          items:
-            type: string
-            format: uuid
-
-    ShareLink:
-      type: object
-      properties:
-        token:
+        userId:
           type: string
-        url:
+          format: uuid
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+        role:
+          type: string
+          enum: [OWNER, COLLABORATOR]
+
+    AddCollaboratorRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
           type: string
 
     WishlistCoverUploadRequest:
       type: object
-      required: [contentType, contentLength]
+      required: [contentType]
       properties:
         contentType:
-          type: string
-        contentLength:
-          type: integer
-
-    WishlistCoverUploadResponse:
-      type: object
-      properties:
-        uploadUrl:
-          type: string
-        s3Key:
-          type: string
-        publicUrl:
           type: string
 
     FinalizeWishlistCoverRequest:
@@ -2597,6 +2906,217 @@ components:
           type: string
 
     SavedSearch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        filters:
+          type: object
+        locationQuery:
+          type: string
+        geoCenterLat:
+          type: number
+        geoCenterLng:
+          type: number
+        radiusKm:
+          type: number
+        notifyNewResults:
+          type: boolean
+        resultCountSnapshot:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    SaveSearchRequest:
+      type: object
+      required: [name, filters]
+      properties:
+        name:
+          type: string
+        filters:
+          type: object
+        locationQuery:
+          type: string
+        geoCenterLat:
+          type: number
+        geoCenterLng:
+          type: number
+        radiusKm:
+          type: number
+        notifyNewResults:
+          type: boolean
+
+    UpdateSavedSearchRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        filters:
+          type: object
+        locationQuery:
+          type: string
+        geoCenterLat:
+          type: number
+        geoCenterLng:
+          type: number
+        radiusKm:
+          type: number
+        notifyNewResults:
+          type: boolean
+
+    SavedSearchResultCountRequest:
+      type: object
+      required: [listingId]
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        sourcePage:
+          type: string
+          enum: [search, wishlist, home]
+
+    HostCalendar:
+      type: object
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/HostCalendarDay'
+
+    HostCalendarDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        blocked:
+          type: boolean
+        turnover:
+          type: boolean
+        minNights:
+          type: integer
+        baseNightlyPrice:
+          type: number
+        seasonalMultiplier:
+          type: number
+        weekendMultiplier:
+          type: number
+        priceOverride:
+          type: number
+          nullable: true
+        finalNightlyPrice:
+          type: number
+        hasPriceOverride:
+          type: boolean
+        hasSeasonalTemplate:
+          type: boolean
+        hasWeekendMultiplier:
+          type: boolean
+
+    SeasonalPricingTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        multiplier:
+          type: number
+
+    CreateSeasonalPricingTemplateRequest:
+      type: object
+      required: [name, startDate, endDate, multiplier]
+      properties:
+        name:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        multiplier:
+          type: number
+
+    LengthOfStayDiscount:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        minNights:
+          type: integer
+        discountPercent:
+          type: number
+
+    CreateLengthOfStayDiscountRequest:
+      type: object
+      required: [minNights, discountPercent]
+      properties:
+        minNights:
+          type: integer
+        discountPercent:
+          type: number
+
+    WeekendMultiplier:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fridayMultiplier:
+          type: number
+        saturdayMultiplier:
+          type: number
+        sundayMultiplier:
+          type: number
+
+    UpdateWeekendMultiplierRequest:
+      type: object
+      required: [fridayMultiplier, saturdayMultiplier, sundayMultiplier]
+      properties:
+        fridayMultiplier:
+          type: number
+        saturdayMultiplier:
+          type: number
+        sundayMultiplier:
+          type: number
+
+    TurnoverDay:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bufferDays:
+          type: integer
+
+    UpdateTurnoverDayRequest:
+      type: object
+      required: [bufferDays]
+      properties:
+        bufferDays:
+          type: integer
       type: object
       properties:
         id:
