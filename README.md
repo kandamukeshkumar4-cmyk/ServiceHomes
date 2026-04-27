@@ -1,5 +1,9 @@
 # ServiceHomes
 
+## Guest Wishlists, Saved Searches, and Recently Viewed
+
+The wishlist platform lets guests create collaborative listing collections, save search filter sets, and return to recently viewed listings. Public share links are read-only, collaborator access can add and edit wishlist items, and recent views are retained for 90 days before scheduled cleanup.
+
 A production-style home services and short-term rental platform.
 
 ## Repositories

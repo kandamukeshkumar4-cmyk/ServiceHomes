@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AppAuthService, Me, UpdateProfilePayload } from '../core/auth.service';
+import { RecentlyViewedCarouselComponent } from '../wishlists/recently-viewed-carousel.component';
 
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RecentlyViewedCarouselComponent],
   template: `
     <div class="p-4 max-w-60rem mx-auto">
       <h1 class="text-2xl font-bold mb-3">Profile & hosting</h1>
@@ -105,6 +106,10 @@ import { AppAuthService, Me, UpdateProfilePayload } from '../core/auth.service';
                 </div>
               </div>
             </div>
+          </div>
+
+          <div class="col-12">
+            <app-recently-viewed-carousel></app-recently-viewed-carousel>
           </div>
         </div>
       </ng-template>

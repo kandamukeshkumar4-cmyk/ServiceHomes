@@ -12,8 +12,7 @@ models:
         tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
+              values:
                   - search_executed
                   - listing_viewed
                   - listing_created
@@ -36,6 +35,12 @@ models:
                   - became_host
                   - host_dashboard_viewed
                   - guest_dashboard_viewed
+                  - wishlist_item_added
+                  - wishlist_item_removed
+                  - wishlist_item_reordered
+                  - wishlist_shared
+                  - saved_search_created
+                  - recently_viewed_recorded
       - name: event_timestamp
         tests:
           - not_null
@@ -54,8 +59,7 @@ models:
       - name: status
         tests:
           - accepted_values:
-              arguments:
-                values: ['DRAFT', 'PUBLISHED', 'UNPUBLISHED']
+              values: ['DRAFT', 'PUBLISHED', 'UNPUBLISHED']
   - name: sr_reservations
     columns:
       - name: id
@@ -65,8 +69,7 @@ models:
       - name: status
         tests:
           - accepted_values:
-              arguments:
-                values: ['PENDING', 'CONFIRMED', 'CANCELLED_BY_GUEST', 'CANCELLED_BY_HOST', 'COMPLETED']
+              values: ['PENDING', 'CONFIRMED', 'CANCELLED_BY_GUEST', 'CANCELLED_BY_HOST', 'COMPLETED']
   - name: fct_reservation
     columns:
       - name: reservation_id
@@ -87,8 +90,7 @@ models:
         tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
+              values:
                   - search_executed
                   - listing_viewed
                   - listing_created
@@ -111,6 +113,12 @@ models:
                   - became_host
                   - host_dashboard_viewed
                   - guest_dashboard_viewed
+                  - wishlist_item_added
+                  - wishlist_item_removed
+                  - wishlist_item_reordered
+                  - wishlist_shared
+                  - saved_search_created
+                  - recently_viewed_recorded
       - name: event_timestamp
         tests:
           - not_null
@@ -127,6 +135,36 @@ models:
       - name: result_count
         tests:
           - not_null
+  - name: sr_wishlist_engagement
+    description: Wishlist and saved engagement events normalized for downstream facts.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+      - name: wishlist_id
+        tests:
+          - not_null
+  - name: fct_wishlist_interaction
+    description: Daily wishlist add, remove, reorder, and share activity.
+    columns:
+      - name: wishlist_id
+        tests:
+          - not_null
+  - name: fct_saved_search_activity
+    description: Saved search creation activity and filter metadata.
+    columns:
+      - name: event_id
+        tests:
+          - unique
+          - not_null
+  - name: dim_user_engagement
+    description: User-level engagement rollup across wishlists, saved searches, and recent views.
+    columns:
+      - name: user_id
+        tests:
+          - unique
+          - not_null
   - name: fct_listing_event
     description: Listing lifecycle and engagement events at one row per listing-scoped event.
     columns:
@@ -137,8 +175,7 @@ models:
       - name: event_type
         tests:
           - accepted_values:
-              arguments:
-                values:
+              values:
                   - listing_viewed
                   - listing_created
                   - listing_updated
@@ -160,8 +197,7 @@ models:
       - name: event_type
         tests:
           - accepted_values:
-              arguments:
-                values:
+              values:
                   - reservation_created
                   - reservation_confirmed
                   - reservation_declined
@@ -179,8 +215,7 @@ models:
       - name: event_type
         tests:
           - accepted_values:
-              arguments:
-                values:
+              values:
                   - review_created
                   - host_review_created
                   - host_response_added

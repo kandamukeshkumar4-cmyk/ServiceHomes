@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "WishlistShared",
+  "namespace": "com.servicehomes.events",
+  "fields": [
+    { "name": "eventId", "type": "string" },
+    { "name": "timestamp", "type": "string" },
+    { "name": "ownerId", "type": "string" },
+    { "name": "wishlistId", "type": "string" },
+    { "name": "shareType", "type": { "type": "enum", "name": "WishlistShareType", "symbols": ["public", "collaborator"] } }
+  ]
+}
